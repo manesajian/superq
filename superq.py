@@ -387,7 +387,7 @@ def db_exec(dbConn, sql):
             break
         except sqlite3.OperationalError:
             # when using shared cache mode, sqlite ignores timeouts and
-            # handlers, requiring this hopefully temporary spinning solution
+            # handlers, requiring this hopefully temporary spinning solution.
             # shared cache mode is needed for parallel access of memory db
             sleep(.01)
         except:
@@ -838,8 +838,6 @@ class SuperQDataStore():
         return self.superqdict[sq.publicName][sqeName]
 
     def superqelem_update(self, sq, sqe):
-        log('>> update: {0}, {1}'.format(sq.name, sq.host))
-
         # private datastore call public
         if sq.host is not None and not self.public:
             sqe = self.networkClient.superqelem_update(sq, sqe)
@@ -1141,7 +1139,7 @@ class superqelem(LinkedListNode):
         self.__internalList.push_tail(atom)
 
     def __key_user_obj(self, obj):
-         # if possible, make user object relatable back to superqelem
+        # if possible, make user object relatable back to superqelem
         try:
             setattr(obj, '_superqelemKey', self.name)
         except:
@@ -1182,8 +1180,6 @@ class superqelem(LinkedListNode):
             setattr(newObj, atom.name, val)
 
         return self.__key_user_obj(newObj)
-
-# TODO: research __slots__
 
 class superq():
     # overriding __new__ in order to be able to return existing objects
