@@ -604,7 +604,7 @@ class SuperQDataStore():
         rows = db_select(dbConn, queryStr)
         self.__return_dbConn(dbConn)
 
-        newSq = superq([], attach = False, host = None)
+        newSq = superq([])
 
         for row in rows:
             # demarshal single-value objects
@@ -693,7 +693,7 @@ class SuperQDataStore():
         if objSample is None:
             return resultSq
 
-        newSq = superq([], attach = False, host = None)
+        newSq = superq([])
 
         # if there is a sample object available, demarshal accordingly
         for sqe in resultSq:
@@ -1203,7 +1203,6 @@ class superq():
 
         return object.__new__(cls)
     
-# TODO: default attach to true?
     def __init__(self,
                  initObj,
                  name = None,
@@ -1381,7 +1380,7 @@ class superq():
         raise KeyError(key)
 
     def __basecopy(self):
-        return superq(self, name = self.name, attach = False, host = None)
+        return superq(self, name = self.name, attach = False)
 
     def __copy__(self):
         return self.__basecopy()
@@ -2182,7 +2181,7 @@ class SuperQNetworkClientMgr():
             raise KeyError('{0} does not exist'.format(name))
 
         # deserialize response body into a detached superq
-        sq = superq(response.body, buildFromStr = True)
+        sq = superq(response.body, attach = False, buildFromStr = True)
 
         return sq
 
@@ -2204,7 +2203,7 @@ class SuperQNetworkClientMgr():
         response = self.__send_msg(sq.host, str(request))
 
         if eval(response.result):
-            return superq(response.body, buildFromStr = True)
+            return superq(response.body, attach = False, buildFromStr = True)
         else:
             raise Exception('Not sure what to raise here yet.')
 
@@ -2328,7 +2327,7 @@ class SuperQStreamHandler(StreamRequestHandler):
                 response.result = str(False)
             else:
                 # deserialize request body into a detached superq
-                sq = superq(body, buildFromStr = True)
+                sq = superq(body, attach = False, buildFromStr = True)
 
                 # assign superq to the node datastore
                 sq.attach()
