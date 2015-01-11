@@ -1686,9 +1686,8 @@ class superq():
             # build understanding of object structure
             self.__initialize_on_first_elem(sqe)
 
-            # will create the backing table once the datastore is attached
-# TODO: make this better legible
-            if not ((self.host is not None) and self.dataStore.public is False):
+            # set flag to create table if non-hosted or dataStore is public
+            if self.host is None or self.dataStore.public:
                 self.createTable = True
 
         if self.attached:
