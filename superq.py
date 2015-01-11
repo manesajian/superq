@@ -387,7 +387,7 @@ def db_exec(dbConn, sql):
             break
         except sqlite3.OperationalError:
             # when using shared cache mode, sqlite ignores timeouts and
-            # handlers, requiring this hopefully temporary spinning solution
+            # handlers, requiring this hopefully temporary spinning solution.
             # shared cache mode is needed for parallel access of memory db
             sleep(.01)
         except:
@@ -604,7 +604,7 @@ class SuperQDataStore():
         rows = db_select(dbConn, queryStr)
         self.__return_dbConn(dbConn)
 
-        newSq = superq([], attach = False, host = None)
+        newSq = superq([])
 
         for row in rows:
             # demarshal single-value objects
@@ -652,7 +652,7 @@ class SuperQDataStore():
 
         return newSq
     
-    def superq_query(self, sq, columns, tables, conditionalStr, objSample = None):
+    def superq_query(self, sq, columns, tables, conditional, objSample = None):
         # create column string and list from input
         if isinstance(columns, list):
             colStr = ','.join(columns)
@@ -661,7 +661,7 @@ class SuperQDataStore():
             colStr = columns
             colLst = columns.split(',')
         else:
-            raise TypeError('invalid type for cols param ({0})'.format(type(columns)))
+            raise TypeError('invalid type ({0})'.format(type(columns)))
 
         # create table string and list from input
         if isinstance(tables, list):
@@ -671,7 +671,7 @@ class SuperQDataStore():
             tableStr = tables
             tableLst = tables.split(',')
         else:
-            raise TypeError('invalid type for tables param ({0})'.format(type(tables)))
+            raise TypeError('invalid type ({0})'.format(type(tables)))
 
         if '<self>' not in tableStr:
             raise ValueError('join tables ({0}) not valid.'.format(tableStr))
@@ -679,10 +679,10 @@ class SuperQDataStore():
         # do some pre-processing and construct query
         colStr = colStr.replace('<self>', sq.name)
         tableStr = tableStr.replace('<self>', sq.name)
-        conditionalStr = conditionalStr.replace('<self>', sq.name)
+        conditional = conditional.replace('<self>', sq.name)
         queryStr = 'SELECT {0} FROM {1} WHERE {2};'.format(colStr,
                                                            tableStr,
-                                                           conditionalStr)
+                                                           conditional)
 
         # execute query locally if superq is not public or the datastore is
         if sq.host is None or self.public:
@@ -693,7 +693,7 @@ class SuperQDataStore():
         if objSample is None:
             return resultSq
 
-        newSq = superq([], attach = False, host = None)
+        newSq = superq([])
 
         # if there is a sample object available, demarshal accordingly
         for sqe in resultSq:
@@ -838,8 +838,6 @@ class SuperQDataStore():
         return self.superqdict[sq.publicName][sqeName]
 
     def superqelem_update(self, sq, sqe):
-        log('>> update: {0}, {1}'.format(sq.name, sq.host))
-
         # private datastore call public
         if sq.host is not None and not self.public:
             sqe = self.networkClient.superqelem_update(sq, sqe)
@@ -1141,7 +1139,7 @@ class superqelem(LinkedListNode):
         self.__internalList.push_tail(atom)
 
     def __key_user_obj(self, obj):
-         # if possible, make user object relatable back to superqelem
+        # if possible, make user object relatable back to superqelem
         try:
             setattr(obj, '_superqelemKey', self.name)
         except:
@@ -1183,8 +1181,6 @@ class superqelem(LinkedListNode):
 
         return self.__key_user_obj(newObj)
 
-# TODO: research __slots__
-
 class superq():
     # overriding __new__ in order to be able to return existing objects
     def __new__(cls,
@@ -1207,7 +1203,6 @@ class superq():
 
         return object.__new__(cls)
     
-# TODO: default attach to true?
     def __init__(self,
                  initObj,
                  name = None,
@@ -1385,7 +1380,7 @@ class superq():
         raise KeyError(key)
 
     def __basecopy(self):
-        return superq(self, name = self.name, attach = False, host = None)
+        return superq(self, name = self.name, attach = False)
 
     def __copy__(self):
         return self.__basecopy()
@@ -1691,9 +1686,8 @@ class superq():
             # build understanding of object structure
             self.__initialize_on_first_elem(sqe)
 
-            # will create the backing table once the datastore is attached
-# TODO: make this better legible
-            if not ((self.host is not None) and self.dataStore.public is False):
+            # set flag to create table if non-hosted or dataStore is public
+            if self.host is None or self.dataStore.public:
                 self.createTable = True
 
         if self.attached:
@@ -1967,9 +1961,9 @@ class SuperQNodeResponse():
             exceptStr = 'Response: {0}\nException: {1}'.format(responseStr, e)
             raise MalformedNetworkResponse(exceptStr)
 
-# TODO: eventually a setting will be added indicating to NetworkClient to proxy
-# requests through the localhost public network node so that the responses are
-# cached for other local processes.
+# TODO: eventually a superq setting will be added indicating to NetworkClient
+# to proxy a request through the localhost public network node so that the
+# response is cached for other local processes.
 
 # manages network connections and requests to network nodes
 class SuperQNetworkClientMgr():
@@ -2186,7 +2180,7 @@ class SuperQNetworkClientMgr():
             raise KeyError('{0} does not exist'.format(name))
 
         # deserialize response body into a detached superq
-        sq = superq(response.body, buildFromStr = True)
+        sq = superq(response.body, attach = False, buildFromStr = True)
 
         return sq
 
@@ -2208,7 +2202,7 @@ class SuperQNetworkClientMgr():
         response = self.__send_msg(sq.host, str(request))
 
         if eval(response.result):
-            return superq(response.body, buildFromStr = True)
+            return superq(response.body, attach = False, buildFromStr = True)
         else:
             raise Exception('Not sure what to raise here yet.')
 
@@ -2317,9 +2311,9 @@ class SuperQStreamHandler(StreamRequestHandler):
         response.msg_id = request.msg_id
 
         # useful for debugging
-        self.log('Msg: cmd= {0}, args= {1}, body= {2}'.format(request.cmd,
-                                                              request.args,
-                                                              request.body))
+##        self.log('Msg: cmd= {0}, args= {1}, body= {2}'.format(request.cmd,
+##                                                              request.args,
+##                                                              request.body))
 
         cmd = request.cmd
         args = request.args
@@ -2332,7 +2326,7 @@ class SuperQStreamHandler(StreamRequestHandler):
                 response.result = str(False)
             else:
                 # deserialize request body into a detached superq
-                sq = superq(body, buildFromStr = True)
+                sq = superq(body, attach = False, buildFromStr = True)
 
                 # assign superq to the node datastore
                 sq.attach()
