@@ -228,15 +228,30 @@ try:
     print('\tDeleting superq ...')
     sq.delete()
 
-    print('Testing superq creation from basic list ...')
+    print('Testing empty superq creation from empty dictionary ...')
+    sq = superq({}, attach = True)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq creation from basic str list ...')
+    sq = superq(['1', '2', '3'], attach = True)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq creation from basic int list ...')
     sq = superq([1, 2, 3], attach = True)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq creation from basic float list ...')
+    sq = superq([1.1, 2.1, 3.1], attach = True)
 
     print('Testing modifying scalar superqelem by index ...')
     sq[2] = 5
     print('\tExpected value = {0}, actual value = {1}'.format(5, sq[2]))
     assert(sq[2] == 5)
 
-    print('Testing superq deletion ...')
+    print('Verifying superq deletion ...')
     sqName = sq.name
     sq.delete()
     try:
