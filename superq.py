@@ -942,8 +942,12 @@ class superqelem(LinkedListNode):
         if self.value is None:
             return
 
-        if type(value) != type(self.value):
-            raise TypeError('scalar type mismatch')
+        if type(self.value) is str:
+            value = str(value)
+        elif type(self.value) is int:
+            value = int(value)
+        elif type(self.value) is float:
+            value = float(value)
 
         self.value = value
 
