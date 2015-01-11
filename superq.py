@@ -1961,9 +1961,9 @@ class SuperQNodeResponse():
             exceptStr = 'Response: {0}\nException: {1}'.format(responseStr, e)
             raise MalformedNetworkResponse(exceptStr)
 
-# TODO: eventually a setting will be added indicating to NetworkClient to proxy
-# requests through the localhost public network node so that the responses are
-# cached for other local processes.
+# TODO: eventually a superq setting will be added indicating to NetworkClient
+# to proxy a request through the localhost public network node so that the
+# response is cached for other local processes.
 
 # manages network connections and requests to network nodes
 class SuperQNetworkClientMgr():
@@ -2311,9 +2311,9 @@ class SuperQStreamHandler(StreamRequestHandler):
         response.msg_id = request.msg_id
 
         # useful for debugging
-        self.log('Msg: cmd= {0}, args= {1}, body= {2}'.format(request.cmd,
-                                                              request.args,
-                                                              request.body))
+##        self.log('Msg: cmd= {0}, args= {1}, body= {2}'.format(request.cmd,
+##                                                              request.args,
+##                                                              request.body))
 
         cmd = request.cmd
         args = request.args
