@@ -652,7 +652,7 @@ class SuperQDataStore():
 
         return newSq
     
-    def superq_query(self, sq, columns, tables, conditionalStr, objSample = None):
+    def superq_query(self, sq, columns, tables, conditional, objSample = None):
         # create column string and list from input
         if isinstance(columns, list):
             colStr = ','.join(columns)
@@ -661,7 +661,7 @@ class SuperQDataStore():
             colStr = columns
             colLst = columns.split(',')
         else:
-            raise TypeError('invalid type for cols param ({0})'.format(type(columns)))
+            raise TypeError('invalid type ({0})'.format(type(columns)))
 
         # create table string and list from input
         if isinstance(tables, list):
@@ -671,7 +671,7 @@ class SuperQDataStore():
             tableStr = tables
             tableLst = tables.split(',')
         else:
-            raise TypeError('invalid type for tables param ({0})'.format(type(tables)))
+            raise TypeError('invalid type ({0})'.format(type(tables)))
 
         if '<self>' not in tableStr:
             raise ValueError('join tables ({0}) not valid.'.format(tableStr))
@@ -679,10 +679,10 @@ class SuperQDataStore():
         # do some pre-processing and construct query
         colStr = colStr.replace('<self>', sq.name)
         tableStr = tableStr.replace('<self>', sq.name)
-        conditionalStr = conditionalStr.replace('<self>', sq.name)
+        conditional = conditional.replace('<self>', sq.name)
         queryStr = 'SELECT {0} FROM {1} WHERE {2};'.format(colStr,
                                                            tableStr,
-                                                           conditionalStr)
+                                                           conditional)
 
         # execute query locally if superq is not public or the datastore is
         if sq.host is None or self.public:
