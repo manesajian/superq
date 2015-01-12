@@ -1,2 +1,2 @@
 # superq
-Python Object-Relational Mapper and Network Datastore
+Python object-relational mapper and network datastore
