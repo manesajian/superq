@@ -1197,7 +1197,7 @@ class superq():
                 buildFromStr = False,
                 buildFromFile = False):
         # str initObj can contain string and file deserialization info
-        if buildFromStr == False and buildFromFile == False:
+        if not buildFromStr and not buildFromFile:
             if isinstance(initObj, str):
                 # return datastore superq if it exists
                 if _dataStore.superq_exists(initObj, host):
@@ -2416,7 +2416,7 @@ class SuperQStreamHandler(StreamRequestHandler):
         # client can stay connected for multiple Request-Response transactions
         while True:
             try:
-                if self.handle_connection() == False:
+                if not self.handle_connection():
                     break
             except Exception as e:
                 tb = format_exc()
