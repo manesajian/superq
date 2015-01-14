@@ -1149,7 +1149,7 @@ class superqelem(LinkedListNode):
         # if possible, make user object relatable back to superqelem
         try:
             setattr(obj, '_superqelemKey', self.name)
-        except:
+        except Exception:
             # one reason for arriving here might be obj is a __slots__ object
             pass
         return obj       
