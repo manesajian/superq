@@ -114,7 +114,7 @@ class LinkedList:
             node.next = self.head
 
             # if list not empty, point current head to new head
-            if self.head != None:
+            if self.head is not None:
                 self.head.prev = node
             else:
                 self.tail = node
@@ -126,7 +126,7 @@ class LinkedList:
             node.prev = self.tail
 
             # if list not empty, point current tail to new tail
-            if self.tail != None:
+            if self.tail is not None:
                 self.tail.next = node
             else:
                 self.head = node
@@ -136,7 +136,7 @@ class LinkedList:
             curNode = self.__lookup(idx)
 
             # handle empty list case
-            if curNode == None:
+            if curNode is None:
                 self.head = node
                 self.tail = node
                 node.prev = None
@@ -171,7 +171,7 @@ class LinkedList:
             self.head = self.head.next
 
             # if list not empty, tell head it has no prev         
-            if self.head != None:
+            if self.head is not None:
                 self.head.prev = None
 
             # one less element in the list
@@ -190,7 +190,7 @@ class LinkedList:
             self.tail = self.tail.prev
 
             # if list not empty, tell tail it has no next
-            if self.tail != None:
+            if self.tail is not None:
                 self.tail.next = None
 
             # one less element in the list
@@ -276,7 +276,7 @@ class LinkedList:
 
     def move_up(self, node):
         # can't move list node up if it is already head
-        if node.prev == None:
+        if node.prev is None:
             return
 
         # these are aliases to the 4 starting elements involved
@@ -286,7 +286,7 @@ class LinkedList:
         current_node_next = node.next
 
         # do the pointer swaps
-        if above_node_prev != None:
+        if above_node_prev is not None:
             above_node_prev.next = current_node
         current_node.prev = above_node_prev
         current_node.next = above_node
@@ -295,12 +295,12 @@ class LinkedList:
         above_node.next.prev = above_node
 
         # if node is at top of list, set head to node
-        if current_node.prev == None:
+        if current_node.prev is None:
             self.head = current_node
 
     def move_down(self, node):
         # can't move list node up if it is already head
-        if node.prev == None:
+        if node.prev is None:
             return
 
         # these are aliases to the 4 starting elements involved
@@ -310,7 +310,7 @@ class LinkedList:
         current_node_next = node.next
 
         # do the pointer swaps
-        if above_node_prev != None:
+        if above_node_prev is not None:
             above_node_prev.next = current_node
         current_node.prev = above_node_prev
         current_node.next = above_node
@@ -319,7 +319,7 @@ class LinkedList:
         above_node.next.prev = above_node
 
         # if node is at top of list, set head to node
-        if current_node.prev == None:
+        if current_node.prev is None:
             self.head = current_node
 
 class NotImplemented(Exception):
