@@ -398,15 +398,16 @@ def db_exec(dbConn, sql):
 def db_select(dbConn, queryStr):
     rowLst = []
 
+    dbConn.row_factory = sqlite3.Row
     try:
-        dbConn.row_factory = sqlite3.Row
         result = dbConn.execute(queryStr)
-
-        for row in result:
-            rowLst.append(row)
     except Exception as e:
         raise DBExecError('queryStr: {0}\nException: {1}'.format(queryStr,
                                                                  str(e)))
+
+    for row in result:
+        rowLst.append(row)
+
     return rowLst
 
 def db_create_table(dbConn, tableName, colStr):
@@ -499,9 +500,11 @@ class SuperQDataStore():
 
     def __get_dbConn(self):
         try:
-            return self.__dbConnPool.pop(block = False)
+            dbConn = self.__dbConnPool.pop(block = False)
         except SuperQEmpty:
             return self.__new_dbConn()
+        else:
+            return dbConn
 
     def __return_dbConn(self, s):
         self.__dbConnPool.push(s)
@@ -2014,9 +2017,10 @@ class SuperQNetworkClientMgr():
             while True:
                 try:
                     s = socketPool.pop(block = False)
-                    s.close()
                 except SuperQEmpty:
                     break
+                else:
+                    s.close()
 
     def __new_socket(self,
                      host = 'localhost',
@@ -2053,9 +2057,11 @@ class SuperQNetworkClientMgr():
 
         # get existing socket if available or open new one
         try:
-            return socketPool.pop(block = False)
+            s = socketPool.pop(block = False)
         except SuperQEmpty:
             return self.__new_socket(host, port, ssl)
+        else:
+            return s
 
     def __return_socket(self,
                         s,
