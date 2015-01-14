@@ -852,7 +852,7 @@ class SuperQDataStore():
             return
 
         # wrap with quotes if sqe key is str
-        if type(sqeName).__name__ == 'str':
+        if isinstance(sqeName, str):
             sqeName = '\'{0}\''.format(sqeName)
 
         # support autoKey
@@ -942,11 +942,11 @@ class superqelem(LinkedListNode):
         if self.value is None:
             return
 
-        if type(self.value) is str:
+        if isinstance(self.value, str):
             value = str(value)
-        elif type(self.value) is int:
+        elif isinstance(self.value, int):
             value = int(value)
-        elif type(self.value) is float:
+        elif isinstance(self.value, float):
             value = float(value)
 
         self.value = value
