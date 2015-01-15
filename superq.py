@@ -756,11 +756,11 @@ class SuperQDataStore():
         if sqe.value is not None:
             name = sqe.name
             if isinstance(name, str):
-                name = '\'{0}\''.format(name)
+                name = "'{0}'".format(name)
 
             value = sqe.value
             if isinstance(value, str):
-                value = '\'{0}\''.format(value)
+                value = "'{0}'".format(value)
 
             valStr += '{0},{1}'.format(name, value)
         else:
@@ -768,13 +768,13 @@ class SuperQDataStore():
             for colName in sq.colNames:
                 # support autoKey
                 if colName == '_name_':
-                    valStr += '\'{0}\','.format(sqe.name)
+                    valStr += "'{0}',".format(sqe.name)
                     continue
 
                 atom = atomDict[colName]
 
                 if atom.type.startswith('str'):
-                    valStr += '\'{0}\','.format(atom.value)
+                    valStr += "'{0}',".format(atom.value)
                 else:
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
@@ -793,7 +793,7 @@ class SuperQDataStore():
         if sqe.value is not None:
             val = sqe.value
             if sqe.valueType.startswith('str'):
-                val = '\'{0}\''.format(val)
+                val = "'{0}'".format(val)
             
             updateStr = '{0}={1}'.format('_val_', val)
 
@@ -809,7 +809,7 @@ class SuperQDataStore():
 
                 val = sqe[sq.colNames[i]]
                 if sq.colTypes[i].startswith('str'):
-                    val = '\'{0}\''.format(val)
+                    val = "'{0}'".format(val)
 
                 updateStr += '{0}={1},'.format(name, val)
             updateStr = updateStr.rstrip(',')
@@ -817,7 +817,7 @@ class SuperQDataStore():
         # quote sqe name if it's a string
         sqeName = sqe.name
         if isinstance(sqeName, str):
-            sqeName = '\'{0}\''.format(sqeName)
+            sqeName = "'{0}'".format(sqeName)
 
         dbConn = self.__get_dbConn()
         db_update_row(dbConn, sq.name, updateStr, keyCol, sqeName)
@@ -856,7 +856,7 @@ class SuperQDataStore():
 
         # wrap with quotes if sqe key is str
         if isinstance(sqeName, str):
-            sqeName = '\'{0}\''.format(sqeName)
+            sqeName = "'{0}'".format(sqeName)
 
         # support autoKey
         keyCol = sq.keyCol
