@@ -2321,9 +2321,9 @@ class SuperQStreamHandler(StreamRequestHandler):
         response.msg_id = request.msg_id
 
         # useful for debugging
-##        self.log('Msg: cmd= {0}, args= {1}, body= {2}'.format(request.cmd,
-##                                                              request.args,
-##                                                              request.body))
+        self.log('Msg: cmd= {0}, args= {1}, body= {2}'.format(request.cmd,
+                                                              request.args,
+                                                              request.body))
 
         cmd = request.cmd
         args = request.args
