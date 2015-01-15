@@ -940,7 +940,7 @@ class superqelem(LinkedListNode):
 
             self.add_atom(attrName, type(attr).__name__, attr)
 
-    def setScalar(self, value):
+    def set_scalar(self, value):
         # scalar superqelems don't have properties
         if self.value is None:
             return
@@ -1375,7 +1375,7 @@ class superq():
 
         # set scalar value
         if elem.value is not None:
-            elem.setScalar(value)
+            elem.set_scalar(value)
             return
             
         raise NotImplemented('__setitem__ by index for non-scalars')
@@ -1730,7 +1730,7 @@ class superq():
                 attachedSqe = self.__internalDict[sqe.name]
 
                 # handle scalars
-                attachedSqe.setScalar(sqe.value)
+                attachedSqe.set_scalar(sqe.value)
 
                 # 'demarshal' from detached sqe to attached
                 for atom in attachedSqe:
