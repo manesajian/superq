@@ -853,12 +853,12 @@ try:
     print('Creating hosted superq for maxlen tests ...')
     sq = superq([], attach = True, host = 'local')
     val = 1
-    for i in range(0, 2000):
+    for i in range(0, 1000):
         foo = Foo(i, i)
         sq.create_elem(foo)
     print('\tChecking length ...')
-    print('\tExpected length = {0}, actual length = {1}'.format(2000, len(sq)))
-    assert(len(sq) == 2000)
+    print('\tExpected length = {0}, actual length = {1}'.format(1000, len(sq)))
+    assert(len(sq) == 1000)
     print('\tDropping each superqelem ...')
     for elem in sq:
         sq.delete_elem(elem)
@@ -895,7 +895,7 @@ try:
     sq2.delete()
 
     print('\nTHREAD tests:\n')
-    total_items = 2000
+    total_items = 1000
     producers = 10
     consumers = 10
     items_produced = 0
