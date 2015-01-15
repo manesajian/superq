@@ -114,7 +114,7 @@ class LinkedList:
             node.next = self.head
 
             # if list not empty, point current head to new head
-            if self.head != None:
+            if self.head is not None:
                 self.head.prev = node
             else:
                 self.tail = node
@@ -126,7 +126,7 @@ class LinkedList:
             node.prev = self.tail
 
             # if list not empty, point current tail to new tail
-            if self.tail != None:
+            if self.tail is not None:
                 self.tail.next = node
             else:
                 self.head = node
@@ -136,7 +136,7 @@ class LinkedList:
             curNode = self.__lookup(idx)
 
             # handle empty list case
-            if curNode == None:
+            if curNode is None:
                 self.head = node
                 self.tail = node
                 node.prev = None
@@ -171,7 +171,7 @@ class LinkedList:
             self.head = self.head.next
 
             # if list not empty, tell head it has no prev         
-            if self.head != None:
+            if self.head is not None:
                 self.head.prev = None
 
             # one less element in the list
@@ -190,7 +190,7 @@ class LinkedList:
             self.tail = self.tail.prev
 
             # if list not empty, tell tail it has no next
-            if self.tail != None:
+            if self.tail is not None:
                 self.tail.next = None
 
             # one less element in the list
@@ -276,7 +276,7 @@ class LinkedList:
 
     def move_up(self, node):
         # can't move list node up if it is already head
-        if node.prev == None:
+        if node.prev is None:
             return
 
         # these are aliases to the 4 starting elements involved
@@ -286,7 +286,7 @@ class LinkedList:
         current_node_next = node.next
 
         # do the pointer swaps
-        if above_node_prev != None:
+        if above_node_prev is not None:
             above_node_prev.next = current_node
         current_node.prev = above_node_prev
         current_node.next = above_node
@@ -295,12 +295,12 @@ class LinkedList:
         above_node.next.prev = above_node
 
         # if node is at top of list, set head to node
-        if current_node.prev == None:
+        if current_node.prev is None:
             self.head = current_node
 
     def move_down(self, node):
         # can't move list node up if it is already head
-        if node.prev == None:
+        if node.prev is None:
             return
 
         # these are aliases to the 4 starting elements involved
@@ -310,7 +310,7 @@ class LinkedList:
         current_node_next = node.next
 
         # do the pointer swaps
-        if above_node_prev != None:
+        if above_node_prev is not None:
             above_node_prev.next = current_node
         current_node.prev = above_node_prev
         current_node.next = above_node
@@ -319,7 +319,7 @@ class LinkedList:
         above_node.next.prev = above_node
 
         # if node is at top of list, set head to node
-        if current_node.prev == None:
+        if current_node.prev is None:
             self.head = current_node
 
 class NotImplemented(Exception):
@@ -398,15 +398,16 @@ def db_exec(dbConn, sql):
 def db_select(dbConn, queryStr):
     rowLst = []
 
+    dbConn.row_factory = sqlite3.Row
     try:
-        dbConn.row_factory = sqlite3.Row
         result = dbConn.execute(queryStr)
-
-        for row in result:
-            rowLst.append(row)
     except Exception as e:
         raise DBExecError('queryStr: {0}\nException: {1}'.format(queryStr,
                                                                  str(e)))
+
+    for row in result:
+        rowLst.append(row)
+
     return rowLst
 
 def db_create_table(dbConn, tableName, colStr):
@@ -499,9 +500,11 @@ class SuperQDataStore():
 
     def __get_dbConn(self):
         try:
-            return self.__dbConnPool.pop(block = False)
+            dbConn = self.__dbConnPool.pop(block = False)
         except SuperQEmpty:
             return self.__new_dbConn()
+        else:
+            return dbConn
 
     def __return_dbConn(self, s):
         self.__dbConnPool.push(s)
@@ -753,11 +756,11 @@ class SuperQDataStore():
         if sqe.value is not None:
             name = sqe.name
             if isinstance(name, str):
-                name = '\'{0}\''.format(name)
+                name = "'{0}'".format(name)
 
             value = sqe.value
             if isinstance(value, str):
-                value = '\'{0}\''.format(value)
+                value = "'{0}'".format(value)
 
             valStr += '{0},{1}'.format(name, value)
         else:
@@ -765,13 +768,13 @@ class SuperQDataStore():
             for colName in sq.colNames:
                 # support autoKey
                 if colName == '_name_':
-                    valStr += '\'{0}\','.format(sqe.name)
+                    valStr += "'{0}',".format(sqe.name)
                     continue
 
                 atom = atomDict[colName]
 
                 if atom.type.startswith('str'):
-                    valStr += '\'{0}\','.format(atom.value)
+                    valStr += "'{0}',".format(atom.value)
                 else:
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
@@ -790,7 +793,7 @@ class SuperQDataStore():
         if sqe.value is not None:
             val = sqe.value
             if sqe.valueType.startswith('str'):
-                val = '\'{0}\''.format(val)
+                val = "'{0}'".format(val)
             
             updateStr = '{0}={1}'.format('_val_', val)
 
@@ -806,7 +809,7 @@ class SuperQDataStore():
 
                 val = sqe[sq.colNames[i]]
                 if sq.colTypes[i].startswith('str'):
-                    val = '\'{0}\''.format(val)
+                    val = "'{0}'".format(val)
 
                 updateStr += '{0}={1},'.format(name, val)
             updateStr = updateStr.rstrip(',')
@@ -814,7 +817,7 @@ class SuperQDataStore():
         # quote sqe name if it's a string
         sqeName = sqe.name
         if isinstance(sqeName, str):
-            sqeName = '\'{0}\''.format(sqeName)
+            sqeName = "'{0}'".format(sqeName)
 
         dbConn = self.__get_dbConn()
         db_update_row(dbConn, sq.name, updateStr, keyCol, sqeName)
@@ -852,8 +855,8 @@ class SuperQDataStore():
             return
 
         # wrap with quotes if sqe key is str
-        if type(sqeName).__name__ == 'str':
-            sqeName = '\'{0}\''.format(sqeName)
+        if isinstance(sqeName, str):
+            sqeName = "'{0}'".format(sqeName)
 
         # support autoKey
         keyCol = sq.keyCol
@@ -933,20 +936,20 @@ class superqelem(LinkedListNode):
                 continue
 
             # add object field as superqelem property
-            self.addProperty(attrName)
+            self.add_property(attrName)
 
             self.add_atom(attrName, type(attr).__name__, attr)
 
-    def setScalar(self, value):
+    def set_scalar(self, value):
         # scalar superqelems don't have properties
         if self.value is None:
             return
 
-        if type(self.value) is str:
+        if isinstance(self.value, str):
             value = str(value)
-        elif type(self.value) is int:
+        elif isinstance(self.value, int):
             value = int(value)
-        elif type(self.value) is float:
+        elif isinstance(self.value, float):
             value = float(value)
 
         self.value = value
@@ -955,28 +958,28 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem(self)
         
-    def addProperty(self, attribute):
+    def add_property(self, attribute):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
         # create local setter and getter with a particular attribute name
-        getter = lambda self: self.__getProperty(attribute)
-        setter = lambda self, value: self.__setProperty(attribute, value)
+        getter = lambda self: self.__get_property(attribute)
+        setter = lambda self, value: self.__set_property(attribute, value)
 
         # construct property attribute and add it to the class
         setattr(self.__class__,
                 attribute,
                 property(fget = getter, fset = setter))
 
-    def __getProperty(self, attribute):
+    def __get_property(self, attribute):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
         return self.__internalDict[attribute].value
 
-    def __setProperty(self, attribute, value):
+    def __set_property(self, attribute, value):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
@@ -1146,7 +1149,7 @@ class superqelem(LinkedListNode):
         # if possible, make user object relatable back to superqelem
         try:
             setattr(obj, '_superqelemKey', self.name)
-        except:
+        except Exception:
             # one reason for arriving here might be obj is a __slots__ object
             pass
         return obj       
@@ -1197,7 +1200,7 @@ class superq():
                 buildFromStr = False,
                 buildFromFile = False):
         # str initObj can contain string and file deserialization info
-        if buildFromStr == False and buildFromFile == False:
+        if not buildFromStr and not buildFromFile:
             if isinstance(initObj, str):
                 # return datastore superq if it exists
                 if _dataStore.superq_exists(initObj, host):
@@ -1372,7 +1375,7 @@ class superq():
 
         # set scalar value
         if elem.value is not None:
-            elem.setScalar(value)
+            elem.set_scalar(value)
             return
             
         raise NotImplemented('__setitem__ by index for non-scalars')
@@ -1727,7 +1730,7 @@ class superq():
                 attachedSqe = self.__internalDict[sqe.name]
 
                 # handle scalars
-                attachedSqe.setScalar(sqe.value)
+                attachedSqe.set_scalar(sqe.value)
 
                 # 'demarshal' from detached sqe to attached
                 for atom in attachedSqe:
@@ -2014,9 +2017,10 @@ class SuperQNetworkClientMgr():
             while True:
                 try:
                     s = socketPool.pop(block = False)
-                    s.close()
                 except SuperQEmpty:
                     break
+                else:
+                    s.close()
 
     def __new_socket(self,
                      host = 'localhost',
@@ -2053,9 +2057,11 @@ class SuperQNetworkClientMgr():
 
         # get existing socket if available or open new one
         try:
-            return socketPool.pop(block = False)
+            s = socketPool.pop(block = False)
         except SuperQEmpty:
             return self.__new_socket(host, port, ssl)
+        else:
+            return s
 
     def __return_socket(self,
                         s,
@@ -2416,7 +2422,7 @@ class SuperQStreamHandler(StreamRequestHandler):
         # client can stay connected for multiple Request-Response transactions
         while True:
             try:
-                if self.handle_connection() == False:
+                if not self.handle_connection():
                     break
             except Exception as e:
                 tb = format_exc()

@@ -495,10 +495,28 @@ try:
 
     print('\nHOSTED superq tests:\n')
 
-    print('Testing creation of empty superq ...')
+    print('Testing empty superq creation ...')
     sq = superq([], attach = True, host = 'local')
-    sqName = sq.name
+    print('\tDeleting superq ...')
+    sq.delete()
 
+    print('Testing empty superq creation from empty dictionary ...')
+    sq = superq({}, attach = True, host = 'local')
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq creation from basic str list ...')
+    sq = superq(['1', '2', '3'], attach = True, host = 'local')
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq creation from basic int list ...')
+    sq = superq([1, 2, 3], attach = True, host = 'local')
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq creation from basic float list ...')
+    sq = superq([1.1, 2.1, 3.1], attach = True, host = 'local')
     print('Testing deletion of empty superq ...')
     sq.delete()
     try:
