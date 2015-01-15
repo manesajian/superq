@@ -644,7 +644,8 @@ class SuperQDataStore():
                 elif isinstance(objVal, float):
                     val = float(row[fieldName])
                 else:
-                    raise TypeError('unsupported type ({0})'.format(type(objVal)))
+                    valType = type(objVal)
+                    raise TypeError('unsupported type ({0})'.format(valType))
 
                 setattr(newObj, fieldName, val)
 
@@ -729,7 +730,8 @@ class SuperQDataStore():
                 elif isinstance(objVal, float):
                     val = float(atom.value)
                 else:
-                    raise TypeError('unsupported type ({0})'.format(type(objVal)))
+                    valType = type(objVal)
+                    raise TypeError('unsupported type ({0})'.format(valType))
 
                 setattr(newObj, fieldName, val)
 
