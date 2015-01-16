@@ -1820,7 +1820,7 @@ class superq():
             else:
                 self.__internalList.push(idx, sqe)
 
-            # for now pushes on hosted superqs will be slow due to blocking here
+            # for now pushes on hosted superqs are slow due to blocking here
             if self.attached:
                 self.create_elem_datastore_only(sqe, idx)
 
@@ -1860,7 +1860,7 @@ class superq():
             sqe = self.__internalList.pop(idx)
             self.__internalDict.pop(sqe.name)
 
-            # for now pops on hosted superqs will be slow due to blocking here
+            # for now pops on hosted superqs are slow due to blocking here
             if self.attached:
                 self.delete_elem_datastore_only(sqe)
 
@@ -2159,6 +2159,10 @@ class SuperQNetworkClientMgr():
 
         return response
 
+    def __send_msg_async(self, host, strMsg):
+        t = Thread(target = self.__send_msg, args = (host, strMsg))
+        t.start()
+
     def superq_exists(self, name, host):
         # build request object from string
         request = SuperQNodeRequest()
@@ -2229,6 +2233,8 @@ class SuperQNetworkClientMgr():
         request.body = str(sqe)
 
         response = self.__send_msg(sq.host, str(request))
+        # Not safe
+        #self.__send_msg_async(sq.host, str(request))
 
     def superqelem_read(self):
         pass
