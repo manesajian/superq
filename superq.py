@@ -2159,6 +2159,9 @@ class SuperQNetworkClientMgr():
 
         return response
 
+    # this might be used in the case of create_elem for instance, to provide
+    #  a non-blocking operation. But it requires some kind of transactional
+    #  implementation or solution to prevent synchronization errors
     def __send_msg_async(self, host, strMsg):
         t = Thread(target = self.__send_msg, args = (host, strMsg))
         t.start()
@@ -2233,8 +2236,6 @@ class SuperQNetworkClientMgr():
         request.body = str(sqe)
 
         response = self.__send_msg(sq.host, str(request))
-        # Not safe
-        #self.__send_msg_async(sq.host, str(request))
 
     def superqelem_read(self):
         pass
