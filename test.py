@@ -820,6 +820,19 @@ try:
     print('\tExpected value = {0}, actual value = {1}'.format(1, sq[0]))
     assert(sq[0] == 1)
 
+# TODO: this test points to maxlen needing to be a property, so that when a
+#  full set has its size decreased, it can remove elements from the head or
+#  tail as appropriate. Possibly we can keep track of where the last element
+#  was added in order to recognize direction
+##    print('Testing decreasing size of set ...')
+##    sq.maxlen -= 1
+##    print('\tAdding elem ...')
+##    sq.create_elem(9)
+##    print('\tExpected length = {0}, actual length = {1}'.format(6, len(sq)))
+##    assert(len(sq) == 6)
+##    print('\tExpected value = {0}, actual value = {1}'.format(2, sq[0]))
+##    assert(sq[0] == 2)
+
     print('Deleting superq ...')
     sq.delete()
 
@@ -853,12 +866,12 @@ try:
     print('Creating hosted superq for maxlen tests ...')
     sq = superq([], attach = True, host = 'local')
     val = 1
-    for i in range(0, 2000):
+    for i in range(0, 1000):
         foo = Foo(i, i)
         sq.create_elem(foo)
     print('\tChecking length ...')
-    print('\tExpected length = {0}, actual length = {1}'.format(2000, len(sq)))
-    assert(len(sq) == 2000)
+    print('\tExpected length = {0}, actual length = {1}'.format(1000, len(sq)))
+    assert(len(sq) == 1000)
     print('\tDropping each superqelem ...')
     for elem in sq:
         sq.delete_elem(elem)
@@ -926,6 +939,8 @@ try:
         thread.daemon = True
         thread.start()
     print('\tSpawning {0} producers ...'.format(producers))
+    producersStart = time.time()
+    consumersStart = time.time()
     for i in range(0, producers):
         thread = Thread(target = producer_thread, args = (sqPending, i + 1))
         thread.daemon = True
@@ -933,13 +948,15 @@ try:
     print('\tWaiting for producers to produce all items ...')
     while items_produced < total_items:
         print('\t\tProduced: {0}'.format(items_produced))
-        time.sleep(1)
+        time.sleep(.5)
     print('\t\tProduced {0}'.format(total_items))
+    print('\t\tElapsed time: {0}'.format(round(time.time() - producersStart, 3)))
     print('\tWaiting for consumers to consume all items ...')
     while items_consumed < total_items:
         print('\t\tConsumed: {0}'.format(items_consumed))
-        time.sleep(1)
+        time.sleep(.5)
     print('\t\tConsumed {0}'.format(total_items))
+    print('\t\tElapsed time: {0}'.format(round(time.time() - consumersStart), 3))
     pendingLen = len(superq('sqPending', attach = True, host = 'local'))
     completedLen = len(superq('sqCompleted', attach = True, host = 'local'))
     print('\tExpected pending superq length = {0}, actual length = {1}'.format(0, pendingLen))
