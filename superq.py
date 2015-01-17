@@ -13,10 +13,18 @@ from time import sleep
 from traceback import format_exc, print_stack
 from uuid import uuid4
 
-# DETACHED_PROCESS is a creation flag for Popen that can imported from
+from subprocess import Popen
+
+# DETACHED_PROCESS is a creation flag for Popen that can be imported from
 # the win32process module if pywin32 is installed, or manually defined
-from subprocess import Popen, CREATE_NEW_PROCESS_GROUP
 DETACHED_PROCESS = 0x00000008
+
+POPEN_FLAGS = DETACHED_PROCESS
+try:
+    from subprocess import CREATE_NEW_PROCESS_GROUP
+    POPEN_FLAGS |= CREATE_NEW_PROCESS_GROUP
+except:
+    pass
 
 DEFAULT_TCP_PORT = 9990
 DEFAULT_SSL_PORT = 9991
@@ -545,7 +553,6 @@ class SuperQDataStore():
         return name in self.superqdict
 
     def superq_create(self, sq):
-        log('publicName: {0}'.format(sq.publicName))
         # private datastore call public
         if sq.host is not None and not self.public:
             self.networkClient.superq_create(sq)
@@ -1998,14 +2005,20 @@ class SuperQNetworkClientMgr():
             nodeProcessStdout = open('node.stdout', 'w')
             nodeProcessStderr = open('node.stderr', 'w')
 
-            popenFlags = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
-            self.__nodeProcess = Popen(['python',
-                                        'superq.py',
-                                        '-t',
-                                        str(DEFAULT_TCP_PORT)],
-                                       creationflags = popenFlags,
-                                       stdout = nodeProcessStdout,
-                                       stderr = nodeProcessStderr)
+            nodeArgs = ['python',
+                        'superq.py',
+                        '-t',
+                        str(DEFAULT_TCP_PORT)]
+
+            if sys.platform == 'win32':
+                self.__nodeProcess = Popen(nodeArgs,
+                                           creationflags = POPEN_FLAGS,
+                                           stdout = nodeProcessStdout,
+                                           stderr = nodeProcessStderr)
+            else:
+                self.__nodeProcess = Popen(nodeArgs,
+                                           stdout = nodeProcessStdout,
+                                           stderr = nodeProcessStderr)
 
             with open('node.pid', 'w') as f:
                 f.write(str(self.__nodeProcess.pid))
