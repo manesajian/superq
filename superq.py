@@ -13,7 +13,7 @@ from time import sleep
 from traceback import format_exc, print_stack
 from uuid import uuid4
 
-from subprocess import Popen
+from subprocess import Popen, STDOUT
 
 # DETACHED_PROCESS is a creation flag for Popen that can be imported from
 # the win32process module if pywin32 is installed, or manually defined
@@ -1731,7 +1731,6 @@ class superq():
             self.dataStore.superqelem_update(self, sqe)
 
     def update_elem(self, value):
-        log('update_elem1: {0}'.format(self.publicName))
         if isinstance(value, superqelem):
             sqe = value
 
@@ -1997,28 +1996,26 @@ class SuperQNetworkClientMgr():
         self.__socketPoolDict = {}
 
     def __start_networked_datastore(self):
+        # start superq local network node
         with self.__nodeProcessLock:
             if self.__nodeProcess is not None:
                 return
-
-            # start superq local network node
-            nodeProcessStdout = open('node.stdout', 'w')
-            nodeProcessStderr = open('node.stderr', 'w')
 
             nodeArgs = ['python',
                         'superq.py',
                         '-t',
                         str(DEFAULT_TCP_PORT)]
+            nodeOutputFile = open('node.output', 'w')
 
             if sys.platform == 'win32':
                 self.__nodeProcess = Popen(nodeArgs,
                                            creationflags = POPEN_FLAGS,
-                                           stdout = nodeProcessStdout,
-                                           stderr = nodeProcessStderr)
+                                           stdout = nodeOutputFile,
+                                           stderr = STDOUT)
             else:
                 self.__nodeProcess = Popen(nodeArgs,
-                                           stdout = nodeProcessStdout,
-                                           stderr = nodeProcessStderr)
+                                           stdout = nodeOutputFile,
+                                           stderr = STDOUT)
 
             with open('node.pid', 'w') as f:
                 f.write(str(self.__nodeProcess.pid))
@@ -2051,15 +2048,24 @@ class SuperQNetworkClientMgr():
 
         try:
             s.connect((host, port))
+            return s
         except ConnectionRefusedError:
-            # start localhost datastore if necessary
+            # start localhost datastore
             if host == 'localhost' and port == DEFAULT_TCP_PORT:
                 self.__start_networked_datastore()
-                s.connect((host, port))
-            else:
-                raise
 
-        return s
+            # attempt to connect to datastore once it is started
+            attempts = 0
+            maxAttempts = 5
+            while attempts < maxAttempts:
+                try:
+                    s.connect((host, port))
+                    return s
+                except:
+                    sleep(.2)
+                attempts += 1
+
+        raise
 
     def __get_socket(self, host, port, ssl = False):                                
         # get or initialize socket pool specific to host and port
