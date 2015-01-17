@@ -532,7 +532,7 @@ try:
     except:
         print('\tsuperq lookup correctly failed.')
 
-    print('Testing superq creation from basic list ...')
+    print('Creating superq from basic scalar list ...')
     sq = superq(['1', '2', '3'], attach = True, host = 'local')
     sqName = sq.name
 
@@ -540,6 +540,8 @@ try:
     sq[0] = '4'
     print('\tExpected value = {0}, actual value = {1}'.format('4', superq(sqName, host = 'local')[0]))
     assert(superq(sqName, host = 'local')[0] == '4')
+    print('\tDeleting superq ...')
+    sq.delete()
 
     print('Testing adding element to empty superq ...')
     print('\tCreating empty superq ...')
