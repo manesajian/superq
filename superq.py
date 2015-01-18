@@ -2157,7 +2157,10 @@ class SuperQNetworkClientMgr():
             host = 'localhost'
             port = DEFAULT_TCP_PORT
         else:
-            host, port = host.split(':')
+            try:
+                host, port = host.split(':')
+            except ValueError:
+                port = DEFAULT_TCP_PORT
 
         msg = bytearray()
         msg.append(0x2A) # 42
