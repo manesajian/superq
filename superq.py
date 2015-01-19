@@ -2065,7 +2065,7 @@ class SuperQNetworkClientMgr():
                         sleep(.2)
                     attempts += 1
 
-                raise
+            raise
 
     def __get_socket(self, host, port, ssl = False):                                
         # get or initialize socket pool specific to host and port
@@ -2081,9 +2081,6 @@ class SuperQNetworkClientMgr():
             s = socketPool.pop(block = False)
         except SuperQEmpty:
             return self.__new_socket(host, port, ssl)
-        except:
-            print('Hmmm ...')
-            raise
 
         return s
 
