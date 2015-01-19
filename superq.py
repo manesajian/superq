@@ -2054,18 +2054,18 @@ class SuperQNetworkClientMgr():
             if host == 'localhost' and port == DEFAULT_TCP_PORT:
                 self.__start_networked_datastore()
 
-            # attempt to connect to datastore once it is started
-            attempts = 0
-            maxAttempts = 5
-            while attempts < maxAttempts:
-                try:
-                    s.connect((host, port))
-                    return s
-                except:
-                    sleep(.2)
-                attempts += 1
+                # attempt to connect to datastore once it is started
+                attempts = 0
+                maxAttempts = 5
+                while attempts < maxAttempts:
+                    try:
+                        s.connect((host, port))
+                        return s
+                    except:
+                        sleep(.2)
+                    attempts += 1
 
-        raise
+                raise
 
     def __get_socket(self, host, port, ssl = False):                                
         # get or initialize socket pool specific to host and port
@@ -2081,8 +2081,11 @@ class SuperQNetworkClientMgr():
             s = socketPool.pop(block = False)
         except SuperQEmpty:
             return self.__new_socket(host, port, ssl)
-        else:
-            return s
+        except:
+            print('Hmmm ...')
+            raise
+
+        return s
 
     def __return_socket(self,
                         s,
