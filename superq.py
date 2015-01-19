@@ -15,16 +15,16 @@ from uuid import uuid4
 
 from subprocess import Popen, STDOUT
 
-# DETACHED_PROCESS is a creation flag for Popen that can be imported from
-# the win32process module if pywin32 is installed, or manually defined
-DETACHED_PROCESS = 0x00000008
-
-POPEN_FLAGS = DETACHED_PROCESS
 try:
     from subprocess import CREATE_NEW_PROCESS_GROUP
-    POPEN_FLAGS |= CREATE_NEW_PROCESS_GROUP
+
+    # DETACHED_PROCESS is a creation flag for Popen that can be imported from
+    # the win32process module if pywin32 is installed, or manually defined
+    DETACHED_PROCESS = 0x00000008
+
+    WIN32_POPEN_FLAGS = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
 except:
-    pass
+    WIN32_POPEN_FLAGS = None
 
 DEFAULT_TCP_PORT = 9990
 DEFAULT_SSL_PORT = 9991
@@ -2007,9 +2007,9 @@ class SuperQNetworkClientMgr():
                         str(DEFAULT_TCP_PORT)]
             nodeOutputFile = open('node.output', 'w')
 
-            if sys.platform == 'win32':
+            if WIN32_POPEN_FLAGS is not None:
                 self.__nodeProcess = Popen(nodeArgs,
-                                           creationflags = POPEN_FLAGS,
+                                           creationflags = WIN32_POPEN_FLAGS,
                                            stdout = nodeOutputFile,
                                            stderr = STDOUT)
             else:
