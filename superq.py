@@ -2441,18 +2441,17 @@ class SuperQStreamHandler(StreamRequestHandler):
             raise MalformedNetworkRequest(msg)
 
         self.return_response(response)
-
-        return True
           
     def handle(self):             
         # client can stay connected for multiple Request-Response transactions
         while True:
             try:
-                if not self.handle_connection():
-                    break
+                self.handle_connection()
             except Exception as e:
                 tb = format_exc()
-                self.raise_error('Exception: {0}\nTrace: {1}'.format(e, tb))
+                log('Exception: {0}\nTrace: {1}'.format(e, tb))
+                break
+        self.request.close()
 
 class SuperQTCPServer(TCPServer):
     def __init__(self,
@@ -2550,12 +2549,12 @@ class SuperQNetworkNode():
         print('Starting node mgr ...')
         
         self.__tcpThread = Thread(target = self.launch_tcp_server,
-                                  args = ('localhost', tcpPort))
+                                  args = ('', tcpPort))
         self.__tcpThread.start()
 
         if startSSL:
             self.__sslThread = Thread(target = self.launch_ssl_server,
-                                      args = ('localhost', sslPort))
+                                      args = ('', sslPort))
             self.__sslThread.start()
 
     def shutdown_node(self):
