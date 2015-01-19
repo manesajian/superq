@@ -2054,18 +2054,18 @@ class SuperQNetworkClientMgr():
             if host == 'localhost' and port == DEFAULT_TCP_PORT:
                 self.__start_networked_datastore()
 
-            # attempt to connect to datastore once it is started
-            attempts = 0
-            maxAttempts = 5
-            while attempts < maxAttempts:
-                try:
-                    s.connect((host, port))
-                    return s
-                except:
-                    sleep(.2)
-                attempts += 1
+                # attempt to connect to datastore once it is started
+                attempts = 0
+                maxAttempts = 5
+                while attempts < maxAttempts:
+                    try:
+                        s.connect((host, port))
+                        return s
+                    except:
+                        sleep(.2)
+                    attempts += 1
 
-        raise
+            raise
 
     def __get_socket(self, host, port, ssl = False):                                
         # get or initialize socket pool specific to host and port
@@ -2081,8 +2081,8 @@ class SuperQNetworkClientMgr():
             s = socketPool.pop(block = False)
         except SuperQEmpty:
             return self.__new_socket(host, port, ssl)
-        else:
-            return s
+
+        return s
 
     def __return_socket(self,
                         s,
@@ -2157,7 +2157,10 @@ class SuperQNetworkClientMgr():
             host = 'localhost'
             port = DEFAULT_TCP_PORT
         else:
-            host, port = host.split(':')
+            try:
+                host, port = host.split(':')
+            except ValueError:
+                port = DEFAULT_TCP_PORT
 
         msg = bytearray()
         msg.append(0x2A) # 42
@@ -2438,18 +2441,17 @@ class SuperQStreamHandler(StreamRequestHandler):
             raise MalformedNetworkRequest(msg)
 
         self.return_response(response)
-
-        return True
           
     def handle(self):             
         # client can stay connected for multiple Request-Response transactions
         while True:
             try:
-                if not self.handle_connection():
-                    break
+                self.handle_connection()
             except Exception as e:
                 tb = format_exc()
-                self.raise_error('Exception: {0}\nTrace: {1}'.format(e, tb))
+                log('Exception: {0}\nTrace: {1}'.format(e, tb))
+                break
+        self.request.close()
 
 class SuperQTCPServer(TCPServer):
     def __init__(self,
@@ -2547,12 +2549,12 @@ class SuperQNetworkNode():
         print('Starting node mgr ...')
         
         self.__tcpThread = Thread(target = self.launch_tcp_server,
-                                  args = ('localhost', tcpPort))
+                                  args = ('', tcpPort))
         self.__tcpThread.start()
 
         if startSSL:
             self.__sslThread = Thread(target = self.launch_ssl_server,
-                                      args = ('localhost', sslPort))
+                                      args = ('', sslPort))
             self.__sslThread.start()
 
     def shutdown_node(self):
