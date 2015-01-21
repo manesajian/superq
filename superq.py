@@ -6,7 +6,7 @@ import sys
 from copy import copy
 from socket import socket, AF_INET, SOCK_STREAM
 from socketserver import TCPServer, ThreadingMixIn, StreamRequestHandler
-from ssl import PROTOCOL_TLSv1
+from ssl import wrap_socket, CERT_NONE, CERT_REQUIRED, PROTOCOL_TLSv1
 from struct import pack, unpack
 from threading import Condition, Lock, RLock, Thread
 from time import sleep
@@ -15,16 +15,16 @@ from uuid import uuid4
 
 from subprocess import Popen, STDOUT
 
-# DETACHED_PROCESS is a creation flag for Popen that can be imported from
-# the win32process module if pywin32 is installed, or manually defined
-DETACHED_PROCESS = 0x00000008
-
-POPEN_FLAGS = DETACHED_PROCESS
 try:
     from subprocess import CREATE_NEW_PROCESS_GROUP
-    POPEN_FLAGS |= CREATE_NEW_PROCESS_GROUP
+
+    # DETACHED_PROCESS is a creation flag for Popen that can be imported from
+    # the win32process module if pywin32 is installed, or manually defined
+    DETACHED_PROCESS = 0x00000008
+
+    WIN32_POPEN_FLAGS = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
 except:
-    pass
+    WIN32_POPEN_FLAGS = None
 
 DEFAULT_TCP_PORT = 9990
 DEFAULT_SSL_PORT = 9991
@@ -1982,11 +1982,7 @@ class SuperQNodeResponse():
 
 # manages network connections and requests to network nodes
 class SuperQNetworkClientMgr():
-    def __init__(self, ssl = False):
-        # currently not really being used. I think this gets removed
-        # and replaced by a per-superq ssl setting
-        self.ssl = ssl
-
+    def __init__(self):
         # client is currently responsible for starting up network node
         self.__nodeProcess = None
 
@@ -2004,12 +2000,14 @@ class SuperQNetworkClientMgr():
             nodeArgs = ['python',
                         'superq.py',
                         '-t',
-                        str(DEFAULT_TCP_PORT)]
+                        str(DEFAULT_TCP_PORT),
+                        '-s',
+                        str(DEFAULT_SSL_PORT)]
             nodeOutputFile = open('node.output', 'w')
 
-            if sys.platform == 'win32':
+            if WIN32_POPEN_FLAGS is not None:
                 self.__nodeProcess = Popen(nodeArgs,
-                                           creationflags = POPEN_FLAGS,
+                                           creationflags = WIN32_POPEN_FLAGS,
                                            stdout = nodeOutputFile,
                                            stderr = STDOUT)
             else:
@@ -2042,9 +2040,10 @@ class SuperQNetworkClientMgr():
 
         # convert socket to ssl if requested
         if ssl:
-            s = ssl.wrap_socket(s,
-                                cert_reqs = ssl.CERT_NONE,
-                                ssl_version = ssl.PROTOCOL_TLSv1)
+            s = wrap_socket(s,
+                            ca_certs = DEFAULT_SSL_PEM_FILE,
+                            cert_reqs = CERT_REQUIRED,
+                            ssl_version = PROTOCOL_TLSv1)
 
         try:
             s.connect((host, port))
@@ -2152,15 +2151,23 @@ class SuperQNetworkClientMgr():
         return response
 
     def __send_msg(self, host, strMsg):
+        ssl = False
+
         # 'local' is shorthand for localhost:DEFAULT_PORT
         if host == 'local':
             host = 'localhost'
             port = DEFAULT_TCP_PORT
         else:
-            try:
-                host, port = host.split(':')
-            except ValueError:
-                port = DEFAULT_TCP_PORT
+            if host.startswith('ssl:'):
+                ssl, host, port = host.split(':')
+                ssl = True
+                port = int(port)
+            else:
+                try:
+                    host, port = host.split(':')
+                    port = int(port)
+                except ValueError:
+                    port = DEFAULT_TCP_PORT
 
         msg = bytearray()
         msg.append(0x2A) # 42
@@ -2168,7 +2175,7 @@ class SuperQNetworkClientMgr():
         msg.extend(strMsg.encode('utf-8'))
 
         # get existing socket from socket pool or initialize new one
-        s = self.__get_socket(host, port)
+        s = self.__get_socket(host, port, ssl)
 
         # send message
         self.__send(s, msg)
@@ -2529,11 +2536,11 @@ class SuperQNetworkNode():
         print('Launching SSL server ...')
         
         # create localhost SSL server on the given port
-        self.__sslServer = SSLThreadedServer((host, port),
-                                             SuperQStreamHandler,
-                                             DEFAULT_SSL_PEM_FILE,
-                                             DEFAULT_SSL_KEY_FILE,
-                                             ssl_version = ssl.PROTOCOL_TLSv1)
+        self.__sslServer = SuperQSSLThreadedServer((host, port),
+                                                   SuperQStreamHandler,
+                                                   DEFAULT_SSL_PEM_FILE,
+                                                   DEFAULT_SSL_KEY_FILE,
+                                                   ssl_version = PROTOCOL_TLSv1)
 
         # handle requests until an explicit shutdown() request
         self.__sslServer.serve_forever()
