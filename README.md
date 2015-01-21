@@ -7,7 +7,7 @@ The superq module provides functionality similar to an object-relational mapping
 
 Reducing the need to write code is what it's all about. Superqs allow you to focus on core logic without worrying about how you're going to move and manipulate data as you scale code from prototype to production.
 
-Using the superq module, powerful functions can be leveraged with just a few lines of code, helping developers quickly create scalable and performant applications.
+Using the superq module, powerful functionality can be leveraged with just a few lines of code, helping developers quickly create scalable and performant applications.
 
 ## Usage
 
@@ -130,11 +130,11 @@ How about a network-enabled mutex?
     sq = superq([], 'name = networkMutex', host = '1.1.1.1:1', maxlen = 1, attach = True)
     sq.push(1)
 
-Now simply p.pop() to acquire the mutex and .push(1) to release it.
+Now just .pop() to acquire the mutex and .push(1) to release it.
 
 Superqs could easily provide a thin comm layer for Python-enabled mobile clients.
 
-Or simply used as a thread-safe, multi-producer, multi-consumer queue.
+Or be used simply as a thread-safe, multi-producer, multi-consumer queue.
 
 There's really a tremendous number of uses superqs can be put to, from providing powerful synchronization and networking primitives to offering full querying capabilities without the need for database setup.
 
