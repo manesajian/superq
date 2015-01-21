@@ -13,7 +13,7 @@ Using the superq module, powerful functions can be leveraged with just a few lin
 
 ### Getting started
 
-    from superq import superq
+    from superq import superq, superqelem
 
 ### Creating the superq
 
@@ -95,7 +95,7 @@ The above query method can be read like a simple SQL statement where the first f
 
     SELECT a FROM sq WHERE b == 5;
 
-query() returns a new "detached" superq. <self> is simply a way to indicate the primary sq backing table.
+query() returns a new "detached" superq. "<self>" is simply a way to indicate the primary sq backing table.
 
 ### Querying a superq for multiple user objects
 
