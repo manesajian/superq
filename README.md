@@ -84,7 +84,7 @@ Or, if you have the user object, you can update the data store like this:
     foo.b = 5
     sq.update_elem(foo)
 
-This above method requires that the user object support dynamic field assignments. When the superqelem is de-marshalled into the user object, prior to being returned to the user, a hidden key field will be assigned to it, so that the superq can look the object back up. If it is not possible to make that assignment (in __slots__-supporting classes for instance), then after retrieving the user object, you must retrieve the superqelem to perform an update.
+This above method requires that the user object support dynamic field assignments. When the superqelem is de-marshalled into the user object, prior to being returned to the user, a hidden key field will be assigned to it, so that the superq can look the object back up. If it is not possible to make that assignment (in `__slots__`-supporting classes for instance), then after retrieving the user object, you must retrieve the superqelem to perform an update.
 
 ### Querying a superq for a single value
 
@@ -95,7 +95,7 @@ The above query method can be read like a simple SQL statement where the first f
 
     SELECT a FROM sq WHERE b == 5;
 
-query() returns a new "detached" superq. "<self>" is simply a way to indicate the primary sq backing table.
+query() returns a new "detached" superq. `<self>` is simply a way to indicate the primary sq backing table.
 
 ### Querying a superq for multiple user objects
 
