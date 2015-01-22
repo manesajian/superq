@@ -441,43 +441,6 @@ def db_delete_row(dbConn, tableName, keyName, keyVal):
                                                               keyName,
                                                               keyVal))
 
-def db_dump_table(dbConn, table_name):
-    cur = dbConn.cursor()
-
-    yield('BEGIN TRANSACTION;')
-
-    # sqlite_master table contains the SQL CREATE statements for the database
-    q = """
-       SELECT name, type, sql
-        FROM sqlite_master
-            WHERE sql NOT NULL AND
-            type == 'table' AND
-            name == :table_name
-        """
-
-    schema_res = cu.execute(q, {'table_name': table_name})
-    for table_name, type, sql in schema_res.fetchall():
-        if table_name == 'sqlite_sequence':
-            yield('DELETE FROM sqlite_sequence;')
-        elif table_name == 'sqlite_stat1':
-            yield('ANALYZE sqlite_master;')
-        elif table_name.startswith('sqlite_'):
-            continue
-        else:
-            yield('%s;' % sql)
-
-        # Build the insert statement for each row of the current table
-        res = cu.execute("PRAGMA table_info('%s')" % table_name)
-        column_names = [str(table_info[1]) for table_info in res.fetchall()]
-        q = "SELECT 'INSERT INTO \"%(tbl_name)s\" VALUES("
-        q += ",".join(["'||quote(" + col + ")||'" for col in column_names])
-        q += ")' FROM '%(tbl_name)s'"
-        query_res = cu.execute(q % {'tbl_name': table_name})
-        for row in query_res:
-            yield("%s;" % row[0])
-
-    yield('COMMIT;')
-
 # TODO: currently persistence is supported through save/load functionality that
 #  can be manually called. The next step of persistence is to make it automatic
 #  and allow persistence to be turned on/off for either individual superqs or
