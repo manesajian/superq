@@ -863,6 +863,27 @@ try:
     print('\tDeleting save file ...')
     remove('superq_test.sq')
 
+    print('Additional larger test of save\\restore functionality ...')
+    print('\tCreating hosted superq ...')
+    sq = superq([], keyCol = 'a', name = 'sq', attach = True, host = 'local')
+    for i in range(0, 1000):
+        foo = Foo(i, i)
+        sq.create_elem(foo)
+    print('\tSaving hosted superq ...')
+    sq.save('superq_test.sq')
+    print('\tDeleting hosted superq ...')
+    sq.delete()
+    print('\tRestoring hosted superq ...')
+    sq = superq('superq_test.sq', attach = True, host = 'local', buildFromFile = True)
+    print('\tChecking length of new superq ...')
+    sqLen = len(superq('sq', host = 'local'))
+    print('\tExpected length = {0}, actual length = {1}'.format(1000, sqLen))
+    assert(sqLen == 1000)
+    print('\tDeleting superq ...')
+    sq.delete()
+    print('\tDeleting save file ...')
+    remove('superq_test.sq')
+
     print('\nSTRESS tests:\n')
 
     print('Creating hosted superq for maxlen tests ...')
@@ -978,6 +999,7 @@ try:
 ##        print('Val: {0}'.format(i.value))
 ##        time.sleep(1)
 
+    # Note: depending on the OS, this might not free up the bound address immediately
     print('\nShutting down superq network node ...')
     shutdown()
 

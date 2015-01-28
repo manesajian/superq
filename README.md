@@ -140,7 +140,7 @@ There's really a tremendous number of uses superqs can be put to, from providing
 
 ## Current status
 
-Superqs are definitely not even close to production-ready. They're just a proof-of-concept right now. Despite the proto-stage of development that they are in, they do already provide some interesting capabilities such as helping make python objects inherently networkable and queryable.
+Superqs are definitely not even close to production-ready. They're just a proof-of-concept right now. Despite the proto-stage of development that they are in, they do already provide some interesting capabilities such as helping make python objects inherently network-accessible and queryable.
 
 Future versions should greatly expand superq scalability, performance, capability, and stability. So stick around, fire me off some ideas, tell me how crappy my code is so I can fix it, or maybe use it as a start for something you want to build.
 

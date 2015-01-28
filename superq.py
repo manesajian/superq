@@ -1324,14 +1324,19 @@ class superq():
 
         return elem.demarshal(self.objSample)
 
-    def __getitem__(self, key):
-        if key in self.__internalDict:
-            elem = self.__internalDict[key]
-        elif isinstance(key, int) and key < len(self.__internalDict):
-            # if element isn't keyed on the int, try the int as an index
-            elem = self.__internalList[key]                       
+    def __getitem__(self, val):
+        if isinstance(val, slice):
+
+        elif isinstance(val, int):
+            if val in self.__internalDict:
+                elem = self.__internalDict[val]
+            elif val < len(self.__internalDict):
+                # if element isn't keyed on the int, use it as an index
+                elem = self.__internalList[val]
+            else:
+                raise KeyError('Invalid key ({0})'.format(val))
         else:
-            raise KeyError(key)
+            raise TypeError('Invalid argument type ({0})'.format(type(val)))
 
         return self.__unwrap_elem(elem)
 
