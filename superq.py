@@ -1327,6 +1327,14 @@ class superq():
     def __getitem__(self, val):
         if isinstance(val, slice):
 
+# can't use dict for slicing, need to support slicing in linked list
+##        slicedkeys = list(self.dict.keys())[sliced]
+##        lst = [ self.dict[key] for key in slicedkeys ]
+##        return lst
+    
+            sq = superq([])
+            #self.create_elem(copy(elem), name = elem.name)
+
         elif isinstance(val, int):
             if val in self.__internalDict:
                 elem = self.__internalDict[val]
