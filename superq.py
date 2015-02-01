@@ -109,7 +109,35 @@ class LinkedList:
 
         return item
 
+    def __determineStep(self,
+                        valToCheck,
+                        step,
+                        positiveStep,
+                        negativeStep):
+        if valToCheck == None:
+            if step > 0:
+                return positiveStep
+            else:
+                return negativeStep
+        else:
+            return valToCheck
+
+    def __slice(self, slice_):
+        retLst = LinkedList()
+
+        step = self.__determineStep(slice_.step, 1, 1, 1)
+        start = self.__determineStep(slice_.start, step, 0, len(self) - 1)
+        stop = self.__determineStep(slice_.stop, step, len(self), -1)
+
+        for item in range(start, stop, step):
+            retList.append(self.__getitem__(item))
+
+        return retLst
+
     def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.__slice(key)
+
         return self.__lookup(key)
 
     def is_empty(self):
@@ -1326,25 +1354,35 @@ class superq():
 
     def __getitem__(self, val):
         if isinstance(val, slice):
+            start, stop, step = val.indices(len(self))
 
-# can't use dict for slicing, need to support slicing in linked list
-##        slicedkeys = list(self.dict.keys())[sliced]
-##        lst = [ self.dict[key] for key in slicedkeys ]
-##        return lst
-    
             sq = superq([])
-            #self.create_elem(copy(elem), name = elem.name)
+            if start in self.__internalDict:
+                sqe = self.__internalDict[start]
+                sq.create_elem(copy(sqe))
+                while sqe.name != stop:
+                    sqe = sqe.next
+                    if sqe.name == start:
+                        break
+                    sq.create_elem(copy(sqe))
+            elif isinstance(start, int):
+                sqSlice = self.__internalList[val]
+                for sqe in sqSlice:
+                    sq.create_elem(copy(sqe))
+            else:
+                raise TypeError('Invalid type ({0})'.format(type(val)))
 
+            return sq
+        elif val in self.__internalDict:
+            elem = self.__internalDict[val]
         elif isinstance(val, int):
-            if val in self.__internalDict:
-                elem = self.__internalDict[val]
-            elif val < len(self.__internalDict):
+            if val < len(self.__internalDict):
                 # if element isn't keyed on the int, use it as an index
                 elem = self.__internalList[val]
             else:
                 raise KeyError('Invalid key ({0})'.format(val))
         else:
-            raise TypeError('Invalid argument type ({0})'.format(type(val)))
+            raise TypeError('Invalid type ({0})'.format(type(val)))
 
         return self.__unwrap_elem(elem)
 
