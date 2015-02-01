@@ -164,7 +164,18 @@ try:
     sqCopy = sq[:]
     print('\tExpected superq length = {0}, actual length = {1}'.format(6, len(sqCopy)))
     assert(len(sqCopy) == 6)
-    
+    print('Slicing portion of copied superq ...')
+    sqSlice = sqCopy[0:3]
+    print('\tExpected superq length = {0}, actual length = {1}'.format(3, len(sqSlice)))
+    assert(len(sqSlice) == 3)
+    print('\tExpected values = {0}, {1}, received value = {2}{3}'.format(10,
+                                                                         12,
+                                                                         sqSlice[0],
+                                                                         sqSlice[2]))
+    assert(sqSlice[0] == 10 and sqSlice[2] == 12)
+    print('\tDeleting superq ...')
+    sq.delete()
+
     print('Testing superq creation from custom object list ...')
     sq = superq([Foo(1,10), Foo(2,12), Foo(3,13)], keyCol = 'a')
     print('\tTesting reading elem by key ...')
