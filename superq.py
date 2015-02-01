@@ -123,16 +123,16 @@ class LinkedList:
             return valToCheck
 
     def __slice(self, slice_):
-        retLst = LinkedList()
+        newLst = LinkedList()
 
         step = self.__determineStep(slice_.step, 1, 1, 1)
         start = self.__determineStep(slice_.start, step, 0, len(self) - 1)
         stop = self.__determineStep(slice_.stop, step, len(self), -1)
 
         for item in range(start, stop, step):
-            retList.append(self.__getitem__(item))
+            newLst.push_tail(self.__getitem__(item))
 
-        return retLst
+        return newLst
 
     def __getitem__(self, key):
         if isinstance(key, slice):
