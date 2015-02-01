@@ -130,15 +130,15 @@ class LinkedList:
         stop = self.__determineStep(slice_.stop, step, len(self), -1)
 
         for item in range(start, stop, step):
-            newLst.push_tail(self.__getitem__(item))
+            newLst.push_tail(copy(self.__getitem__(item)))
 
         return newLst
 
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            return self.__slice(key)
+    def __getitem__(self, val):
+        if isinstance(val, slice):
+            return self.__slice(val)
 
-        return self.__lookup(key)
+        return self.__lookup(val)
 
     def is_empty(self):
         return self.__count == 0
