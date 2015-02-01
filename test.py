@@ -157,6 +157,14 @@ try:
     print('\tDeleting superq ...')
     sq.delete()
 
+    print('Testing superq basic slicing ...')
+    print('\tCreating superq ...')
+    sq = superq([10, 11, 12, 13, 14, 15])
+    print('\tCopying superq via empty slice ...')
+    sqCopy = sq[:]
+    print('\tExpected superq length = {0}, actual length = {1}'.format(6, len(sqCopy)))
+    assert(len(sqCopy) == 6)
+    
     print('Testing superq creation from custom object list ...')
     sq = superq([Foo(1,10), Foo(2,12), Foo(3,13)], keyCol = 'a')
     print('\tTesting reading elem by key ...')
