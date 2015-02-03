@@ -168,11 +168,17 @@ try:
     sqSlice = sqCopy[0:3]
     print('\tExpected superq length = {0}, actual length = {1}'.format(3, len(sqSlice)))
     assert(len(sqSlice) == 3)
-    print('\tExpected values = {0}, {1}, received value = {2}{3}'.format(10,
-                                                                         12,
-                                                                         sqSlice[0],
-                                                                         sqSlice[2]))
+    print('\tExpected values = {0}, {1}, actual values = {2}, {3}'.format(10,
+                                                                        12,
+                                                                        sqSlice[0],
+                                                                        sqSlice[2]))
     assert(sqSlice[0] == 10 and sqSlice[2] == 12)
+    print('Testing [-1:] slice ...')
+    sqSlice = sqSlice[-1:]
+    print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sqSlice)))
+    assert(len(sqSlice) == 1)
+    print('\tExpected value = {0}, actual value = {1}'.format(12, sqSlice[0]))
+    assert(sqSlice[0] == 12)
     print('\tDeleting superq ...')
     sq.delete()
 
