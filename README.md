@@ -9,6 +9,23 @@ Reducing the need to write code is what it's all about. Superqs allow you to foc
 
 Using the superq module, powerful functionality can be leveraged with just a few lines of code, helping developers quickly create scalable and performant applications.
 
+## Design Philosophy
+
+Under the hood, the superq module uses sqlite to support SQL-style queries and persistence.
+In some ways superq could be considered to extend the sqlite philosophy and use cases. Just as sqlite provides a powerful lightweight alternative to the traditional client-server RDBMS, superq provides a lightweight, zero-configuration alternative to distributed datastores such as FoundationDB and MongoDB.
+
+## Architecture
+
+A superq instance is owned by a thread, a process, or the network.
+
+The base case is a _detached_ superq intended for single-thread use. In this case superq essentially provides a versatile alternative to synchronized Python collections such as the queue module. Important to note is that query functionality is not available to detached superqs and correspondingly access is very fast.
+
+An _attached_ superq can be accessed from multiple threads and supports queries. This is accomplished through a local instance of the superq datastore backed by sqlite.
+
+A _hosted_ superq is owned by a superq network node process managing a public datastore instance. The node process provides local and remote access and supports secure connections through SSL.
+
+The final type, a _distributed_ superq is under development but will eventually provide advanced parallel characteristics such as availability and partitioning.
+
 ## Usage
 
 ### Getting started
@@ -140,15 +157,17 @@ There's really a tremendous number of uses superqs can be put to, from providing
 
 ## Current status
 
-Superqs are definitely not even close to production-ready. They're just a proof-of-concept right now. Despite the proto-stage of development that they are in, they do already provide some interesting capabilities such as helping make python objects inherently network-accessible and queryable.
+Superqs are definitely not production-ready. I consider the code proof-of-concept right now. Despite the proto-stage of development that it is in, superq does already provide some interesting functionality as an inherently network-accessible, queryable Python collection.
 
-Future versions should greatly expand superq scalability, performance, capability, and stability. So stick around, fire me off some ideas, tell me how crappy my code is so I can fix it, or maybe use it as a start for something you want to build.
+Eventually version 1.0 will represent a complete and stable version of the API while 2.0 should provide full distributed functionality.
 
 ## About
 
 I started this project to learn more about data and scalability and intend to eventually produce a useful object-relational mapping front-end integrated with a scalable, distributed datastore.
 
 My hope is that the superq interface can help Python developers by providing a fundamentally-scalable collection that is as easy to use as the standard collections but far more powerful.
+
+Future versions should greatly expand superq scalability, performance, capability, and stability. So stick around, fire me off some ideas, tell me how crappy my code is so I can fix it, or maybe use it as a start for something you want to build.
 
 ## License
 

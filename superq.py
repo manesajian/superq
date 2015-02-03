@@ -1368,7 +1368,7 @@ class superq():
             elif isinstance(start, int):
                 sqSlice = self.__internalList[val]
                 for sqe in sqSlice:
-                    sq.create_elem(copy(sqe))
+                    sq.create_elem(sqe)
             else:
                 raise TypeError('Invalid type ({0})'.format(type(val)))
 
