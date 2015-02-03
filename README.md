@@ -9,6 +9,23 @@ Reducing the need to write code is what it's all about. Superqs allow you to foc
 
 Using the superq module, powerful functionality can be leveraged with just a few lines of code, helping developers quickly create scalable and performant applications.
 
+## Design Philosophy
+
+Under the hood, the superq module uses sqlite to provide query capability and support persistence.
+In some ways superq could be considered to extend the sqlite philosophy and use cases. Just as sqlite provides a powerful lightweight alternative to the traditional client-server RDBMS, superq provides a lightweight, zero-configuration alternative to distributed datastores such as FoundationDB and MongoDB.
+
+## Architecture
+
+A superq instance can be owned by a thread, a process, or the network. This allows for maximum functionality without sacrificing performance and is the key to scalability.
+
+The base case is a _detached_ superq intended for single-thread use. In this case superq essentially provides a versatile alternative to synchronized Python collections such as provided by the queue module. Important to note is that query functionality is not available to detached superqs and correspondingly access is very fast.
+
+An _attached_ superq can be accessed from multiple threads and supports queries. This is accomplished through a local instance of the superq datastore backed by sqlite.
+
+A _hosted_ superq is owned by a superq network node process which manages a public datastore instance. The node process provides local and remote access and supports secure connections through SSL.
+
+The final type, a _distributed_ superq is under development but will eventually provide advanced datastore characteristics such as availability and partitioning.
+
 ## Usage
 
 ### Getting started
