@@ -157,15 +157,15 @@ There's really a tremendous number of uses superqs can be put to, from providing
 
 ## Current status
 
-Superqs are definitely not even close to production-ready. They're just a proof-of-concept right now. Despite the proto-stage of development that they are in, they do already provide some interesting capabilities such as helping make python objects inherently network-accessible and queryable.
-
-Future versions should greatly expand superq scalability, performance, capability, and stability. So stick around, fire me off some ideas, tell me how crappy my code is so I can fix it, or maybe use it as a start for something you want to build.
+Superqs are definitely not production-ready. I consider the code proof-of-concept right now. Despite the proto-stage of development that they are in, they do already provide some interesting capabilities such as helping make python objects inherently network-accessible and queryable. Eventually version 1.0 will represent a complete and stable version of the API while 2.0 should provide full distributed functionality.
 
 ## About
 
 I started this project to learn more about data and scalability and intend to eventually produce a useful object-relational mapping front-end integrated with a scalable, distributed datastore.
 
 My hope is that the superq interface can help Python developers by providing a fundamentally-scalable collection that is as easy to use as the standard collections but far more powerful.
+
+Future versions should greatly expand superq scalability, performance, capability, and stability. So stick around, fire me off some ideas, tell me how crappy my code is so I can fix it, or maybe use it as a start for something you want to build.
 
 ## License
 
