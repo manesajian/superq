@@ -157,7 +157,9 @@ There's really a tremendous number of uses superqs can be put to, from providing
 
 ## Current status
 
-Superqs are definitely not production-ready. I consider the code proof-of-concept right now. Despite the proto-stage of development that they are in, they do already provide some interesting capabilities such as helping make python objects inherently network-accessible and queryable. Eventually version 1.0 will represent a complete and stable version of the API while 2.0 should provide full distributed functionality.
+Superqs are definitely not production-ready. I consider the code proof-of-concept right now. Despite the proto-stage of development that it is in, superq does already provide some interesting functionality as an inherently network-accessible, queryable Python collection.
+
+Eventually version 1.0 will represent a complete and stable version of the API while 2.0 should provide full distributed functionality.
 
 ## About
 
