@@ -11,7 +11,7 @@ Using the superq module, powerful functionality can be leveraged with just a few
 
 ## Design Philosophy
 
-Under the hood, the superq module uses sqlite to provide query capability and support persistence.
+Under the hood, the superq module uses sqlite to support SQL-style queries and persistence.
 In some ways superq could be considered to extend the sqlite philosophy and use cases. Just as sqlite provides a powerful lightweight alternative to the traditional client-server RDBMS, superq provides a lightweight, zero-configuration alternative to distributed datastores such as FoundationDB and MongoDB.
 
 ## Architecture
