@@ -24,7 +24,7 @@ An _attached_ superq can be accessed from multiple threads and supports queries.
 
 A _hosted_ superq is owned by a superq network node process managing a public datastore instance. The node process provides local and remote access and supports secure connections through SSL.
 
-The final type, a _distributed_ superq is under development but will eventually provide advanced parallelcharacteristics such as availability and partitioning.
+The final type, a _distributed_ superq is under development but will eventually provide advanced parallel characteristics such as availability and partitioning.
 
 ## Usage
 
