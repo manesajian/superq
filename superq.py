@@ -577,9 +577,6 @@ class SuperQDataStore():
 
         return sq
 
-    def superq_update(self, sq):
-        raise NotImplementedError('SuperQDataStore.superq_update()')
-
     def superq_delete(self, sq):
         # delete superq from dict after locking the entire collection
         self._dataStoreBigLock.acquire()
