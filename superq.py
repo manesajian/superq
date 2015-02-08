@@ -109,25 +109,29 @@ class LinkedList:
 
         return item
 
-    def __determineStep(self,
-                        valToCheck,
-                        step,
-                        positiveStep,
-                        negativeStep):
-        if valToCheck == None:
-            if step > 0:
-                return positiveStep
-            else:
-                return negativeStep
-        else:
-            return valToCheck
-
     def __slice(self, slice_):
         newLst = LinkedList()
 
-        step = self.__determineStep(slice_.step, 1, 1, 1)
-        start = self.__determineStep(slice_.start, step, 0, len(self) - 1)
-        stop = self.__determineStep(slice_.stop, step, len(self), -1)
+        start = slice_.start
+        stop = slice_.stop
+        step = slice_.step
+
+        if start == None:
+            start = 0
+        elif start < 0:
+            if abs(start) > len(self):
+                raise IndexError('list index out of range')
+            start = len(self) + start
+
+        if stop == None:
+            stop = len(self)
+        elif stop < 0:
+            if abs(stop) > len(self):
+                raise IndexError('list index out of range')
+            stop = len(self) - stop
+
+        if step == None:
+            step = 1
 
         for item in range(start, stop, step):
             newLst.push_tail(copy(self.__getitem__(item)))
@@ -576,9 +580,6 @@ class SuperQDataStore():
             sq = self.superqdict[name]
 
         return sq
-
-    def superq_update(self, sq):
-        raise NotImplementedError('SuperQDataStore.superq_update()')
 
     def superq_delete(self, sq):
         # delete superq from dict after locking the entire collection
@@ -1209,7 +1210,7 @@ class superq():
                     raise KeyError('superq {0} does not exist'.format(initObj))
 
         return object.__new__(cls)
-    
+
     def __init__(self,
                  initObj,
                  name = None,
@@ -1368,7 +1369,7 @@ class superq():
             elif isinstance(start, int):
                 sqSlice = self.__internalList[val]
                 for sqe in sqSlice:
-                    sq.create_elem(sqe)
+                    sq.create_elem(copy(sqe))
             else:
                 raise TypeError('Invalid type ({0})'.format(type(val)))
 
