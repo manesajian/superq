@@ -164,7 +164,7 @@ try:
     sqCopy = sq[:]
     print('\tExpected superq length = {0}, actual length = {1}'.format(6, len(sqCopy)))
     assert(len(sqCopy) == 6)
-    print('Slicing portion of copied superq ...')
+    print('\tSlicing portion of copied superq ...')
     sqSlice = sqCopy[0:3]
     print('\tExpected superq length = {0}, actual length = {1}'.format(3, len(sqSlice)))
     assert(len(sqSlice) == 3)
@@ -173,12 +173,27 @@ try:
                                                                         sqSlice[0],
                                                                         sqSlice[2]))
     assert(sqSlice[0] == 10 and sqSlice[2] == 12)
-    print('Testing [-1:] slice ...')
+    print('\tTesting [-1:] slice ...')
     sqSlice = sqSlice[-1:]
     print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sqSlice)))
     assert(len(sqSlice) == 1)
     print('\tExpected value = {0}, actual value = {1}'.format(12, sqSlice[0]))
     assert(sqSlice[0] == 12)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Additional superq slicing ...')
+    print('\tCreating superq ...')
+    sq = superq([1, 2, 3, 4, 5, 6, 7, 8])
+    print('\tTesting [1:4:2] slice ...')
+    sqSlice = sq[1:4:2]
+    print('\tExpected superq length = {0}, actual length = {1}'.format(2, len(sqSlice)))
+    assert(len(sqSlice) == 2)
+    print('\tExpected values = {0}, {1}, actual values = {2}, {3}'.format(2,
+                                                                          4,
+                                                                          sqSlice[0],
+                                                                          sqSlice[1]))
+    assert(sqSlice[0] == 2 and sqSlice[1] == 4)
     print('\tDeleting superq ...')
     sq.delete()
 
