@@ -18,9 +18,9 @@ In some ways superq can be considered to extend the sqlite philosophy and use ca
 
 A superq instance is owned by a thread, a process, or the network.
 
-The base case is a _detached_ superq intended for single-thread use. In this case superq essentially provides a versatile alternative to synchronized Python collections such as the queue module. Important to note is that query functionality is not available to detached superqs and correspondingly access is very fast.
+The base case is a _detached_ superq, i.e. unattached to a datastore, which is intended for single-thread use. In this case superq essentially provides a versatile alternative to Python collections such as lists, dictionaries, deques, or the synchronized Queue class. Important to note is that query functionality is not available to detached superqs, and so access is very fast.
 
-An _attached_ superq can be accessed from multiple threads and supports queries. This is accomplished through a local instance of the superq datastore backed by sqlite.
+An _attached_ superq supports queries as well as concurrent access within a process. This is accomplished through a local instance of the superq datastore backed by sqlite.
 
 A _hosted_ superq is owned by a superq network node process managing a public datastore instance. The node process provides local and remote access and supports secure connections through SSL.
 
