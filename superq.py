@@ -116,25 +116,43 @@ class LinkedList:
         stop = slice_.stop
         step = slice_.step
 
+        if step == None:
+            step = 1
+
         if start == None:
-            start = 0
+            if step < 0:
+                start = -1
+            else:
+                start = 0
         elif start < 0:
-            if abs(start) > len(self):
-                raise IndexError('list index out of range')
             start = len(self) + start
+
+        if abs(start) > len(self):
+            raise IndexError('list index out of range')
 
         if stop == None:
             stop = len(self)
         elif stop < 0:
-            if abs(stop) > len(self):
-                raise IndexError('list index out of range')
             stop = len(self) - stop
 
-        if step == None:
-            step = 1
+        if abs(stop) > len(self):
+            raise IndexError('list index out of range')
 
-        for item in range(start, stop, step):
-            newLst.push_tail(copy(self.__getitem__(item)))
+        node = self.__getitem__(start)
+        for i in range(*slice_.indices(len(self))):
+            newLst.push_tail(copy(node))
+            steps = step
+            while steps != 0:
+                if steps < 0:
+                    node = node.prev
+                    if node is None:
+                        node = self.tail
+                    steps += 1
+                else:
+                    node = node.next
+                    if node is None:
+                        node = self.head
+                    steps -= 1
 
         return newLst
 
@@ -427,7 +445,7 @@ def db_exec(dbConn, sql):
             break
         except sqlite3.OperationalError:
             # when using shared cache mode, sqlite ignores timeouts and
-            # handlers, requiring this hopefully temporary spinning solution.
+            # handlers, requiring for now this spinning solution.
             # shared cache mode is needed for parallel access of memory db
             sleep(.01)
         except:

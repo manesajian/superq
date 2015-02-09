@@ -3,7 +3,7 @@ superq
 
 A flexible Python collection scaling to need.
 
-The superq module provides functionality similar to an object-relational mapping (ORM) interface over a distributed data store. It can be used in place of standard collections like dictionaries and Queues and potentially eliminates a lot of network and db-oriented plumbing code.
+The superq module provides functionality similar to an object-relational mapping interface on top of a distributed data store. It can be used in place of standard collections like dictionaries and Queues and potentially eliminates a lot of network and db-oriented plumbing code.
 
 Reducing the need to write code is what it's all about. Superqs allow you to focus on core logic without worrying about how you're going to move and manipulate data as you scale code from prototype to production.
 
@@ -18,9 +18,9 @@ In some ways superq can be considered to extend the sqlite philosophy and use ca
 
 A superq instance is owned by a thread, a process, or the network.
 
-The base case is a _detached_ superq intended for single-thread use. In this case superq essentially provides a versatile alternative to synchronized Python collections such as the queue module. Important to note is that query functionality is not available to detached superqs and correspondingly access is very fast.
+The base case is a _detached_ superq, i.e. unattached to a datastore, which is intended for single-thread use. In this case superq essentially provides a versatile alternative to Python collections such as lists, dictionaries, deques, or the synchronized Queue class. Important to note is that query functionality is not available to detached superqs, and correspondingly, access is very fast.
 
-An _attached_ superq can be accessed from multiple threads and supports queries. This is accomplished through a local instance of the superq datastore backed by sqlite.
+An _attached_ superq supports queries as well as concurrent access within a process. This is accomplished through a local instance of the superq datastore backed by sqlite.
 
 A _hosted_ superq is owned by a superq network node process managing a public datastore instance. The node process provides local and remote access and supports secure connections through SSL.
 
@@ -151,7 +151,7 @@ Now just .pop() to acquire the mutex and .push(1) to release it.
 
 Superqs could easily provide a thin comm layer for Python-enabled mobile clients.
 
-Or be used simply as a thread-safe, multi-producer, multi-consumer queue.
+Or function as a persistent multi-producer, multi-consumer queue.
 
 There's really a tremendous number of uses superqs can be put to, from providing powerful synchronization and networking primitives to offering full querying capabilities without the need for database setup.
 
