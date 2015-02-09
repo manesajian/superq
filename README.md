@@ -18,7 +18,7 @@ In some ways superq can be considered to extend the sqlite philosophy and use ca
 
 A superq instance is owned by a thread, a process, or the network.
 
-The base case is a _detached_ superq, i.e. unattached to a datastore, which is intended for single-thread use. In this case superq essentially provides a versatile alternative to Python collections such as lists, dictionaries, deques, or the synchronized Queue class. Important to note is that query functionality is not available to detached superqs, and so access is very fast.
+The base case is a _detached_ superq, i.e. unattached to a datastore, which is intended for single-thread use. In this case superq essentially provides a versatile alternative to Python collections such as lists, dictionaries, deques, or the synchronized Queue class. Important to note is that query functionality is not available to detached superqs, and correspondingly, access is very fast.
 
 An _attached_ superq supports queries as well as concurrent access within a process. This is accomplished through a local instance of the superq datastore backed by sqlite.
 
@@ -151,7 +151,7 @@ Now just .pop() to acquire the mutex and .push(1) to release it.
 
 Superqs could easily provide a thin comm layer for Python-enabled mobile clients.
 
-Or be used simply as a thread-safe, multi-producer, multi-consumer queue.
+Or function as a persistent multi-producer, multi-consumer queue.
 
 There's really a tremendous number of uses superqs can be put to, from providing powerful synchronization and networking primitives to offering full querying capabilities without the need for database setup.
 
