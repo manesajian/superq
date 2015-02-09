@@ -194,6 +194,17 @@ try:
                                                                           sqSlice[0],
                                                                           sqSlice[1]))
     assert(sqSlice[0] == 2 and sqSlice[1] == 4)
+    print('\tTesting [::-1] reverse list slice ...')
+    sqSlice = sq[::-1]
+    print('\tExpected superq length = {0}, actual length = {1}'.format(8, len(sqSlice)))
+    assert(len(sqSlice) == 8)
+    print('\tExpected values = {0}, {1}, actual values = {2}, {3}'.format(8,
+                                                                          1,
+                                                                          sqSlice[0],
+                                                                          sqSlice[7]))
+    for sqe in sqSlice:
+        print('{0}\n'.format(sqe))
+    assert(sqSlice[0] == 8 and sqSlice[7] == 1)
     print('\tDeleting superq ...')
     sq.delete()
 
