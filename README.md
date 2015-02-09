@@ -3,7 +3,7 @@ superq
 
 A flexible Python collection scaling to need.
 
-The superq module provides functionality similar to an object-relational mapping (ORM) interface over a distributed data store. It can be used in place of standard collections like dictionaries and Queues and potentially eliminates a lot of network and db-oriented plumbing code.
+The superq module provides functionality similar to an object-relational mapping interface on top of a distributed data store. It can be used in place of standard collections like dictionaries and Queues and potentially eliminates a lot of network and db-oriented plumbing code.
 
 Reducing the need to write code is what it's all about. Superqs allow you to focus on core logic without worrying about how you're going to move and manipulate data as you scale code from prototype to production.
 
