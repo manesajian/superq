@@ -46,13 +46,13 @@ def shutdown():
         _dataStore.shutdown()
 
 # simple linked list element. superqelem inherits from this
-class LinkedListNode:
+class MultiListNode:
     def __init__(self):
         self.prev = None
         self.next = None
 
 # doubly-linked list implementation used by superq and superqelem
-class LinkedList:
+class MultiList:
     def __init__(self, circular = False):
         self.head = None
         self.tail = None
@@ -110,7 +110,7 @@ class LinkedList:
         return item
 
     def __slice(self, slice_):
-        newLst = LinkedList()
+        newLst = MultiList()
 
         start = slice_.start
         stop = slice_.stop
@@ -886,24 +886,24 @@ class SuperQDataStore():
         db_delete_row(dbConn, sq.name, keyCol, sqeName)
         self.__return_dbConn(dbConn)
 
-class elematom(LinkedListNode):
+class elematom(MultiListNode):
     def __init__(self, name, type_, value):
-        LinkedListNode.__init__(self)
+        MultiListNode.__init__(self)
 
         self.name = name
         self.type = type_
         self.value = value
 
-class superqelem(LinkedListNode):
+class superqelem(MultiListNode):
     def __init__(self,
                  name = None,
                  value = None,
                  parentSq = None,
                  buildFromStr = False):
-        LinkedListNode.__init__(self)
+        MultiListNode.__init__(self)
 
         # list of elematoms
-        self.__internalList = LinkedList()
+        self.__internalList = MultiList()
 
         # dictionary of elematoms, keyed by 'field' name
         self.__internalDict = {}
@@ -1294,7 +1294,7 @@ class superq():
         self.createTable = False
 
         # superqelems are arrayed like a list but mapped like a dictionary
-        self.__internalList = LinkedList()
+        self.__internalList = MultiList()
         self.__internalDict = {}
 
         # automatically generates key column
@@ -1511,7 +1511,7 @@ class superq():
 
     def buildFromStr(self, sqStr, attach = False):
         # initialize internal storage
-        self.__internalList = LinkedList()
+        self.__internalList = MultiList()
         self.__internalDict = {}
 
         # separate out sq header from remainder
