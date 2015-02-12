@@ -1,9 +1,9 @@
 import getopt
-import os
 import sqlite3
 import sys
 
 from copy import copy
+from os import kill
 from socket import socket, AF_INET, SOCK_STREAM
 from socketserver import TCPServer, ThreadingMixIn, StreamRequestHandler
 from ssl import wrap_socket, CERT_NONE, CERT_REQUIRED, PROTOCOL_TLSv1
@@ -2053,7 +2053,7 @@ class SuperQNetworkClientMgr():
 
     def shutdown(self):
         if self.__nodeProcess is not None:
-            os.kill(self.__nodeProcess.pid, 9)
+            kill(self.__nodeProcess.pid, 9)
 
         # cleanup socket pools
         for key, socketPool in self.__socketPoolDict.items():
