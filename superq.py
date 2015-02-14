@@ -2287,9 +2287,6 @@ class SuperQNetworkClientMgr():
         else:
             raise Exception('Not sure what to raise here yet.')
 
-    def superqelem_exists(self):
-        pass
-
     def superqelem_create(self, sq, sqe, idx = None):
         # build request object
         request = SuperQNodeRequest()
