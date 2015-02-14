@@ -2296,9 +2296,6 @@ class SuperQNetworkClientMgr():
 
         response = self.__send_msg(sq.host, str(request))
 
-    def superqelem_read(self):
-        pass
-
     def superqelem_update(self, sq, sqe):
         # build request object
         request = SuperQNodeRequest()
