@@ -2245,8 +2245,6 @@ class SuperQNetworkClientMgr():
         request.args = sq.publicName
         request.body = str(sq)
 
-        strRequest = str(request)
-
         self.__send_msg(sq.host, str(request))
 
     def superq_read(self, name, host):
