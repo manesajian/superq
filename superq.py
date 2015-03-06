@@ -1914,11 +1914,11 @@ class superq():
     # rotate superqelems n steps to the right. If n is negative, rotates left
     def rotate(self, n):
         # iterate to the indicated index
-        if key >= 0:
-            for i in range(0, key):
+        if n >= 0:
+            for i in range(0, n):
                 self.push_head(self.pop_tail())
         else:
-            for i in range(1, abs(key)):
+            for i in range(1, abs(n)):
                 self.push_tail(self.pop_head())
 
     # waits for superq to be empty
