@@ -178,7 +178,7 @@ class MultiList:
                 self.tail = node
 
             self.head = node
-        elif idx == self.__count:
+        elif idx >= self.__count:
             # set new tail, order of operations matters
             node.next = None
             node.prev = self.tail
@@ -261,8 +261,6 @@ class MultiList:
             return item
         else:
             curNode = self.__lookup(idx)
-
-            item = curNode
 
             # because curNode is not head or tail, these dereferences are safe
             curNode.prev.next = curNode.next
@@ -1246,17 +1244,17 @@ class superq():
             return
 
         # mutex must be held whenever the queue is mutating.  All methods
-        # that acquire mutex must release it before returning.  mutex
-        # is shared between the three conditions, so acquiring and
-        # releasing the conditions also acquires and releases mutex.
+        # that acquire mutex must release it before returning. mutex is
+        # shared between the conditions, so acquiring and releasing the
+        # conditions also acquires and releases mutex
         self.mutex = RLock()
 
         # notify not_empty whenever an item is added to the queue; a
-        # thread waiting to get is notified then.
+        # thread waiting to get is notified then
         self.not_empty = Condition(self.mutex)
 
         # notify not_full whenever an item is removed from the queue;
-        # a thread waiting to put is notified then.
+        # a thread waiting to put is notified then
         self.not_full = Condition(self.mutex)
 
         self.name = name
@@ -1916,11 +1914,11 @@ class superq():
     # rotate superqelems n steps to the right. If n is negative, rotates left
     def rotate(self, n):
         # iterate to the indicated index
-        if key >= 0:
-            for i in range(0, key):
+        if n >= 0:
+            for i in range(0, n):
                 self.push_head(self.pop_tail())
         else:
-            for i in range(1, abs(key)):
+            for i in range(1, abs(n)):
                 self.push_tail(self.pop_head())
 
     # waits for superq to be empty
@@ -2149,8 +2147,9 @@ class SuperQNetworkClientMgr():
         data = self.__recv(s, 1)
 
         if (len(data) == 0 or data[0] != 42):
-            return
+            raise Exception('Bad message.')
 
+# TODO: look at this, can it read less than it should? It should block, right?
         # next 4 bytes must always be message body length
         data = bytearray()
         while len(data) < 4:
@@ -2164,6 +2163,7 @@ class SuperQNetworkClientMgr():
         # convert length
         messageLength = unpack('I', data)[0]
 
+# TODO: look at this, can it read less than it should? It should block, right?
         # now read the rest of the message
         data = bytearray()
         while len(data) < messageLength:
@@ -2245,8 +2245,6 @@ class SuperQNetworkClientMgr():
         request.args = sq.publicName
         request.body = str(sq)
 
-        strRequest = str(request)
-
         self.__send_msg(sq.host, str(request))
 
     def superq_read(self, name, host):
@@ -2287,8 +2285,7 @@ class SuperQNetworkClientMgr():
         else:
             raise Exception('Not sure what to raise here yet.')
 
-    def superqelem_exists(self):
-        pass
+# TODO: need to be checking return values and raising exceptions as appropriate
 
     def superqelem_create(self, sq, sqe, idx = None):
         # build request object
@@ -2298,9 +2295,6 @@ class SuperQNetworkClientMgr():
         request.body = str(sqe)
 
         response = self.__send_msg(sq.host, str(request))
-
-    def superqelem_read(self):
-        pass
 
     def superqelem_update(self, sq, sqe):
         # build request object
