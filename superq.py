@@ -1863,6 +1863,7 @@ class superq():
 
             self.not_empty.notify()
 
+# TODO: investigate whether this should be removed. need for return on push?
             return sqe
 
     def push_head(self, value, block = True, timeout = None):
@@ -2393,11 +2394,13 @@ class SuperQStreamHandler(StreamRequestHandler):
             response.body = ''
         elif cmd == 'superq_create':
             if _dataStore.superq_exists(args):
+                self.log("superq " + args + " already exists.");
                 response.result = str(False)
             else:
+                self.log("deserializing.");
                 # deserialize request body into a detached superq
                 sq = superq(body, attach = False, buildFromStr = True)
-
+                self.log("name=" + sq.name);
                 # assign superq to the node datastore
                 sq.attach()
 
