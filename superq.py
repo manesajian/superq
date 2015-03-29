@@ -46,13 +46,13 @@ def shutdown():
         _dataStore.shutdown()
 
 # simple linked list element. superqelem inherits from this
-class MultiListNode:
+class LinkedListNode:
     def __init__(self):
         self.prev = None
         self.next = None
 
 # doubly-linked list implementation used by superq and superqelem
-class MultiList:
+class LinkedList:
     def __init__(self, circular = False):
         self.head = None
         self.tail = None
@@ -110,7 +110,7 @@ class MultiList:
         return item
 
     def __slice(self, slice_):
-        newLst = MultiList()
+        newLst = LinkedList()
 
         start = slice_.start
         stop = slice_.stop
@@ -884,24 +884,24 @@ class SuperQDataStore():
         db_delete_row(dbConn, sq.name, keyCol, sqeName)
         self.__return_dbConn(dbConn)
 
-class elematom(MultiListNode):
+class elematom(LinkedListNode):
     def __init__(self, name, type_, value):
-        MultiListNode.__init__(self)
+        LinkedListNode.__init__(self)
 
         self.name = name
         self.type = type_
         self.value = value
 
-class superqelem(MultiListNode):
+class superqelem(LinkedListNode):
     def __init__(self,
                  name = None,
                  value = None,
                  parentSq = None,
                  buildFromStr = False):
-        MultiListNode.__init__(self)
+        LinkedListNode.__init__(self)
 
         # list of elematoms
-        self.__internalList = MultiList()
+        self.__internalList = LinkedList()
 
         # dictionary of elematoms, keyed by 'field' name
         self.__internalDict = {}
@@ -1292,7 +1292,7 @@ class superq():
         self.createTable = False
 
         # superqelems are arrayed like a list but mapped like a dictionary
-        self.__internalList = MultiList()
+        self.__internalList = LinkedList()
         self.__internalDict = {}
 
         # automatically generates key column
@@ -1509,7 +1509,7 @@ class superq():
 
     def buildFromStr(self, sqStr, attach = False):
         # initialize internal storage
-        self.__internalList = MultiList()
+        self.__internalList = LinkedList()
         self.__internalDict = {}
 
         # separate out sq header from remainder
@@ -2029,7 +2029,7 @@ class SuperQNetworkClientMgr():
             if self.__nodeProcess is not None:
                 return
 
-            nodeArgs = ['python',
+            nodeArgs = ['python3',
                         'superq.py',
                         '-t',
                         str(DEFAULT_TCP_PORT),
