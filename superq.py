@@ -2251,7 +2251,10 @@ class SuperQNetworkClientMgr():
         request.args = sq.publicName
         request.body = str(sq)
 
-        self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request))
+
+        if not eval(response.result):
+            raise SuperQEx('superq_create(): {0}'.format(response))
 
     def superq_read(self, name, host):
         # build request object from string
@@ -2276,6 +2279,9 @@ class SuperQNetworkClientMgr():
         request.args = sq.publicName
 
         response = self.__send_msg(sq.host, str(request))
+
+# Currently there is a failing test after trying to delete a
+#  empty superq
 
         if not eval(response.result):
             raise SuperQEx('superq_delete(): {0}'.format(response))
