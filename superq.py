@@ -1863,7 +1863,7 @@ class superq():
 
             self.not_empty.notify()
 
-# TODO: investigate whether this should be removed. need for return on push?
+            # return the object for elegant create_elem()
             return sqe
 
     def push_head(self, value, block = True, timeout = None):
