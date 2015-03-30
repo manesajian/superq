@@ -379,7 +379,7 @@ class LinkedList:
             self.head = current_node
 
 # specific superq exceptions should derive from this
-class SuperQException(Exception):
+class SuperQEx(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
@@ -2289,7 +2289,7 @@ class SuperQNetworkClientMgr():
         if eval(response.result):
             return superq(response.body, attach = False, buildFromStr = True)
         else:
-            raise Exception('Not sure what to raise here yet.')
+            raise SuperQEx('superq_query() failed: {0}'.format(response))
 
 # TODO: need to be checking return values and raising exceptions as appropriate
 
@@ -2301,6 +2301,9 @@ class SuperQNetworkClientMgr():
         request.body = str(sqe)
 
         response = self.__send_msg(sq.host, str(request))
+
+        if not eval(response.result):
+            raise SuperQEx('superq_create() failed: {0}'.format(str(response)))
 
     def superqelem_update(self, sq, sqe):
         # build request object
@@ -2390,10 +2393,12 @@ class SuperQStreamHandler(StreamRequestHandler):
         # start building response
         response = SuperQNodeResponse()
         response.msg_id = request.msg_id
+#        response.result = str(False)
 
         cmd = request.cmd
         args = request.args
         body = request.body
+
         if cmd == 'superq_exists':
             response.result = str(_dataStore.superq_exists(args))
             response.body = ''
@@ -2455,6 +2460,8 @@ class SuperQStreamHandler(StreamRequestHandler):
             sqe = superqelem(body, buildFromStr = True)
 
             sq.create_elem(sqe, idx = sqeIdx)
+
+            response.result = str(True);
         elif cmd == 'superqelem_read':
             pass
         elif cmd == 'superqelem_update':
@@ -2469,6 +2476,8 @@ class SuperQStreamHandler(StreamRequestHandler):
             sqe = superqelem(body, buildFromStr = True)
 
             sq.update_elem(sqe)
+
+            response.result = str(True);
         elif cmd == 'superqelem_delete':
             sqName = args
             sqeName = body
@@ -2479,6 +2488,8 @@ class SuperQStreamHandler(StreamRequestHandler):
                 raise KeyError('superq {0} does not exist'.format(sqName))
 
             sq.delete_elem(sqeName)
+
+            response.result = str(True);
         else:
             raise MalformedNetworkRequest(msg)
 
