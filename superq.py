@@ -2150,7 +2150,6 @@ class SuperQNetworkClientMgr():
         if (len(data) == 0 or data[0] != 42):
             raise Exception('Bad message.')
 
-# TODO: look at this, can it read less than it should? It should block, right?
         # next 4 bytes must always be message body length
         data = bytearray()
         while len(data) < 4:
@@ -2164,7 +2163,6 @@ class SuperQNetworkClientMgr():
         # convert length
         messageLength = unpack('I', data)[0]
 
-# TODO: look at this, can it read less than it should? It should block, right?
         # now read the rest of the message
         data = bytearray()
         while len(data) < messageLength:
