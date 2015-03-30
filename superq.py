@@ -2393,7 +2393,7 @@ class SuperQStreamHandler(StreamRequestHandler):
         # start building response
         response = SuperQNodeResponse()
         response.msg_id = request.msg_id
-#        response.result = str(False)
+        response.result = str(False)
 
         cmd = request.cmd
         args = request.args
