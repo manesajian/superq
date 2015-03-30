@@ -378,6 +378,13 @@ class LinkedList:
         if current_node.prev is None:
             self.head = current_node
 
+# specific superq exceptions should derive from this
+class SuperQException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 class NotImplemented(Exception):
     def __init__(self, value):
         self.value = value
