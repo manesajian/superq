@@ -2303,7 +2303,7 @@ class SuperQNetworkClientMgr():
         response = self.__send_msg(sq.host, str(request))
 
         if not eval(response.result):
-            raise SuperQEx('superq_create() failed: {0}'.format(str(response)))
+            raise SuperQEx('superqelem_create(): {0}'.format(str(response)))
 
     def superqelem_update(self, sq, sqe):
         # build request object
@@ -2313,6 +2313,9 @@ class SuperQNetworkClientMgr():
         request.body = str(sqe)
 
         response = self.__send_msg(sq.host, str(request))
+
+        if not eval(response.result):
+            raise SuperQEx('superqelem_update(): {0}'.format(str(response)))
 
     def superqelem_delete(self, sq, sqeName):
         # build request object
