@@ -2420,23 +2420,19 @@ class SuperQStreamHandler(StreamRequestHandler):
                 self.log("superq " + args + " already exists.");
                 response.result = str(False)
             else:
-                self.log("deserializing.");
                 # deserialize request body into a detached superq
                 sq = superq(body, attach = False, buildFromStr = True)
-                self.log("name=" + sq.name);
+
                 # assign superq to the node datastore
                 sq.attach()
 
                 response.result = str(True)
         elif cmd == 'superq_read':
-            try:
-                sq = _dataStore.superq_read(args)
+            sq = _dataStore.superq_read(args)
 
-                response.body = str(sq)
+            response.body = str(sq)
 
-                response.result = str(True)
-            except KeyError:
-                response.result = str(False)
+            response.result = str(True)
         elif cmd == 'superq_delete':
             try:
                 sq = _dataStore.superq_read(args)
@@ -2444,6 +2440,8 @@ class SuperQStreamHandler(StreamRequestHandler):
                 raise KeyError('superq {0} does not exist'.format(args))
 
             _dataStore.superq_delete(sq)
+
+            response.result = str(True)
         elif cmd == 'superq_query':
             try:
                 sq = _dataStore.superq_read(args)
