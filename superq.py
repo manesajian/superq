@@ -2326,6 +2326,9 @@ class SuperQNetworkClientMgr():
 
         response = self.__send_msg(sq.host, str(request))
 
+        if not eval(response.result):
+            raise SuperQEx('superqelem_delete(): {0}'.format(str(response)))
+
 # deserializes requests, processes them, and serializes responses
 class SuperQStreamHandler(StreamRequestHandler):
     def log(self, msg):
