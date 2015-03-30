@@ -2275,7 +2275,10 @@ class SuperQNetworkClientMgr():
         request.cmd = 'superq_delete'
         request.args = sq.publicName
 
-        self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request))
+
+        if not eval(response.result):
+            raise SuperQEx('superq_delete(): {0}'.format(response))
 
     def superq_query(self, sq, queryStr):
         # build request object from string
@@ -2289,9 +2292,7 @@ class SuperQNetworkClientMgr():
         if eval(response.result):
             return superq(response.body, attach = False, buildFromStr = True)
         else:
-            raise SuperQEx('superq_query() failed: {0}'.format(response))
-
-# TODO: need to be checking return values and raising exceptions as appropriate
+            raise SuperQEx('superq_query(): {0}'.format(response))
 
     def superqelem_create(self, sq, sqe, idx = None):
         # build request object
