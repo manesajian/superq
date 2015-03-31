@@ -202,8 +202,6 @@ try:
                                                                           1,
                                                                           sqSlice[0],
                                                                           sqSlice[7]))
-    for sqe in sqSlice:
-        print('{0}\n'.format(sqe))
     assert(sqSlice[0] == 8 and sqSlice[7] == 1)
     print('\tDeleting superq ...')
     sq.delete()
@@ -267,7 +265,7 @@ try:
     sq = superq(sqName)
     print('\tExpected superq length = {0}, actual length = {1}'.format(2, len(sq)))
     assert(len(sq) == 2)
-    print('\tExpected value = {0}, actual value = {1}'.format(4, sq[1].b))
+    print('\tExpected value = {0}, actual value = {1}'.format(2, sq[1].b))
     assert(sq[1].b == 2)
     print('\tDeleting superq ...')
     sq.delete()
@@ -410,7 +408,7 @@ try:
     print('\tAttempting to update superqelem from user obj ...')
     try:
         sq.update_elem(foo3)
-        raise Exception('Update incorrectly succeded.')
+        raise Exception('Update incorrectly succeeded.')
     except:
         print('\tUpdate correctly failed.')
     
@@ -418,7 +416,7 @@ try:
     print('\tAttempting to delete superqelem from user obj ...')
     try:
         sq.delete_elem(foo3)
-        raise Exception('Delete incorrectly succeded.')
+        raise Exception('Delete incorrectly succeeded.')
     except:
         print('\tDelete correctly failed.')
     print('\tDeleting superq ...')
@@ -546,15 +544,12 @@ try:
 
     print('\nHOSTED superq tests:\n')
 
-    print('Testing empty superq creation ...')
-    sq = superq([], attach = True, host = 'local')
-    print('\tDeleting superq ...')
-    sq.delete()
-
-    print('Testing empty superq creation from empty dictionary ...')
-    sq = superq({}, attach = True, host = 'local')
-    print('\tDeleting superq ...')
-    sq.delete()
+    print('Testing invalid empty public superq creation ...')
+    try:
+        sq = superq([], attach = True, host = 'local')
+        raise Exception('Create incorrectly succeeded.')
+    except:
+        print('\tCreate correctly failed.')
 
     print('Testing superq creation from basic str list ...')
     sq = superq(['1', '2', '3'], attach = True, host = 'local')
@@ -568,8 +563,8 @@ try:
 
     print('Testing superq creation from basic float list ...')
     sq = superq([1.1, 2.1, 3.1], attach = True, host = 'local')
-    print('Testing deletion of empty superq ...')
     sq.delete()
+    print('Testing deletion of empty superq ...')
     try:
         sq = superq(sqName, host = 'local')
         raise Exception('\tExpected failure did not occur.')
@@ -589,8 +584,9 @@ try:
 
     print('Testing updating scalar list ...')
     sq[0] = '4'
-    print('\tExpected value = {0}, actual value = {1}'.format('4', superq(sqName, host = 'local')[0]))
-    assert(superq(sqName, host = 'local')[0] == '4')
+    val = superq(sqName, host = 'local')[0]
+    print('\tExpected value = {0}, actual value = {1}'.format('4', val))
+    assert(val == '4')
     print('\tDeleting superq ...')
     sq.delete()
 
