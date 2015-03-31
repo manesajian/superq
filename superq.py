@@ -1413,7 +1413,7 @@ class superq():
     def __setitem__(self, key, value):
         if key in self.__internalDict:
             elem = self.__internalDict[key]
-        elif isinstance(key, int) and key < len(self.__internalDict):
+        elif isinstance(key, int) and key < len(self):
             # if element isn't keyed on the int, try the int as an index
             elem = self.__internalList[key]                       
         else:
