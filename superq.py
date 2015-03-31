@@ -1317,10 +1317,6 @@ class superq():
             self.initialized = True
             return
 
-        # creates new superq in datastore or attaches to existing one
-        if attach:
-            self.attach()
-
         if isinstance(initObj, superq):
             # self.__copy__ and __deepcopy__ arrive here
             for elem in initObj:
@@ -1333,6 +1329,10 @@ class superq():
                 self.create_elem(value, name = key)
         else:
             raise TypeError('Unsupported type ({0})'.format(type(initObj)))
+
+        # creates new superq in datastore or attaches to existing one
+        if attach:
+            self.attach()
 
         # skip __init__ in the future if superq is returned by __new__
         self.initialized = True
@@ -1643,10 +1643,10 @@ class superq():
 
         self.dataStore.superq_create(self)
 
-        # create each elem. The 1st one triggers backing table creation
-        if len(self) > 0:
-            # add each superqelem now
-            for name, sqe in self.__internalDict.items():
+        # if attaching a locally-backed superq, back each elem
+        if self.host is None or self.dataStore.public:
+            # create each elem. The 1st one triggers backing table creation
+            for sqe in self.__internalList:
                 self.create_elem_datastore_only(sqe)
 
     def detach(self):
