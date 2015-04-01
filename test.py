@@ -544,12 +544,13 @@ try:
 
     print('\nHOSTED superq tests:\n')
 
-    print('Testing invalid empty public superq creation ...')
-    try:
-        sq = superq([], attach = True, host = 'local')
-        raise Exception('Create incorrectly succeeded.')
-    except:
-        print('\tCreate correctly failed.')
+    print('Testing empty public superq creation ...')
+    sq = superq([], attach = True, host = 'local')
+    sqName = sq.name
+    sq = superq(sqName, host = 'local')
+    print('\tCreate succeeded.')
+    print('\tDeleting superq ...')
+    sq.delete()
 
     print('Testing superq creation from basic str list ...')
     sq = superq(['1', '2', '3'], attach = True, host = 'local')
