@@ -2271,9 +2271,6 @@ class SuperQNetworkClientMgr():
 
         response = self.__send_msg(sq.host, str(request))
 
-# Currently there is a failing test after trying to delete a
-#  empty superq
-
         if not eval(response.result):
             raise SuperQEx('superq_delete(): {0}'.format(response))
 
