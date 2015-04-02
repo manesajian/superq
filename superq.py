@@ -496,11 +496,6 @@ def db_delete_row(dbConn, tableName, keyName, keyVal):
                                                               keyName,
                                                               keyVal))
 
-# TODO: currently persistence is supported through save/load functionality that
-#  can be manually called. The next step of persistence is to make it automatic
-#  and allow persistence to be turned on/off for either individual superqs or
-#  entire datastores.
-
 # instantiated for each superq app and for each network node process
 class SuperQDataStore():
     def __init__(self):
@@ -2014,10 +2009,6 @@ class SuperQNodeResponse():
         except Exception as e:
             exceptStr = 'Response: {0}\nException: {1}'.format(responseStr, e)
             raise MalformedNetworkResponse(exceptStr)
-
-# TODO: eventually a superq setting will be added indicating to NetworkClient
-# to proxy a request through the localhost public network node so that the
-# response is cached for other local processes.
 
 # manages network connections and requests to network nodes
 class SuperQNetworkClientMgr():
