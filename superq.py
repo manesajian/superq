@@ -423,7 +423,7 @@ class SuperQFull(SuperQEx):
     def __str__(self):
         return repr(self.value)
 
-class ObjectNotRecognized(Exception):
+class ObjectNotRecognized(SuperQEx):
     def __init__(self, value):
         self.value = value
     def __str__(self):
