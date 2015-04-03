@@ -404,12 +404,13 @@ try:
 
     print('Testing attempting user object update with no keyCol ...')
     print('\tCreating superq ...')
-    sq = superq([Foo3('a', 1), Foo3('b', 2), Foo3('c', 3)], name = 'sq', attach = True)
+    lst = [Foo3('a', 1), Foo3('b', 2), Foo3('c', 3)]
+    sq = superq(lst, name = 'sq', attach = True)
     print('\tRetrieving user obj ...')
     foo3 = sq[0]
     print('\tModifying user obj value ...')
     foo3.b = 5
-    print('\tAttempting to set attribute on object that should be unsettable ...')
+    print('\tAttempting to set unsettable object attribute ...')
     try:
         foo3.c = None
         raise Exception('Attribute set incorrectly succeeded.')
@@ -434,7 +435,8 @@ try:
 
     print('Testing deleting superqelems keyed by different data types ...')
     print('\tCreating superq keyed by int ...')
-    sq = superq([Foo(1, 'a'), Foo(2, 'b')], keyCol = 'a', name = 'sq', attach = True)
+    lst = [Foo(1, 'a'), Foo(2, 'b')]
+    sq = superq(lst, keyCol = 'a', name = 'sq', attach = True)
     print('\tDeleting superqelem ...')
     sq.delete_elem(2)
     sqLen = len(superq('sq'))
@@ -443,7 +445,8 @@ try:
     print('\tDeleting superq ...')
     sq.delete()
     print('\tCreating superq keyed by str ...')
-    sq = superq([Foo('ab', 1), Foo('bc', 2)], keyCol = 'a', name = 'sq', attach = True)
+    lst = [Foo('ab', 1), Foo('bc', 2)]
+    sq = superq(lst, keyCol = 'a', name = 'sq', attach = True)
     print('\tDeleting superqelem ...')
     sq.delete_elem('bc')
     sqLen = len(superq('sq'))
