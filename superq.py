@@ -411,13 +411,13 @@ class MalformedNetworkResponse(SuperQEx):
     def __str__(self):
         return repr(self.value)
 
-class SuperQEmpty(Exception):
+class SuperQEmpty(SuperQEx):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
 
-class SuperQFull(Exception):
+class SuperQFull(SuperQEx):
     def __init__(self, value):
         self.value = value
     def __str__(self):
