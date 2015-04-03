@@ -631,7 +631,8 @@ try:
     sq.delete()
 
     print('Testing superq creation from custom object list ...')
-    sq1 = superq([Foo('a', 1), Foo('b', 2)], keyCol = 'a', name = 'sq1', attach = True, host = 'local')
+    lst = [Foo('a', 1), Foo('b', 2)]
+    sq1 = superq(lst, keyCol = 'a', name = 'sq1', attach = True, host = 'local')
 
     print('Testing superq lookup from datastore ...')
     sq1 = superq('sq1', host = 'local', attach = True)
@@ -669,7 +670,11 @@ try:
               Foo2('h', 8, .08),
               Foo2('i', 9, .09),
               Foo2('j', 10, .1)]
-    sqMulti = superq(myFoos, keyCol = 'a', name = 'sqMulti', attach = True, host = 'local')
+    sqMulti = superq(myFoos,
+                     keyCol = 'a',
+                     name = 'sqMulti',
+                     attach = True,
+                     host = 'local')
     print('\tPerforming data sanity check ...')
     sqCheck = superq('sqMulti', host = 'local')
     myFoo2 = Foo2('z', 100, 1.1)
@@ -678,7 +683,8 @@ try:
     assert(sqCheck['e'].b == 5)
     print('\tPerforming query for single result ...')
     sqResult = sqMulti.query(['a', 'b', 'c'], ['<self>'], 'b = {0}'.format(2))
-    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1)
     sqResult.objSample = myFoo2
     print('\tExpected value = {0}, actual = {1}'.format(.02, sqResult[0].c))
@@ -692,14 +698,19 @@ try:
               Foo2('c', 3, .03),
               Foo2('d', 4, .04),
               Foo2('e', 5, .05)]
-    sqMulti = superq(myFoos, keyCol = 'a', name = 'sqMulti', attach = True, host = 'local')
+    sqMulti = superq(myFoos,
+                     keyCol = 'a',
+                     name = 'sqMulti',
+                     attach = True,
+                     host = 'local')
     print('\tPerforming data sanity check ...')
     sqCheck = superq('sqMulti', host = 'local')
     mySqe = superqelem()
     sqCheck.objSample = mySqe
     print('\tPerforming query for single result ...')
     sqResult = sqMulti.query(['a', 'b', 'c'], ['<self>'], 'b = {0}'.format(2))
-    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1)
     floatVal = float(sqResult[0].c)
     print('\tExpected value = {0}, actual = {1}'.format(.02, floatVal))
@@ -718,14 +729,19 @@ try:
               Foo2('h', 8, .08),
               Foo2('i', 9, .09),
               Foo2('j', 10, .1)]
-    sqMulti = superq(myFoos, keyCol = 'a', name = 'sqMulti', attach = True, host = 'local')
+    sqMulti = superq(myFoos,
+                     keyCol = 'a',
+                     name = 'sqMulti',
+                     attach = True,
+                     host = 'local')
     print('\tPerforming data sanity check ...')
     sqCheck = superq('sqMulti', host = 'local')
     print('\tExpected value = {0}, actual = {1}'.format(5, sqCheck['e'].b))
     assert(sqCheck['e'].b == 5)
     print('\tPerforming query for multiple results ...')
     sqResult = sqMulti.query(['a', 'b', 'c'], ['<self>'], 'b > {0}'.format(2))
-    print('\tExpected superq length = {0}, actual = {1}'.format(8, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(8,
+                                                                len(sqResult)))
     assert(len(sqResult) == 8)
     sqMulti.delete()
 
@@ -733,20 +749,30 @@ try:
     print('\tCreating first superq ...')
     lstA = [Foo(1, 2), Foo(2, 3), Foo(3, 4)]
     lstB = [Foo2('foo', 4, 1.5), Foo2('bar', 5, 2.5)]
-    sqA = superq(lstA, keyCol = 'a', name = 'sqA', attach = True, host = 'local')
+    sqA = superq(lstA,
+                 keyCol = 'a',
+                 name = 'sqA',
+                 attach = True,
+                 host = 'local')
     print('\tCreating second superq ...')
-    sqB = superq(lstB, keyCol = 'a', name = 'sqB', attach = True, host = 'local')
+    sqB = superq(lstB,
+                 keyCol = 'a',
+                 name = 'sqB',
+                 attach = True,
+                 host = 'local')
     colLst = ['<self>.a', 'sqB.c']
     tableLst = ['<self>', 'sqB']
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, None)
-    print('\tExpected result length = {0}, actual = {1}'.format(1, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(1,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1)
     sqResult.objSample = Foo2(1, 1, 1.1)
-    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3, 1.5,
-                                                                        sqResult[0].a,
-                                                                        sqResult[0].c))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3,
+                                                                 1.5,
+                                                                 sqResult[0].a,
+                                                                 sqResult[0].c))
     assert(sqResult[0].a == 3 and sqResult[0].c == 1.5)
     print('\tDeleting superqs ...')
     sqA.delete()
