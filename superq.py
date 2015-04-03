@@ -24,6 +24,7 @@ try:
 
     WIN32_POPEN_FLAGS = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
 except:
+    # running on non-Windows platform
     WIN32_POPEN_FLAGS = None
 
 DEFAULT_TCP_PORT = 9990
@@ -2145,7 +2146,7 @@ class SuperQNetworkClientMgr():
         # first byte will always be a marker to verify begining of Request
         data = self.__recv(s, 1)
 
-        if (len(data) == 0 or data[0] != 42):
+        if (len(data) == 0 or data[0] != SUPERQ_MSG_HEADER_BYTE):
             raise Exception('Bad message.')
 
         # next 4 bytes must always be message body length
@@ -2200,7 +2201,7 @@ class SuperQNetworkClientMgr():
                     port = DEFAULT_TCP_PORT
 
         msg = bytearray()
-        msg.append(0x2A) # 42
+        msg.append(SUPERQ_MSG_HEADER_BYTE)
         msg.extend(pack('I', len(strMsg)))
         msg.extend(strMsg.encode('utf-8'))
 
@@ -2340,7 +2341,7 @@ class SuperQStreamHandler(StreamRequestHandler):
         strResponse = str(response)
         msg = bytearray()
         
-        msg.append(0x2A) # 42
+        msg.append(SUPERQ_MSG_HEADER_BYTE)
         msg.extend(pack('I', len(strResponse)))
         msg.extend(strResponse.encode('utf-8'))
 
@@ -2353,7 +2354,7 @@ class SuperQStreamHandler(StreamRequestHandler):
         if len(data) == 0:
             self.raise_error('connection closed while reading marker')
 
-        if data[0] != 42:
+        if data[0] != SUPERQ_MSG_HEADER_BYTE:
             self.raise_error('invalid marker ({0}).'.format(data[0]))
 
         # next 4 bytes must always be message body length
