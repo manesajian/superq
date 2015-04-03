@@ -1432,7 +1432,6 @@ class superq():
 
         # serialize necessary attributes as name-value pairs
         sqAttrs = ''
-        sqAttrs += 'name|{0},'.format(self.name)
         sqAttrs += 'host|{0},'.format(self.host)
         sqAttrs += 'keyCol|{0},'.format(self.keyCol)
         sqAttrs += 'maxlen|{0},'.format(self.maxlen)
