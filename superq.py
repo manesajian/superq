@@ -387,13 +387,13 @@ class SuperQEx(Exception):
     def __str__(self):
         return repr(self.value)
 
-class NotImplemented(Exception):
+class NotImplemented(SuperQEx):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
     
-class DBExecError(Exception):
+class DBExecError(SuperQEx):
     def __init__(self, value):
         self.value = value
     def __str__(self):
