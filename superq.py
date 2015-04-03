@@ -2617,7 +2617,7 @@ class SuperQNetworkNode():
             self.shutdown_ssl_server()
 
 def main(argv):
-    print('Entered superq main(). SuperQNetworkNode mode.')
+    print('Starting SuperQNetworkNode mode ...')
 
     tcpPort = DEFAULT_TCP_PORT
     sslPort = DEFAULT_SSL_PORT
@@ -2642,10 +2642,10 @@ def main(argv):
         print('sslEnabled is {0}'.format(sslEnabled))
         print('SSL port is {0}'.format(sslPort))
 
-    print('Setting datastore to public mode ...')
+    print('Setting internal datastore to public ...')
     _dataStore.set_public()
 
-    print('Creating and launching network node ...')
+    print('Creating and launching node ...')
     nodeMgr = SuperQNetworkNode()
     nodeMgr.launch_node_mgr(int(tcpPort), int(sslPort), sslEnabled)
 
