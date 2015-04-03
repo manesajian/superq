@@ -1133,10 +1133,10 @@ try:
     len2 = len(superq('sqCompleted', attach = True, host = 'local'))
     print('\tExpected pending length = {0}, actual = {1}'.format(0,
                                                                  len1))
-    assert(pendingLen == 0)
+    assert(len1 == 0)
     print('\tExpected completed length = {0}, actual = {1}'.format(total_items,
                                                                    len2))
-    assert(completedLen == total_items)
+    assert(len2 == total_items)
     print('\tDeleting superqs ...')
     sqPending.delete()
     sqCompleted.delete()
