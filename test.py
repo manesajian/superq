@@ -49,45 +49,45 @@ try:
     for i in range(0, 10):
         ll.push_tail(FooNode(i + 1))
 
-    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(ll)))
+    print('\tExpected list length = {0}, actual = {1}'.format(10, len(ll)))
     assert(len(ll) == 10)
-    print('\tExpected value = {0}, actual value = {1}'.format(1, ll[0].a))
+    print('\tExpected value = {0}, actual = {1}'.format(1, ll[0].a))
     assert(ll[0].a == 1)
 
     print('Testing removing elements from head ...')
     for i in range(0, 5):
         ll.pop_head()
-    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(ll)))
+    print('\tExpected list length = {0}, actual = {1}'.format(5, len(ll)))
     assert(len(ll) == 5)
 
     print('Testing adding elements to head ...')
     for i in range(0, 5):
         ll.push_head(FooNode(i + 1))
-    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(ll)))
+    print('\tExpected list length = {0}, actual = {1}'.format(10, len(ll)))
     assert(len(ll) == 10)
-    print('\tExpected value = {0}, actual value = {1}'.format(5, ll[0].a))
+    print('\tExpected value = {0}, actual = {1}'.format(5, ll[0].a))
     assert(ll[0].a == 5)
 
     print('Testing removing elements from tail ...')
     for i in range(0, 5):
         ll.pop_tail()
-    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(ll)))
+    print('\tExpected list length = {0}, actual = {1}'.format(5, len(ll)))
     assert(len(ll) == 5)
 
     print('Testing adding into middle of list ...')
     print('\tPush element into list ...')
     ll.push_middle(3, FooNode(11))
-    print('\tExpected list length = {0}, actual length = {1}'.format(6, len(ll)))
+    print('\tExpected list length = {0}, actual = {1}'.format(6, len(ll)))
     assert(len(ll) == 6)
-    print('\tExpected value = {0}, actual value = {1}'.format(11, ll[3].a))
+    print('\tExpected value = {0}, actual = {1}'.format(11, ll[3].a))
     assert(ll[3].a == 11)
 
     print('Testing removing from middle of list ...')
     print('\tPop element from list ...')
     fooNode = ll.pop_middle(3)
-    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(ll)))
+    print('\tExpected list length = {0}, actual = {1}'.format(5, len(ll)))
     assert(len(ll) == 5)
-    print('\tExpected value = {0}, actual value = {1}'.format(11, fooNode.a))
+    print('\tExpected value = {0}, actual = {1}'.format(11, fooNode.a))
     assert(fooNode.a == 11)
 
     print('Testing push/pop from both sides of list ...')
@@ -96,7 +96,7 @@ try:
     print('\tAdding elements ...')
     for i in range(0, 10):
         ll.push_tail(FooNode(i + 1))
-    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(ll)))
+    print('\tExpected list length = {0}, actual = {1}'.format(10, len(ll)))
     assert(len(ll) == 10)
     
     print('\nDETACHED superq tests:\n')
@@ -143,7 +143,7 @@ try:
     pyLst = [1, 2, 3, 4, 5]
     sq = superq(pyLst)
     sqLst = sq.list()
-    print('\tExpected type = {0}, actual type = {1}'.format('list', type(sqLst).__name__))
+    print('\tExpected type = {0}, actual = {1}'.format('list', type(sqLst).__name__))
     assert(isinstance(sqLst, list))
     print('\tChecking values ...')
     for i in range(0, len(pyLst)):
@@ -162,22 +162,22 @@ try:
     sq = superq([10, 11, 12, 13, 14, 15])
     print('\tCopying superq via empty slice ...')
     sqCopy = sq[:]
-    print('\tExpected superq length = {0}, actual length = {1}'.format(6, len(sqCopy)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(6, len(sqCopy)))
     assert(len(sqCopy) == 6)
     print('\tSlicing portion of copied superq ...')
     sqSlice = sqCopy[0:3]
-    print('\tExpected superq length = {0}, actual length = {1}'.format(3, len(sqSlice)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(3, len(sqSlice)))
     assert(len(sqSlice) == 3)
-    print('\tExpected values = {0}, {1}, actual values = {2}, {3}'.format(10,
+    print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format(10,
                                                                         12,
                                                                         sqSlice[0],
                                                                         sqSlice[2]))
     assert(sqSlice[0] == 10 and sqSlice[2] == 12)
     print('\tTesting [-1:] slice ...')
     sqSlice = sqSlice[-1:]
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sqSlice)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqSlice)))
     assert(len(sqSlice) == 1)
-    print('\tExpected value = {0}, actual value = {1}'.format(12, sqSlice[0]))
+    print('\tExpected value = {0}, actual = {1}'.format(12, sqSlice[0]))
     assert(sqSlice[0] == 12)
     print('\tDeleting superq ...')
     sq.delete()
@@ -187,18 +187,18 @@ try:
     sq = superq([1, 2, 3, 4, 5, 6, 7, 8])
     print('\tTesting [1:4:2] slice ...')
     sqSlice = sq[1:4:2]
-    print('\tExpected superq length = {0}, actual length = {1}'.format(2, len(sqSlice)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(2, len(sqSlice)))
     assert(len(sqSlice) == 2)
-    print('\tExpected values = {0}, {1}, actual values = {2}, {3}'.format(2,
+    print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format(2,
                                                                           4,
                                                                           sqSlice[0],
                                                                           sqSlice[1]))
     assert(sqSlice[0] == 2 and sqSlice[1] == 4)
     print('\tTesting [::-1] reverse list slice ...')
     sqSlice = sq[::-1]
-    print('\tExpected superq length = {0}, actual length = {1}'.format(8, len(sqSlice)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(8, len(sqSlice)))
     assert(len(sqSlice) == 8)
-    print('\tExpected values = {0}, {1}, actual values = {2}, {3}'.format(8,
+    print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format(8,
                                                                           1,
                                                                           sqSlice[0],
                                                                           sqSlice[7]))
@@ -229,7 +229,7 @@ try:
     assert(val == 3)
     print('\tTesting deleting superqelem ...')
     sq.delete_elem(newSqe)
-    print('\tExpected superq length = {0}, actual length = {1}'.format(2, len(sq)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(2, len(sq)))
     assert(len(sq) == 2)
 
     print('Testing retrieving original object from superq ...')
@@ -250,22 +250,22 @@ try:
 
     print('Testing reading superqelem atom value by int index ...')
     atomVal = sqe[1]
-    print('\tExpected value = {0}, actual value = {1}'.format(1, atomVal))
+    print('\tExpected value = {0}, actual = {1}'.format(1, atomVal))
     assert(atomVal == 1)
 
     print('Testing writing superqelem atom value by int index ...')
     sqe[1] = 5
     atomVal = sqe[1]
-    print('\tExpected value = {0}, actual value = {1}'.format(5, atomVal))
+    print('\tExpected value = {0}, actual = {1}'.format(5, atomVal))
     assert(atomVal == 5)
 
     print('Testing attaching superq to datastore ...')
     sqName = sq.name
     sq.attach()
     sq = superq(sqName)
-    print('\tExpected superq length = {0}, actual length = {1}'.format(2, len(sq)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(2, len(sq)))
     assert(len(sq) == 2)
-    print('\tExpected value = {0}, actual value = {1}'.format(2, sq[1].b))
+    print('\tExpected value = {0}, actual = {1}'.format(2, sq[1].b))
     assert(sq[1].b == 2)
     print('\tDeleting superq ...')
     sq.delete()
@@ -297,7 +297,7 @@ try:
 
     print('Testing modifying scalar superqelem by index ...')
     sq[2] = 5
-    print('\tExpected value = {0}, actual value = {1}'.format(5, sq[2]))
+    print('\tExpected value = {0}, actual = {1}'.format(5, sq[2]))
     assert(sq[2] == 5)
 
     print('Verifying superq deletion ...')
@@ -325,19 +325,19 @@ try:
     print('Testing adding new superqelem ...')
     sq1.create_elem(Foo('c', 3))
     sqLen = len(superq('sq1', attach = True))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(3, sqLen))
+    print('\tExpected superq length = {0}, actual = {1}'.format(3, sqLen))
     assert(sqLen == 3)
 
     print('Testing modifying superqelem field ...')
     sq1.n(1).b = 5
     print('\tChecking modified superqelem field ...')
     val = superq('sq1')['b'].b
-    print('\tExpected value = {0}, actual value = {1}'.format(5, val))
+    print('\tExpected value = {0}, actual = {1}'.format(5, val))
     assert(val == 5)
 
     print('Testing looking up superqelem by index ...')
     sqe = superq('sq1').n(2)
-    print('\tExpected name = {0}, actual name = {1}'.format('c', sqe.name))
+    print('\tExpected name = {0}, actual = {1}'.format('c', sqe.name))
     assert(sqe.name == 'c')
 
     print('Testing retrieval of original object type ...')
@@ -346,7 +346,7 @@ try:
     myFoo = sq1[1]
     print('\tCalling function on object ...')
     val = myFoo.bar()
-    print('\tExpected value = {0}, actual value = {1}'.format(42, val))
+    print('\tExpected value = {0}, actual = {1}'.format(42, val))
     assert(val == 42)
     print('\tDeleting superq ...')
     sq1.delete()
@@ -356,9 +356,9 @@ try:
     sq1 = superq([Foo2('aaa', 4, 1.1), Foo2('bbb', 5, 1.2)], keyCol = 'a', name = 'sq1', attach = True)
     print('\tLooking up superq in datastore ...')
     sq1 = superq('sq1')
-    print('\tExpected superq length = {0}, actual length = {1}'.format(2, len(sq1)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(2, len(sq1)))
     assert(len(sq1) == 2)
-    print('\tExpected value = {0}, actual value = {1}'.format(1.2, sq1['bbb'].c))
+    print('\tExpected value = {0}, actual = {1}'.format(1.2, sq1['bbb'].c))
     assert(sq1['bbb'].c == 1.2)
     print('\tDeleting superq ...')
     sq1.delete()
@@ -380,14 +380,14 @@ try:
     sq.update_elem(foo3)
     print('\tRetrieving superqelem value ...')
     val = superq('sq', attach = True)[0].b
-    print('\tExpected value = {0}, actual value = {1}'.format(5, val))
+    print('\tExpected value = {0}, actual = {1}'.format(5, val))
     assert(val == 5)
     
     print('Testing deleting user object with valid keycol ...')
     print('\tDeleting superqelem from user obj ...')
     sq.delete_elem(foo3)
     sqLen = len(superq('sq', attach = True))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(2, sqLen))
+    print('\tExpected superq length = {0}, actual = {1}'.format(2, sqLen))
     assert(sqLen == 2)    
     print('\tDeleting superq ...')
     sq.delete()
@@ -428,7 +428,7 @@ try:
     print('\tDeleting superqelem ...')
     sq.delete_elem(2)
     sqLen = len(superq('sq'))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, sqLen))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, sqLen))
     assert(sqLen == 1)
     print('\tDeleting superq ...')
     sq.delete()
@@ -437,7 +437,7 @@ try:
     print('\tDeleting superqelem ...')
     sq.delete_elem('bc')
     sqLen = len(superq('sq'))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, sqLen))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, sqLen))
     assert(sqLen == 1)
     print('\tDeleting superq ...')
     sq.delete()
@@ -457,42 +457,42 @@ try:
     sqMulti = superq(myFoos, keyCol = 'a', name = 'sqMulti', attach = True)
     print('\tPerforming data sanity check ...')
     sqCheck = superq('sqMulti')
-    print('\tExpected value = {0}, actual value = {1}'.format(5, sqCheck['e'].b))
+    print('\tExpected value = {0}, actual = {1}'.format(5, sqCheck['e'].b))
     assert(sqCheck['e'].b == 5)
     print('\tPerforming query for single result ...')
     sqResult = sqMulti.query(['a'], ['<self>'], 'b = {0}'.format(5))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
     assert(len(sqResult) == 1)
-    print('\tExpected value = {0}, actual value = {1}'.format('e', sqResult[0]['a']))
+    print('\tExpected value = {0}, actual = {1}'.format('e', sqResult[0]['a']))
     assert(sqResult[0]['a'] == 'e')
 
     print('Performing query for single integer result ...')
     sqResult = sqMulti.query(['b'], ['<self>'], 'c = {0}'.format('.05'))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
     assert(len(sqResult) == 1)
-    print('\tExpected value = {0}, actual value = {1}'.format(5, sqResult[0]['b']))
+    print('\tExpected value = {0}, actual = {1}'.format(5, sqResult[0]['b']))
     assert(sqResult[0]['b'] == 5)
 
     print('Performing query into custom object ...')
     sqResult = sqMulti.query(['a', 'b'], ['<self>'], 'c = {0}'.format('.1'))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
     assert(len(sqResult) == 1)
     print('\tSetting objSample ...')
     sqResult.objSample = Foo('a', 1)
     myFoo = sqResult[0]
-    print('\tExpected values = {0}, {1}, actual value = {2}, {3}'.format('j', 10,
+    print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format('j', 10,
                                                                          myFoo.a, myFoo.b))
     assert(myFoo.a == 'j' and myFoo.b == 10)
 
     print('Performing multiple row query ...')
     sqResult = sqMulti.query(['a', 'b'], ['<self>'], 'c > {0}'.format(.02))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(8, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(8, len(sqResult)))
     assert(len(sqResult) == 8)
     print('\tTesting attaching detached superq as new superq ...')
     sqResult.name = 'sqMulti2'
     sqResult.attach()
     sqCheck = superq('sqMulti2')
-    print('\tExpected superq length = {0}, actual length = {1}'.format(8, len(sqCheck)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(8, len(sqCheck)))
     assert(len(sqCheck) == 8)
     print('\tDeleting superqs ...')
     sqMulti.delete()
@@ -509,12 +509,12 @@ try:
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual length = {1}'.format(1, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(1, len(sqResult)))
     assert(len(sqResult) == 1)
     sqResult.objSample = sampleFoo
-    print('\tExpected values = {0},{1}, actual values = {2},{3}'.format(3, 1.5,
-                                                                        sqResult[0].a,
-                                                                        sqResult[0].c))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3, 1.5,
+                                                                 sqResult[0].a,
+                                                                 sqResult[0].c))
     assert(sqResult[0].a == 3 and sqResult[0].c == 1.5)
     print('\tDeleting superqs ...')
     sqA.delete()
@@ -531,10 +531,10 @@ try:
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual length = {1}'.format(2, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(2, len(sqResult)))
     assert(len(sqResult) == 2)
     sqResult.objSample = sampleFoo
-    print('\tExpected values = {0},{1}, actual values = {2},{3}'.format(3, 2.5,
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3, 2.5,
                                                                         sqResult[1].a,
                                                                         sqResult[1].c))
     assert(sqResult[1].a == 3 and sqResult[1].c == 2.5)
@@ -586,7 +586,7 @@ try:
     print('Testing updating scalar list ...')
     sq[0] = '4'
     val = superq(sqName, host = 'local')[0]
-    print('\tExpected value = {0}, actual value = {1}'.format('4', val))
+    print('\tExpected value = {0}, actual = {1}'.format('4', val))
     assert(val == '4')
     print('\tDeleting superq ...')
     sq.delete()
@@ -597,7 +597,7 @@ try:
     sqName = sq.name
     print('\tAdding element to superq ...')
     sq['abc'] = Foo('a', 1)      
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sq)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sq)))
     assert(len(sq) == 1)
     print('\tDeleting superq ...')
     sq.delete()
@@ -611,20 +611,20 @@ try:
     print('Adding new superqelem ...')
     sq1.create_elem(Foo('c', 3))
     sqLen = len(superq('sq1', host = 'local', attach = True))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(3, sqLen))
+    print('\tExpected superq length = {0}, actual = {1}'.format(3, sqLen))
     assert(sqLen == 3)
 
     print('Re-attaching and adding additional superqelem ...')
     superq('sq1', host = 'local', attach = True).create_elem(Foo('d', 4))
     sqLen = len(superq('sq1', host = 'local', attach = True))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(4, sqLen))
+    print('\tExpected superq length = {0}, actual = {1}'.format(4, sqLen))
     assert(sqLen == 4)
 
     print('Modifying superqelem field ...')
     sq1.n('a').b = 5
     print('\tChecking modified superqelem field ...')
     val = superq('sq1', host = 'local')['a'].b
-    print('\tExpected value = {0}, actual value = {1}'.format(5, val))
+    print('\tExpected value = {0}, actual = {1}'.format(5, val))
     assert(val == 5)
     print('\tDeleting superq ...')
     sq1.delete()
@@ -646,14 +646,14 @@ try:
     sqCheck = superq('sqMulti', host = 'local')
     myFoo2 = Foo2('z', 100, 1.1)
     sqCheck.objSample = myFoo2
-    print('\tExpected value = {0}, actual value = {1}'.format(5, sqCheck['e'].b))
+    print('\tExpected value = {0}, actual = {1}'.format(5, sqCheck['e'].b))
     assert(sqCheck['e'].b == 5)
     print('\tPerforming query for single result ...')
     sqResult = sqMulti.query(['a', 'b', 'c'], ['<self>'], 'b = {0}'.format(2))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
     assert(len(sqResult) == 1)
     sqResult.objSample = myFoo2
-    print('\tExpected value = {0}, actual value = {1}'.format(.02, sqResult[0].c))
+    print('\tExpected value = {0}, actual = {1}'.format(.02, sqResult[0].c))
     assert(sqResult[0].c == .02)
     sqMulti.delete()
 
@@ -671,10 +671,10 @@ try:
     sqCheck.objSample = mySqe
     print('\tPerforming query for single result ...')
     sqResult = sqMulti.query(['a', 'b', 'c'], ['<self>'], 'b = {0}'.format(2))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
     assert(len(sqResult) == 1)
     floatVal = float(sqResult[0].c)
-    print('\tExpected value = {0}, actual value = {1}'.format(.02, floatVal))
+    print('\tExpected value = {0}, actual = {1}'.format(.02, floatVal))
     assert(floatVal == .02)
     sqMulti.delete()
     
@@ -693,11 +693,11 @@ try:
     sqMulti = superq(myFoos, keyCol = 'a', name = 'sqMulti', attach = True, host = 'local')
     print('\tPerforming data sanity check ...')
     sqCheck = superq('sqMulti', host = 'local')
-    print('\tExpected value = {0}, actual value = {1}'.format(5, sqCheck['e'].b))
+    print('\tExpected value = {0}, actual = {1}'.format(5, sqCheck['e'].b))
     assert(sqCheck['e'].b == 5)
     print('\tPerforming query for multiple results ...')
     sqResult = sqMulti.query(['a', 'b', 'c'], ['<self>'], 'b > {0}'.format(2))
-    print('\tExpected superq length = {0}, actual length = {1}'.format(8, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(8, len(sqResult)))
     assert(len(sqResult) == 8)
     sqMulti.delete()
 
@@ -713,10 +713,10 @@ try:
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, None)
-    print('\tExpected result length = {0}, actual length = {1}'.format(1, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(1, len(sqResult)))
     assert(len(sqResult) == 1)
     sqResult.objSample = Foo2(1, 1, 1.1)
-    print('\tExpected values = {0},{1}, actual values = {2},{3}'.format(3, 1.5,
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3, 1.5,
                                                                         sqResult[0].a,
                                                                         sqResult[0].c))
     assert(sqResult[0].a == 3 and sqResult[0].c == 1.5)
@@ -737,11 +737,11 @@ try:
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual length = {1}'.format(1, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(1, len(sqResult)))
     assert(len(sqResult) == 1)
-    print('\tExpected values = {0},{1}, actual values = {2},{3}'.format(3, 'foo',
-                                                                        sqResult[0].a,
-                                                                        sqResult[0].b))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3, 'foo',
+                                                                 sqResult[0].a,
+                                                                 sqResult[0].b))
     assert(sqResult[0].a == 3 and sqResult[0].b == 'foo')
     print('\tDeleting superqs ...')
     sqA.delete()
@@ -760,7 +760,7 @@ try:
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual length = {1}'.format(2, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(2, len(sqResult)))
     assert(len(sqResult) == 2)
     print('\tDeleting superqs ...')
     sqA.delete()
@@ -771,7 +771,7 @@ try:
     print('Creating hosted superq for deque tests ...')
     sq = superq([1, 2, 3, 4, 5], attach = True, host = 'local')
     print('\tChecking length ...')
-    print('\tExpected length = {0}, actual length = {1}'.format(5, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
     assert(len(sq) == 5)
 
     print('Testing double-ended reads ...')
@@ -779,7 +779,7 @@ try:
     leftVal = sq[0]
     print('\tReading from tail ...')
     rightVal = sq[-1]
-    print('\tExpected values = {0},{1}, actual values = {2},{3}'.format(1, 5, leftVal, rightVal))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(1, 5, leftVal, rightVal))
     assert(leftVal == 1)
     assert(rightVal == 5)
 
@@ -788,13 +788,13 @@ try:
     sq.push_head(0)
     print('\tWriting to tail ...')
     sq.push_tail(6)
-    print('\tExpected length = {0}, actual length = {1}'.format(7, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(7, len(sq)))
     assert(len(sq) == 7)
     print('\tReading from head ...')
     leftVal = sq[0]
     print('\tReading from tail ...')
     rightVal = sq[-1]
-    print('\tExpected values = {0},{1}, actual values = {2},{3}'.format(0, 6, leftVal, rightVal))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(0, 6, leftVal, rightVal))
     assert(leftVal == 0)
     assert(rightVal == 6)
 
@@ -803,9 +803,9 @@ try:
     leftVal = sq.pop_head()
     print('\tPoppping from tail ...')
     rightVal = sq.pop_tail()
-    print('\tExpected length = {0}, actual length = {1}'.format(5, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
     assert(len(sq) == 5)
-    print('\tExpected values = {0},{1}, actual values = {2},{3}'.format(0, 6, leftVal, rightVal))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(0, 6, leftVal, rightVal))
     assert(leftVal == 0)
     assert(rightVal == 6)
 
@@ -814,9 +814,9 @@ try:
     sq.push(7, idx = 3)
     print('\tReading from middle ...')
     val = superq(sq.name, attach = True, host = 'local')[3]
-    print('\tExpected length = {0}, actual length = {1}'.format(6, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(6, len(sq)))
     assert(len(sq) == 6)
-    print('\tExpected value = {0}, actual value = {1}'.format(7, val))
+    print('\tExpected value = {0}, actual = {1}'.format(7, val))
     assert(val == 7)
 
     print('Deleting superq ...')
@@ -827,7 +827,7 @@ try:
     print('Creating hosted superq for maxlen tests ...')
     sq = superq([1, 2, 3, 4, 5], host = 'local', maxlen = 5)
     print('\tChecking length ...')
-    print('\tExpected length = {0}, actual length = {1}'.format(5, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
     assert(len(sq) == 5)
 
     print('Testing inserting element into middle of full set ...')
@@ -842,32 +842,32 @@ try:
     sq.delete_elem(sq.n(1).name)
     print('\tInserting elem ...')
     sq.create_elem(6, idx = 2)
-    print('\tExpected length = {0}, actual length = {1}'.format(5, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
     assert(len(sq) == 5)
 
     print('Testing appending element to full set ...')
     print('\tAdding elem ...')
     sq.create_elem(7)
-    print('\tExpected length = {0}, actual length = {1}'.format(5, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
     assert(len(sq) == 5)
-    print('\tExpected value = {0}, actual value = {1}'.format(3, sq[0]))
+    print('\tExpected value = {0}, actual = {1}'.format(3, sq[0]))
     assert(sq[0] == 3)
 
     print('Testing prepending element to full set ...')
     print('\tAdding elem ...')
     sq.create_elem(1, idx = 0)
-    print('\tExpected length = {0}, actual length = {1}'.format(5, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
     assert(len(sq) == 5)
-    print('\tExpected value = {0}, actual value = {1}'.format(5, sq[len(sq) - 1]))
+    print('\tExpected value = {0}, actual = {1}'.format(5, sq[len(sq) - 1]))
     assert(sq[len(sq) - 1] == 5)
 
     print('Testing increasing size of set ...')
     sq.maxlen += 1
     print('\tAdding elem ...')
     sq.create_elem(8)
-    print('\tExpected length = {0}, actual length = {1}'.format(6, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(6, len(sq)))
     assert(len(sq) == 6)
-    print('\tExpected value = {0}, actual value = {1}'.format(1, sq[0]))
+    print('\tExpected value = {0}, actual = {1}'.format(1, sq[0]))
     assert(sq[0] == 1)
 
 # TODO: this test points to maxlen needing to be a property, so that when a
@@ -880,9 +880,9 @@ try:
 ##    sq.maxlen -= 1
 ##    print('\tAdding elem ...')
 ##    sq.create_elem(9)
-##    print('\tExpected length = {0}, actual length = {1}'.format(6, len(sq)))
+##    print('\tExpected length = {0}, actual = {1}'.format(6, len(sq)))
 ##    assert(len(sq) == 6)
-##    print('\tExpected value = {0}, actual value = {1}'.format(2, sq[0]))
+##    print('\tExpected value = {0}, actual = {1}'.format(2, sq[0]))
 ##    assert(sq[0] == 2)
 
     print('Deleting superq ...')
@@ -906,7 +906,7 @@ try:
     sq = superq('superq_test.sq', attach = True, host = 'local', buildFromFile = True)
     print('\tChecking length of new superq ...')
     sqLen = len(superq('sq', host = 'local'))
-    print('\tExpected length = {0}, actual length = {1}'.format(5, sqLen))
+    print('\tExpected length = {0}, actual = {1}'.format(5, sqLen))
     assert(sqLen == 5)
     print('\tDeleting superq ...')
     sq.delete()
@@ -927,7 +927,7 @@ try:
     sq = superq('superq_test.sq', attach = True, host = 'local', buildFromFile = True)
     print('\tChecking length of new superq ...')
     sqLen = len(superq('sq', host = 'local'))
-    print('\tExpected length = {0}, actual length = {1}'.format(1000, sqLen))
+    print('\tExpected length = {0}, actual = {1}'.format(1000, sqLen))
     assert(sqLen == 1000)
     print('\tDeleting superq ...')
     sq.delete()
@@ -943,7 +943,7 @@ try:
         foo = Foo(i, i)
         sq.create_elem(foo)
     print('\tChecking length ...')
-    print('\tExpected length = {0}, actual length = {1}'.format(1000, len(sq)))
+    print('\tExpected length = {0}, actual = {1}'.format(1000, len(sq)))
     assert(len(sq) == 1000)
     print('\tDropping each superqelem ...')
     for elem in sq:
@@ -959,7 +959,7 @@ try:
         foo = Foo(i, i)
         sq1.create_elem(foo)
     print('\tChecking length ...')
-    print('\tExpected length = {0}, actual length = {1}'.format(1000, len(sq1)))
+    print('\tExpected length = {0}, actual = {1}'.format(1000, len(sq1)))
     assert(len(sq1) == 1000)
     print('\tCreating second superq ...')
     sq2 = superq([], name = 'sq2', attach = True, host = 'local')
@@ -967,14 +967,14 @@ try:
         foo = Foo(i, i)
         sq2.create_elem(foo)
     print('\tChecking length ...')
-    print('\tExpected length = {0}, actual length = {1}'.format(1000, len(sq2)))
+    print('\tExpected length = {0}, actual = {1}'.format(1000, len(sq2)))
     assert(len(sq2) == 1000)
     colLst = ['<self>.a', 'sq2.b']
     tableLst = ['<self>', 'sq2']
     conditionalStr = '<self>.a = sq2.b'
     print('\tPerforming join ...')
     sqResult = sq1.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual length = {1}'.format(1000, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(1000, len(sqResult)))
     assert(len(sqResult) == 1000)
     print('\tDeleting superqs ...')
     sq1.delete()
@@ -1032,9 +1032,9 @@ try:
     print('\t\tElapsed time: {0}'.format(round(time.time() - consumersStart), 3))
     pendingLen = len(superq('sqPending', attach = True, host = 'local'))
     completedLen = len(superq('sqCompleted', attach = True, host = 'local'))
-    print('\tExpected pending superq length = {0}, actual length = {1}'.format(0, pendingLen))
+    print('\tExpected pending superq length = {0}, actual = {1}'.format(0, pendingLen))
     assert(pendingLen == 0)
-    print('\tExpected completed superq length = {0}, actual length = {1}'.format(total_items, completedLen))
+    print('\tExpected completed superq length = {0}, actual = {1}'.format(total_items, completedLen))
     assert(completedLen == total_items)
     print('\tDeleting superqs ...')
     sqPending.delete()
