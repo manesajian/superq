@@ -2311,10 +2311,6 @@ class SuperQNetworkClientMgr():
 
 # deserializes requests, processes them, and serializes responses
 class SuperQStreamHandler(StreamRequestHandler):
-    def log(self, msg):
-        with open('node.output', 'a') as f:
-            f.write('\n' + msg)
-
     def raise_error(self, msg):
         with open('node.output', 'a') as f:
             f.write('\n' + msg)
@@ -2352,7 +2348,7 @@ class SuperQStreamHandler(StreamRequestHandler):
 
                 data += currentData
         except Exception as e:
-            self.log(str(e))
+            log(str(e))
             self.raise_error(str(e))
             raise
 
@@ -2390,7 +2386,7 @@ class SuperQStreamHandler(StreamRequestHandler):
             response.body = ''
         elif cmd == 'superq_create':
             if _dataStore.superq_exists(args):
-                self.log("superq " + args + " already exists.");
+                log("superq " + args + " already exists.");
                 response.result = str(False)
             else:
                 # deserialize request body into a detached superq
