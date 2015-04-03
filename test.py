@@ -143,11 +143,13 @@ try:
     pyLst = [1, 2, 3, 4, 5]
     sq = superq(pyLst)
     sqLst = sq.list()
-    print('\tExpected type = {0}, actual = {1}'.format('list', type(sqLst).__name__))
+    sqLstName = type(sqLst).__name__
+    print('\tExpected type = {0}, actual = {1}'.format('list', sqLstName))
     assert(isinstance(sqLst, list))
     print('\tChecking values ...')
     for i in range(0, len(pyLst)):
-        print('\t\tOriginal value: {0}, Returned value: {1}'.format(pyLst[i], sqLst[i]))
+        print('\t\tOriginal val: {0}, Current val: {1}'.format(pyLst[i],
+                                                               sqLst[i]))
         assert(pyLst[i] == sqLst[i])       
     print('\tDeleting superq ...')
     sq.delete()
@@ -162,20 +164,23 @@ try:
     sq = superq([10, 11, 12, 13, 14, 15])
     print('\tCopying superq via empty slice ...')
     sqCopy = sq[:]
-    print('\tExpected superq length = {0}, actual = {1}'.format(6, len(sqCopy)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(6,
+                                                                len(sqCopy)))
     assert(len(sqCopy) == 6)
     print('\tSlicing portion of copied superq ...')
     sqSlice = sqCopy[0:3]
-    print('\tExpected superq length = {0}, actual = {1}'.format(3, len(sqSlice)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(3,
+                                                                len(sqSlice)))
     assert(len(sqSlice) == 3)
     print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format(10,
-                                                                        12,
-                                                                        sqSlice[0],
-                                                                        sqSlice[2]))
+                                                                   12,
+                                                                   sqSlice[0],
+                                                                   sqSlice[2]))
     assert(sqSlice[0] == 10 and sqSlice[2] == 12)
     print('\tTesting [-1:] slice ...')
     sqSlice = sqSlice[-1:]
-    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqSlice)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1,
+                                                                len(sqSlice)))
     assert(len(sqSlice) == 1)
     print('\tExpected value = {0}, actual = {1}'.format(12, sqSlice[0]))
     assert(sqSlice[0] == 12)
