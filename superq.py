@@ -430,7 +430,7 @@ class ObjectNotRecognized(SuperQEx):
         return repr(self.value)
 
 def log(msg):
-    with open('node.output3', 'a') as f:
+    with open('node.output', 'a') as f:
         f.write('\n' + msg)
 
 def db_exec(dbConn, sql):
@@ -2023,17 +2023,12 @@ class SuperQNetworkClientMgr():
                         str(DEFAULT_TCP_PORT),
                         '-s',
                         str(DEFAULT_SSL_PORT)]
-            nodeOutputFile = open('node.output', 'w')
 
             if WIN32_POPEN_FLAGS is not None:
                 self.__nodeProcess = Popen(nodeArgs,
-                                           creationflags = WIN32_POPEN_FLAGS,
-                                           stdout = nodeOutputFile,
-                                           stderr = STDOUT)
+                                           creationflags = WIN32_POPEN_FLAGS)
             else:
-                self.__nodeProcess = Popen(nodeArgs,
-                                           stdout = nodeOutputFile,
-                                           stderr = STDOUT)
+                self.__nodeProcess = Popen(nodeArgs)
 
             with open('node.pid', 'w') as f:
                 f.write(str(self.__nodeProcess.pid))
