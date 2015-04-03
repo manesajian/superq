@@ -474,38 +474,45 @@ try:
     assert(sqCheck['e'].b == 5)
     print('\tPerforming query for single result ...')
     sqResult = sqMulti.query(['a'], ['<self>'], 'b = {0}'.format(5))
-    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1)
     print('\tExpected value = {0}, actual = {1}'.format('e', sqResult[0]['a']))
     assert(sqResult[0]['a'] == 'e')
 
     print('Performing query for single integer result ...')
     sqResult = sqMulti.query(['b'], ['<self>'], 'c = {0}'.format('.05'))
-    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1)
     print('\tExpected value = {0}, actual = {1}'.format(5, sqResult[0]['b']))
     assert(sqResult[0]['b'] == 5)
 
     print('Performing query into custom object ...')
     sqResult = sqMulti.query(['a', 'b'], ['<self>'], 'c = {0}'.format('.1'))
-    print('\tExpected superq length = {0}, actual = {1}'.format(1, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(1,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1)
     print('\tSetting objSample ...')
     sqResult.objSample = Foo('a', 1)
     myFoo = sqResult[0]
-    print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format('j', 10,
-                                                                         myFoo.a, myFoo.b))
+    print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format('j',
+                                                                   10,
+                                                                   myFoo.a,
+                                                                   myFoo.b))
     assert(myFoo.a == 'j' and myFoo.b == 10)
 
     print('Performing multiple row query ...')
     sqResult = sqMulti.query(['a', 'b'], ['<self>'], 'c > {0}'.format(.02))
-    print('\tExpected superq length = {0}, actual = {1}'.format(8, len(sqResult)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(8,
+                                                                len(sqResult)))
     assert(len(sqResult) == 8)
     print('\tTesting attaching detached superq as new superq ...')
     sqResult.name = 'sqMulti2'
     sqResult.attach()
     sqCheck = superq('sqMulti2')
-    print('\tExpected superq length = {0}, actual = {1}'.format(8, len(sqCheck)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(8,
+                                                                len(sqCheck)))
     assert(len(sqCheck) == 8)
     print('\tDeleting superqs ...')
     sqMulti.delete()
@@ -513,19 +520,23 @@ try:
 
     print('Testing basic join ...')
     print('\tCreating first superq ...')
-    sqA = superq([Foo(1, 2), Foo(2, 3), Foo(3, 4)], keyCol = 'a', name = 'sqA', attach = True)
+    lstA = [Foo(1, 2), Foo(2, 3), Foo(3, 4)]
+    sqA = superq(lstA, keyCol = 'a', name = 'sqA', attach = True)
     print('\tCreating second superq ...')
-    sqB = superq([Foo2('foo', 4, 1.5), Foo2('bar', 5, 2.5)], keyCol = 'a', name = 'sqB', attach = True)
+    lstB = [Foo2('foo', 4, 1.5), Foo2('bar', 5, 2.5)]
+    sqB = superq(lstB, keyCol = 'a', name = 'sqB', attach = True)
     sampleFoo = Foo2(1, 1, 1.1)
     colLst = ['<self>.a', 'sqB.c']
     tableLst = ['<self>', 'sqB']
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual = {1}'.format(1, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(1,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1)
     sqResult.objSample = sampleFoo
-    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3, 1.5,
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3,
+                                                                 1.5,
                                                                  sqResult[0].a,
                                                                  sqResult[0].c))
     assert(sqResult[0].a == 3 and sqResult[0].c == 1.5)
@@ -535,21 +546,25 @@ try:
 
     print('Testing join returning multiple elements ...')
     print('\tCreating first superq ...')
-    sqA = superq([Foo(1, 2), Foo(2, 3), Foo(3, 4)], keyCol = 'a', name = 'sqA', attach = True)
+    lstA = [Foo(1, 2), Foo(2, 3), Foo(3, 4)]
+    sqA = superq(lstA, keyCol = 'a', name = 'sqA', attach = True)
     print('\tCreating second superq ...')
-    sqB = superq([Foo2('foo', 3, 1.5), Foo2('bar', 4, 2.5)], keyCol = 'a', name = 'sqB', attach = True)
+    lstB = [Foo2('foo', 3, 1.5), Foo2('bar', 4, 2.5)]
+    sqB = superq(lstB, keyCol = 'a', name = 'sqB', attach = True)
     sampleFoo = Foo2(1, 1, 1.1)
     colLst = ['<self>.a', 'sqB.c']
     tableLst = ['<self>', 'sqB']
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual = {1}'.format(2, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(2,
+                                                                len(sqResult)))
     assert(len(sqResult) == 2)
     sqResult.objSample = sampleFoo
-    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3, 2.5,
-                                                                        sqResult[1].a,
-                                                                        sqResult[1].c))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3,
+                                                                 2.5,
+                                                                 sqResult[1].a,
+                                                                 sqResult[1].c))
     assert(sqResult[1].a == 3 and sqResult[1].c == 2.5)
     print('\tDeleting superqs ...')
     sqA.delete()
