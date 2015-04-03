@@ -324,7 +324,8 @@ try:
         print('\tsuperq lookup correctly failed.')
 
     print('Testing superq creation from custom object list ...')
-    sq = superq([Foo('a', 1), Foo('b', 2)], keyCol = 'a', name = 'sq1', attach = True)
+    lst = [Foo('a', 1), Foo('b', 2)]
+    sq = superq(lst, keyCol = 'a', name = 'sq1', attach = True)
 
     print('Testing superq lookup from datastore ...')
     sq1 = superq('sq1', attach = True)
@@ -360,7 +361,8 @@ try:
 
     print('Testing support of basic data types ...')
     print('\tCreating superq ...')
-    sq1 = superq([Foo2('aaa', 4, 1.1), Foo2('bbb', 5, 1.2)], keyCol = 'a', name = 'sq1', attach = True)
+    lst = [Foo2('aaa', 4, 1.1), Foo2('bbb', 5, 1.2)]
+    sq1 = superq(lst, keyCol = 'a', name = 'sq1', attach = True)
     print('\tLooking up superq in datastore ...')
     sq1 = superq('sq1')
     print('\tExpected superq length = {0}, actual = {1}'.format(2, len(sq1)))
@@ -372,12 +374,13 @@ try:
 
     print('Testing updating user object with valid keycol ...')
     print('\tCreating superq ...')
-    sq = superq([Foo3('a', 1), Foo3('b', 2), Foo3('c', 3)], keyCol = 'a', name = 'sq', attach = True)
+    lst = [Foo3('a', 1), Foo3('b', 2), Foo3('c', 3)]
+    sq = superq(lst, keyCol = 'a', name = 'sq', attach = True)
     print('\tRetrieving user obj ...')
     foo3 = sq[0]
     print('\tModifying user obj value ...')
     foo3.b = 5
-    print('\tAttempting to set attribute on object that should be unsettable ...')
+    print('\tAttempting to set unsettable object attribute ...')
     try:
         foo3.c = None
         raise Exception('Attribute set incorrectly succeeded.')
