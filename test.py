@@ -873,7 +873,9 @@ try:
 # TODO: this test points to maxlen needing to be a property, so that when a
 #  full set has its size decreased, it can remove elements from the head or
 #  tail as appropriate. Possibly we can keep track of where the last element
-#  was added in order to recognize direction
+#  was added in order to recognize direction. Presumably if direction is not
+#  known, elements would be dropped from the tail by default. There could be
+#  a setting like maxlen_trunc_head to change this behavior.
 ##    print('Testing decreasing size of set ...')
 ##    sq.maxlen -= 1
 ##    print('\tAdding elem ...')
