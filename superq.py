@@ -2629,8 +2629,7 @@ def main(argv):
     print('TCP port is {0}'.format(tcpPort))
 
     if (sslEnabled):
-        print('sslEnabled is {0}'.format(sslEnabled))
-        print('SSL port is {0}'.format(sslPort))
+        print('SSL port is {0}. '.format(sslPort))
 
     print('Setting internal datastore to public ...')
     _dataStore.set_public()
