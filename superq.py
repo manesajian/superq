@@ -2551,7 +2551,7 @@ class SuperQNetworkNode():
         self.__sslThread = None
 
     def launch_tcp_server(self, host, port):
-        print('Launching TCP server ...')
+        log('Launching TCP server ...')
 
         # create localhost TCP server on the given port
         self.__tcpServer = SuperQTCPThreadedServer((host, port),
@@ -2568,7 +2568,7 @@ class SuperQNetworkNode():
         self.__tcpThread = None
 
     def launch_ssl_server(self, host, port):
-        print('Launching SSL server ...')
+        log('Launching SSL server ...')
         
         # create localhost SSL server on the given port
         self.__sslServer = SuperQSSLThreadedServer((host, port),
@@ -2588,7 +2588,7 @@ class SuperQNetworkNode():
         self.__sslThread = None
 
     def launch_node_mgr(self, tcpPort, sslPort, startSSL):
-        print('Starting node mgr ...')
+        log('Starting node mgr ...')
         
         self.__tcpThread = Thread(target = self.launch_tcp_server,
                                   args = ('', tcpPort))
@@ -2607,7 +2607,7 @@ class SuperQNetworkNode():
             self.shutdown_ssl_server()
 
 def main(argv):
-    print('Starting superq public node ...')
+    log('Starting superq public node ...')
 
     tcpPort = DEFAULT_TCP_PORT
     sslPort = DEFAULT_SSL_PORT
@@ -2626,22 +2626,22 @@ def main(argv):
             sslEnabled = True
             sslPort = arg
 
-    print('TCP port is {0}'.format(tcpPort))
+    log('TCP port is {0}'.format(tcpPort))
 
     if (sslEnabled):
-        print('SSL port is {0}. '.format(sslPort))
+        log('SSL port is {0}. '.format(sslPort))
 
-    print('Setting internal datastore to public ...')
+    log('Setting internal datastore to public ...')
     _dataStore.set_public()
 
-    print('Creating and launching node ...')
+    log('Creating and launching node ...')
     nodeMgr = SuperQNetworkNode()
     nodeMgr.launch_node_mgr(int(tcpPort), int(sslPort), sslEnabled)
 
-    print('Cleaning up ...')
+    log('Cleaning up ...')
     nodeMgr.shutdown_node()
 
-    print('Leaving main.')
+    log('Leaving main.')
 
 if __name__ == '__main__':
     main(sys.argv[1:])
