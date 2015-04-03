@@ -43,62 +43,62 @@ try:
     print('\nLINKEDLIST tests:\n')
 
     print('Testing creating linked list ...')
-    llist = LinkedList()
+    ll = LinkedList()
 
     print('Testing adding elements to tail ...')
     for i in range(0, 10):
-        llist.push_tail(FooNode(i + 1))
-    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(llist)))
-    assert(len(llist) == 10)
-    print('\tExpected value = {0}, actual value = {1}'.format(1, llist[0].a))
-    assert(llist[0].a == 1)
+        ll.push_tail(FooNode(i + 1))
+
+    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(ll)))
+    assert(len(ll) == 10)
+    print('\tExpected value = {0}, actual value = {1}'.format(1, ll[0].a))
+    assert(ll[0].a == 1)
 
     print('Testing removing elements from head ...')
     for i in range(0, 5):
-        llist.pop_head()
-    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(llist)))
-    assert(len(llist) == 5)
+        ll.pop_head()
+    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(ll)))
+    assert(len(ll) == 5)
 
     print('Testing adding elements to head ...')
     for i in range(0, 5):
-        llist.push_head(FooNode(i + 1))
-    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(llist)))
-    assert(len(llist) == 10)
-    print('\tExpected value = {0}, actual value = {1}'.format(5, llist[0].a))
-    assert(llist[0].a == 5)
+        ll.push_head(FooNode(i + 1))
+    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(ll)))
+    assert(len(ll) == 10)
+    print('\tExpected value = {0}, actual value = {1}'.format(5, ll[0].a))
+    assert(ll[0].a == 5)
 
     print('Testing removing elements from tail ...')
     for i in range(0, 5):
-        llist.pop_tail()
-    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(llist)))
-    assert(len(llist) == 5)
+        ll.pop_tail()
+    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(ll)))
+    assert(len(ll) == 5)
 
     print('Testing adding into middle of list ...')
     print('\tPush element into list ...')
-    llist.push_middle(3, FooNode(11))
-    print('\tExpected list length = {0}, actual length = {1}'.format(6, len(llist)))
-    assert(len(llist) == 6)
-    print('\tExpected value = {0}, actual value = {1}'.format(11, llist[3].a))
-    assert(llist[3].a == 11)
+    ll.push_middle(3, FooNode(11))
+    print('\tExpected list length = {0}, actual length = {1}'.format(6, len(ll)))
+    assert(len(ll) == 6)
+    print('\tExpected value = {0}, actual value = {1}'.format(11, ll[3].a))
+    assert(ll[3].a == 11)
 
     print('Testing removing from middle of list ...')
     print('\tPop element from list ...')
-    fooNode = llist.pop_middle(3)
-    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(llist)))
-    assert(len(llist) == 5)
+    fooNode = ll.pop_middle(3)
+    print('\tExpected list length = {0}, actual length = {1}'.format(5, len(ll)))
+    assert(len(ll) == 5)
     print('\tExpected value = {0}, actual value = {1}'.format(11, fooNode.a))
     assert(fooNode.a == 11)
 
     print('Testing push/pop from both sides of list ...')
     print('\tCreating linked list ...')
-    llist = LinkedList()
+    ll = LinkedList()
     print('\tAdding elements ...')
     for i in range(0, 10):
-        llist.push_tail(FooNode(i + 1))
-    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(llist)))
-    assert(len(llist) == 10)
+        ll.push_tail(FooNode(i + 1))
+    print('\tExpected list length = {0}, actual length = {1}'.format(10, len(ll)))
+    assert(len(ll) == 10)
     
-
     print('\nDETACHED superq tests:\n')
 
     print('Testing empty superq creation ...')
