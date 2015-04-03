@@ -399,13 +399,13 @@ class DBExecError(SuperQEx):
     def __str__(self):
         return repr(self.value)
 
-class MalformedNetworkRequest(Exception):
+class MalformedNetworkRequest(SuperQEx):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
 
-class MalformedNetworkResponse(Exception):
+class MalformedNetworkResponse(SuperQEx):
     def __init__(self, value):
         self.value = value
     def __str__(self):
