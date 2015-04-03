@@ -782,18 +782,28 @@ try:
     print('\tCreating first superq ...')
     lstA = [Foo(1, 2), Foo(2, 3), Foo(3, 4)]
     lstB = [Foo2('foo', 4, 1.5), Foo2('bar', 5, 2.5)]
-    sqA = superq(lstA, keyCol = 'a', name = 'sqA', attach = True, host = 'local')
+    sqA = superq(lstA,
+                 keyCol = 'a',
+                 name = 'sqA',
+                 attach = True,
+                 host = 'local')
     print('\tCreating second superq ...')
-    sqB = superq(lstB, keyCol = 'a', name = 'sqB', attach = True, host = 'local')
+    sqB = superq(lstB,
+                 keyCol = 'a',
+                 name = 'sqB',
+                 attach = True,
+                 host = 'local')
     sampleFoo = Foo(1, 'a')
     colLst = ['<self>.a as a', 'sqB.a as b']
     tableLst = ['<self>', 'sqB']
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual = {1}'.format(1, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(1,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1)
-    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3, 'foo',
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(3,
+                                                                 'foo',
                                                                  sqResult[0].a,
                                                                  sqResult[0].b))
     assert(sqResult[0].a == 3 and sqResult[0].b == 'foo')
@@ -805,16 +815,25 @@ try:
     print('\tCreating first superq ...')
     lstA = [Foo(1, 2), Foo(2, 3), Foo(3, 4)]
     lstB = [Foo2('foo', 3, 1.5), Foo2('bar', 4, 2.5)]
-    sqA = superq(lstA, keyCol = 'a', name = 'sqA', attach = True, host = 'local')
+    sqA = superq(lstA,
+                 keyCol = 'a',
+                 name = 'sqA',
+                 attach = True,
+                 host = 'local')
     print('\tCreating second superq ...')
-    sqB = superq(lstB, keyCol = 'a', name = 'sqB', attach = True, host = 'local')
+    sqB = superq(lstB,
+                 keyCol = 'a',
+                 name = 'sqB',
+                 attach = True,
+                 host = 'local')
     sampleFoo = Foo2('str', 1, 1.1)
     colLst = ['<self>.a', 'sqB.c']
     tableLst = ['<self>', 'sqB']
     conditionalStr = '<self>.b = sqB.b'
     print('\tPerforming join ...')
     sqResult = sqA.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual = {1}'.format(2, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(2,
+                                                                len(sqResult)))
     assert(len(sqResult) == 2)
     print('\tDeleting superqs ...')
     sqA.delete()
@@ -833,7 +852,10 @@ try:
     leftVal = sq[0]
     print('\tReading from tail ...')
     rightVal = sq[-1]
-    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(1, 5, leftVal, rightVal))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(1,
+                                                                 5,
+                                                                 leftVal,
+                                                                 rightVal))
     assert(leftVal == 1)
     assert(rightVal == 5)
 
@@ -848,7 +870,10 @@ try:
     leftVal = sq[0]
     print('\tReading from tail ...')
     rightVal = sq[-1]
-    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(0, 6, leftVal, rightVal))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(0,
+                                                                 6,
+                                                                 leftVal,
+                                                                 rightVal))
     assert(leftVal == 0)
     assert(rightVal == 6)
 
@@ -859,7 +884,10 @@ try:
     rightVal = sq.pop_tail()
     print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
     assert(len(sq) == 5)
-    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(0, 6, leftVal, rightVal))
+    print('\tExpected values = {0},{1}, actual = {2},{3}'.format(0,
+                                                                 6,
+                                                                 leftVal,
+                                                                 rightVal))
     assert(leftVal == 0)
     assert(rightVal == 6)
 
@@ -951,13 +979,20 @@ try:
               Foo2('c', 3, .03),
               Foo2('d', 4, .04),
               Foo2('e', 5, .05)]
-    sq = superq(myFoos, keyCol = 'a', name = 'sq', attach = True, host = 'local')
+    sq = superq(myFoos,
+                keyCol = 'a',
+                name = 'sq',
+                attach = True,
+                host = 'local')
     print('\tSaving hosted superq ...')
     sq.save('superq_test.sq')
     print('\tDeleting hosted superq ...')
     sq.delete()
     print('\tRestoring hosted superq ...')
-    sq = superq('superq_test.sq', attach = True, host = 'local', buildFromFile = True)
+    sq = superq('superq_test.sq',
+                attach = True,
+                host = 'local',
+                buildFromFile = True)
     print('\tChecking length of new superq ...')
     sqLen = len(superq('sq', host = 'local'))
     print('\tExpected length = {0}, actual = {1}'.format(5, sqLen))
@@ -978,7 +1013,10 @@ try:
     print('\tDeleting hosted superq ...')
     sq.delete()
     print('\tRestoring hosted superq ...')
-    sq = superq('superq_test.sq', attach = True, host = 'local', buildFromFile = True)
+    sq = superq('superq_test.sq',
+                attach = True,
+                host = 'local',
+                buildFromFile = True)
     print('\tChecking length of new superq ...')
     sqLen = len(superq('sq', host = 'local'))
     print('\tExpected length = {0}, actual = {1}'.format(1000, sqLen))
@@ -1028,7 +1066,8 @@ try:
     conditionalStr = '<self>.a = sq2.b'
     print('\tPerforming join ...')
     sqResult = sq1.query(colLst, tableLst, conditionalStr, sampleFoo)
-    print('\tExpected result length = {0}, actual = {1}'.format(1000, len(sqResult)))
+    print('\tExpected result length = {0}, actual = {1}'.format(1000,
+                                                                len(sqResult)))
     assert(len(sqResult) == 1000)
     print('\tDeleting superqs ...')
     sq1.delete()
@@ -1059,10 +1098,14 @@ try:
     print('\tCreating pending jobs superq ...')
     sqPending = superq([], name = 'sqPending', attach = True, host = 'local')
     print('\tCreating completed jobs superq ...')
-    sqCompleted = superq([], name = 'sqCompleted', attach = True, host = 'local')
+    sqCompleted = superq([],
+                         name = 'sqCompleted',
+                         attach = True,
+                         host = 'local')
     print('\tSpawning {0} consumers ...'.format(consumers))
     for i in range(0, consumers):
-        thread = Thread(target = consumer_thread, args = (sqPending, sqCompleted))
+        thread = Thread(target = consumer_thread,
+                        args = (sqPending, sqCompleted))
         thread.daemon = True
         thread.start()
     print('\tSpawning {0} producers ...'.format(producers))
@@ -1077,18 +1120,22 @@ try:
         print('\t\tProduced: {0}'.format(items_produced))
         time.sleep(.5)
     print('\t\tProduced {0}'.format(total_items))
-    print('\t\tElapsed time: {0}'.format(round(time.time() - producersStart, 3)))
+    print('\t\tElapsed time: {0}'.format(round(time.time() - producersStart,
+                                               3)))
     print('\tWaiting for consumers to consume all items ...')
     while items_consumed < total_items:
         print('\t\tConsumed: {0}'.format(items_consumed))
         time.sleep(.5)
     print('\t\tConsumed {0}'.format(total_items))
-    print('\t\tElapsed time: {0}'.format(round(time.time() - consumersStart), 3))
-    pendingLen = len(superq('sqPending', attach = True, host = 'local'))
-    completedLen = len(superq('sqCompleted', attach = True, host = 'local'))
-    print('\tExpected pending superq length = {0}, actual = {1}'.format(0, pendingLen))
+    print('\t\tElapsed time: {0}'.format(round(time.time() - consumersStart),
+                                               3))
+    len1 = len(superq('sqPending', attach = True, host = 'local'))
+    len2 = len(superq('sqCompleted', attach = True, host = 'local'))
+    print('\tExpected pending length = {0}, actual = {1}'.format(0,
+                                                                 len1))
     assert(pendingLen == 0)
-    print('\tExpected completed superq length = {0}, actual = {1}'.format(total_items, completedLen))
+    print('\tExpected completed length = {0}, actual = {1}'.format(total_items,
+                                                                   len2))
     assert(completedLen == total_items)
     print('\tDeleting superqs ...')
     sqPending.delete()
@@ -1103,7 +1150,7 @@ try:
 ##        print('Val: {0}'.format(i.value))
 ##        time.sleep(1)
 
-    # Note: depending on the OS, this might not free up the bound address immediately
+    # Note: depending on the OS, bound address might not be free immediately
     print('\nShutting down superq network node ...')
     shutdown()
 
@@ -1111,4 +1158,3 @@ try:
 except:
     shutdown()
     raise
-
