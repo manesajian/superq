@@ -192,21 +192,23 @@ try:
     sq = superq([1, 2, 3, 4, 5, 6, 7, 8])
     print('\tTesting [1:4:2] slice ...')
     sqSlice = sq[1:4:2]
-    print('\tExpected superq length = {0}, actual = {1}'.format(2, len(sqSlice)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(2,
+                                                                len(sqSlice)))
     assert(len(sqSlice) == 2)
     print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format(2,
-                                                                          4,
-                                                                          sqSlice[0],
-                                                                          sqSlice[1]))
+                                                                   4,
+                                                                   sqSlice[0],
+                                                                   sqSlice[1]))
     assert(sqSlice[0] == 2 and sqSlice[1] == 4)
     print('\tTesting [::-1] reverse list slice ...')
     sqSlice = sq[::-1]
-    print('\tExpected superq length = {0}, actual = {1}'.format(8, len(sqSlice)))
+    print('\tExpected superq length = {0}, actual = {1}'.format(8,
+                                                                len(sqSlice)))
     assert(len(sqSlice) == 8)
     print('\tExpected values = {0}, {1}, actual = {2}, {3}'.format(8,
-                                                                          1,
-                                                                          sqSlice[0],
-                                                                          sqSlice[7]))
+                                                                   1,
+                                                                   sqSlice[0],
+                                                                   sqSlice[7]))
     assert(sqSlice[0] == 8 and sqSlice[7] == 1)
     print('\tDeleting superq ...')
     sq.delete()
@@ -244,13 +246,13 @@ try:
 
     print('Testing superqelem iteration ...')
     sqe = sq.n(0)
-    expectedValues = ['a', 1]
-    valuesIndex = 0
+    values = ['a', 1]
+    valuesIdx = 0
     for atom in sqe:
-        if atom.value != expectedValues[valuesIndex]:
-            raise Exception('Atom value ({0}) not equal to expected value ({1}).'.format(atom.value,
-                                                                                         expectedValues[valuesIndex]))
-        valuesIndex += 1
+        if atom.value != values[valuesIdx]:
+            raise Exception('Val {0}; expecting {1}.'.format(atom.value,
+                                                             values[valuesIdx]))
+        valuesIdx += 1
     print('\tPassed value check.')
 
     print('Testing reading superqelem atom value by int index ...')
