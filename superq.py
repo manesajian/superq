@@ -39,6 +39,7 @@ MAX_BUF_LEN = 4096
 # subpar method used to validate beginning of network messages
 SUPERQ_MSG_HEADER_BYTE = 42
 
+# local process datastore serving either user program or superq public node
 _dataStore = None
 _dataStoreLock = Lock()
 
