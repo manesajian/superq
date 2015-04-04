@@ -3,6 +3,7 @@ import sqlite3
 import sys
 
 from copy import copy
+from enum import Enum
 from os import kill
 from socket import socket, AF_INET, SOCK_STREAM
 from socketserver import TCPServer, ThreadingMixIn, StreamRequestHandler
@@ -38,6 +39,17 @@ MAX_BUF_LEN = 4096
 
 # subpar method used to validate beginning of network messages
 SUPERQ_MSG_HEADER_BYTE = 42
+
+SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
+                              'superq_create '
+                              'superq_read '
+                              'superq_delete '
+                              'superq_query '
+                              'superqelem_exists '
+                              'superqelem_create '
+                              'superqelem_read '
+                              'superqelem_update '
+                              'superqelem_delete')
 
 # local process datastore serving either user program or superq public node
 _dataStore = None
@@ -1923,7 +1935,7 @@ _dataStore = SuperQDataStore()
 _nodeRequestNextId = 1
 _nodeRequestLock = Lock()
 class SuperQNodeRequest():
-    def __init__(self, msg_id_ = '', cmd_ = '', args_ = '', body_ = ''):
+    def __init__(self, msg_id_ = '', cmd_ = 0, args_ = '', body_ = ''):
         self.msg_id = msg_id_
         self.cmd = cmd_
         self.args = args_
@@ -1961,7 +1973,7 @@ class SuperQNodeRequest():
                 raise MalformedNetworkRequest(requestStr)
 
             self.msg_id = elems[0]
-            self.cmd = elems[1]
+            self.cmd = SQNodeCmd(int(elems[1]))
             self.args = elems[2]
             self.body = body
         except Exception as e:
@@ -2212,7 +2224,7 @@ class SuperQNetworkClientMgr():
     def superq_exists(self, name, host):
         # build request object from string
         request = SuperQNodeRequest()
-        request.cmd = 'superq_exists'
+        request.cmd = SQNodeCmd.superq_exists.value
         request.args = name
 
         response = self.__send_msg(host, str(request))
@@ -2222,7 +2234,7 @@ class SuperQNetworkClientMgr():
     def superq_create(self, sq):
         # build request object from string
         request = SuperQNodeRequest()
-        request.cmd = 'superq_create'
+        request.cmd = SQNodeCmd.superq_create.value
         request.args = sq.publicName
         request.body = str(sq)
 
@@ -2234,7 +2246,7 @@ class SuperQNetworkClientMgr():
     def superq_read(self, name, host):
         # build request object from string
         request = SuperQNodeRequest()
-        request.cmd = 'superq_read'
+        request.cmd = SQNodeCmd.superq_read.value
         request.args = name
 
         response = self.__send_msg(host, str(request))
@@ -2250,7 +2262,7 @@ class SuperQNetworkClientMgr():
     def superq_delete(self, sq):
         # build request object
         request = SuperQNodeRequest()
-        request.cmd = 'superq_delete'
+        request.cmd = SQNodeCmd.superq_delete.value
         request.args = sq.publicName
 
         response = self.__send_msg(sq.host, str(request))
@@ -2261,7 +2273,7 @@ class SuperQNetworkClientMgr():
     def superq_query(self, sq, queryStr):
         # build request object from string
         request = SuperQNodeRequest()
-        request.cmd = 'superq_query'
+        request.cmd = SQNodeCmd.superq_query.value
         request.args = sq.publicName
         request.body = queryStr
 
@@ -2275,7 +2287,7 @@ class SuperQNetworkClientMgr():
     def superqelem_create(self, sq, sqe, idx = None):
         # build request object
         request = SuperQNodeRequest()
-        request.cmd = 'superqelem_create'
+        request.cmd = SQNodeCmd.superqelem_create.value
         request.args = '{0},{1}'.format(sq.publicName, idx)
         request.body = str(sqe)
 
@@ -2287,7 +2299,7 @@ class SuperQNetworkClientMgr():
     def superqelem_update(self, sq, sqe):
         # build request object
         request = SuperQNodeRequest()
-        request.cmd = 'superqelem_update'
+        request.cmd = SQNodeCmd.superqelem_update.value
         request.args = '{0}'.format(sq.publicName)
         request.body = str(sqe)
 
@@ -2299,7 +2311,7 @@ class SuperQNetworkClientMgr():
     def superqelem_delete(self, sq, sqeName):
         # build request object
         request = SuperQNodeRequest()
-        request.cmd = 'superqelem_delete'
+        request.cmd = SQNodeCmd.superqelem_delete.value
         request.args = '{0}'.format(sq.publicName)
         request.body = '{0}'.format(sqeName)
 
@@ -2380,10 +2392,10 @@ class SuperQStreamHandler(StreamRequestHandler):
         args = request.args
         body = request.body
 
-        if cmd == 'superq_exists':
+        if cmd == SQNodeCmd.superq_exists:
             response.result = str(_dataStore.superq_exists(args))
             response.body = ''
-        elif cmd == 'superq_create':
+        elif cmd == SQNodeCmd.superq_create:
             if _dataStore.superq_exists(args):
                 log("superq " + args + " already exists.");
                 response.result = str(False)
@@ -2395,13 +2407,13 @@ class SuperQStreamHandler(StreamRequestHandler):
                 sq.attach()
 
                 response.result = str(True)
-        elif cmd == 'superq_read':
+        elif cmd == SQNodeCmd.superq_read:
             sq = _dataStore.superq_read(args)
 
             response.body = str(sq)
 
             response.result = str(True)
-        elif cmd == 'superq_delete':
+        elif cmd == SQNodeCmd.superq_delete:
             try:
                 sq = _dataStore.superq_read(args)
             except:
@@ -2410,7 +2422,7 @@ class SuperQStreamHandler(StreamRequestHandler):
             _dataStore.superq_delete(sq)
 
             response.result = str(True)
-        elif cmd == 'superq_query':
+        elif cmd == SQNodeCmd.superq_query:
             try:
                 sq = _dataStore.superq_read(args)
             except:
@@ -2420,9 +2432,9 @@ class SuperQStreamHandler(StreamRequestHandler):
             response.body = str(_dataStore.superq_query_local(body))
 
             response.result = str(True)
-        elif cmd == 'superqelem_exists':
+        elif cmd == SQNodeCmd.superqelem_exists:
             pass
-        elif cmd == 'superqelem_create':
+        elif cmd == SQNodeCmd.superqelem_create:
             sqName, sqeIdx = args.split(',')
 
             try:
@@ -2441,9 +2453,9 @@ class SuperQStreamHandler(StreamRequestHandler):
             sq.create_elem(sqe, idx = sqeIdx)
 
             response.result = str(True);
-        elif cmd == 'superqelem_read':
+        elif cmd == SQNodeCmd.superqelem_read:
             pass
-        elif cmd == 'superqelem_update':
+        elif cmd == SQNodeCmd.superqelem_update:
             sqName = args
 
             try:
@@ -2457,7 +2469,7 @@ class SuperQStreamHandler(StreamRequestHandler):
             sq.update_elem(sqe)
 
             response.result = str(True);
-        elif cmd == 'superqelem_delete':
+        elif cmd == SQNodeCmd.superqelem_delete:
             sqName = args
             sqeName = body
 
