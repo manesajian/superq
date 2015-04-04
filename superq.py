@@ -15,7 +15,6 @@ from traceback import format_exc, print_stack
 from uuid import uuid4
 
 from subprocess import Popen, STDOUT
-
 try:
     from subprocess import CREATE_NEW_PROCESS_GROUP
 
@@ -456,20 +455,21 @@ def db_exec(dbConn, sql):
             # handlers, requiring for now this spinning solution.
             # shared cache mode is needed for parallel access of memory db
             sleep(.01)
-        except:
-            raise DBExecError('sql: {0}'.format(sql))
+        except Exception as e:
+            raise DBExecError('query: {0}\nException: {1}'.format(sql,
+                                                                  str(e)))
 
     dbConn.commit()
 
-def db_select(dbConn, queryStr):
+def db_select(dbConn, sql):
     rowLst = []
 
     dbConn.row_factory = sqlite3.Row
     try:
-        result = dbConn.execute(queryStr)
+        result = dbConn.execute(sql)
     except Exception as e:
-        raise DBExecError('queryStr: {0}\nException: {1}'.format(queryStr,
-                                                                 str(e)))
+        raise DBExecError('query: {0}\nException: {1}'.format(sql,
+                                                              str(e)))
 
     for row in result:
         rowLst.append(row)
