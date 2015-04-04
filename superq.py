@@ -40,6 +40,7 @@ MAX_BUF_LEN = 4096
 # subpar method used to validate beginning of network messages
 SUPERQ_MSG_HEADER_BYTE = 42
 
+# commands supported by superq network nodes
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
                               'superq_create '
                               'superq_read '
@@ -1953,18 +1954,18 @@ class SuperQNodeRequest():
         _nodeRequestLock.release()
 
     def __str__(self):
-        return '{0}|{1}|{2};;{3}'.format(self.msg_id,
+        return '{0}|{1}|{2}%{3}'.format(self.msg_id,
                                          self.cmd,
                                          self.args,
                                          self.body)
 
     def from_str(self, requestStr):
         try:  
-            headerSeparatorIdx = requestStr.index(';;')
-            
+            headerSeparatorIdx = requestStr.index('%')
+
             # separate out cmd header and body
             cmdHeader = requestStr[ : headerSeparatorIdx]
-            body = requestStr[headerSeparatorIdx + 2 : ]
+            body = requestStr[headerSeparatorIdx + 1 : ]
 
             elems = cmdHeader.split('|')
 
@@ -1986,17 +1987,17 @@ class SuperQNodeResponse():
         self.body = body_
 
     def __str__(self):
-        return '{0}|{1};;{2}'.format(self.msg_id,
-                                     self.result,
-                                     self.body)
+        return '{0}|{1}%{2}'.format(self.msg_id,
+                                    self.result,
+                                    self.body)
 
     def from_str(self, responseStr):
         try:
-            headerSeparatorIdx = responseStr.index(';;')
+            headerSeparatorIdx = responseStr.index('%')
             
             # separate out cmd header and body
             responseHeader = responseStr[ : headerSeparatorIdx]
-            responseBody = responseStr[headerSeparatorIdx + 2 : ]
+            responseBody = responseStr[headerSeparatorIdx + 1 : ]
 
             elems = responseHeader.split('|')
 
@@ -2407,7 +2408,7 @@ class SuperQStreamHandler(StreamRequestHandler):
             response.body = ''
         elif cmd == SQNodeCmd.superq_create:
             if _dataStore.superq_exists(args):
-                log("superq " + args + " already exists.");
+                log("superq " + args + " already exists.")
                 response.result = str(False)
             else:
                 # deserialize request body into a detached superq
@@ -2462,7 +2463,7 @@ class SuperQStreamHandler(StreamRequestHandler):
 
             sq.create_elem(sqe, idx = sqeIdx)
 
-            response.result = str(True);
+            response.result = str(True)
         elif cmd == SQNodeCmd.superqelem_read:
             pass
         elif cmd == SQNodeCmd.superqelem_update:
@@ -2478,7 +2479,7 @@ class SuperQStreamHandler(StreamRequestHandler):
 
             sq.update_elem(sqe)
 
-            response.result = str(True);
+            response.result = str(True)
         elif cmd == SQNodeCmd.superqelem_delete:
             sqName = args
             sqeName = body
@@ -2490,7 +2491,7 @@ class SuperQStreamHandler(StreamRequestHandler):
 
             sq.delete_elem(sqeName)
 
-            response.result = str(True);
+            response.result = str(True)
         else:
             raise MalformedNetworkRequest(msg)
 
