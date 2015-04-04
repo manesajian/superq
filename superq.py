@@ -1,9 +1,9 @@
-import getopt
 import sqlite3
 import sys
 
 from copy import copy
 from enum import Enum
+from getopt import getopt
 from os import kill
 from socket import socket, AF_INET, SOCK_STREAM
 from socketserver import TCPServer, ThreadingMixIn, StreamRequestHandler
@@ -2613,8 +2613,8 @@ def main(argv):
     sslEnabled = False
 
     try:
-        opts, args = getopt.getopt(argv, 't:s:', ['tcpport=', 'sslport='])
-    except getopt.GetoptError:
+        opts, args = getopt(argv, 't:s:', ['tcpport=', 'sslport='])
+    except GetoptError:
         sys.exit(2)
 
     for opt, arg in opts:
