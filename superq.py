@@ -2322,6 +2322,17 @@ class SuperQNetworkClientMgr():
 
 # deserializes requests, processes them, and serializes responses
 class SuperQStreamHandler(StreamRequestHandler):
+    def handle(self):             
+        # client can stay connected for multiple Request-Response transactions
+        while True:
+            try:
+                self.handle_connection()
+            except Exception as e:
+                tb = format_exc()
+                log('Exception: {0}\nTrace: {1}'.format(e, tb))
+                break
+        self.request.close()
+
     def raise_error(self, msg):
         with open('node.output', 'a') as f:
             f.write('\n' + msg)
@@ -2486,17 +2497,6 @@ class SuperQStreamHandler(StreamRequestHandler):
 
         self.return_response(response)
           
-    def handle(self):             
-        # client can stay connected for multiple Request-Response transactions
-        while True:
-            try:
-                self.handle_connection()
-            except Exception as e:
-                tb = format_exc()
-                log('Exception: {0}\nTrace: {1}'.format(e, tb))
-                break
-        self.request.close()
-
 class SuperQTCPServer(TCPServer):
     def __init__(self,
                  server_address,
@@ -2553,8 +2553,6 @@ class SuperQNetworkNode():
         self.__sslThread = None
 
     def launch_tcp_server(self, host, port):
-        log('Launching TCP server ...')
-
         # create localhost TCP server on the given port
         self.__tcpServer = SuperQTCPThreadedServer((host, port),
                                                    SuperQStreamHandler)
@@ -2570,8 +2568,6 @@ class SuperQNetworkNode():
         self.__tcpThread = None
 
     def launch_ssl_server(self, host, port):
-        log('Launching SSL server ...')
-        
         # create localhost SSL server on the given port
         self.__sslServer = SuperQSSLThreadedServer((host, port),
                                                    SuperQStreamHandler,
@@ -2590,13 +2586,13 @@ class SuperQNetworkNode():
         self.__sslThread = None
 
     def launch_node_mgr(self, tcpPort, sslPort, startSSL):
-        log('Starting node mgr ...')
-        
+        log('Starting TCP connection handler ...')
         self.__tcpThread = Thread(target = self.launch_tcp_server,
                                   args = ('', tcpPort))
         self.__tcpThread.start()
 
         if startSSL:
+            log('Starting SSL connection handler ...')
             self.__sslThread = Thread(target = self.launch_ssl_server,
                                       args = ('', sslPort))
             self.__sslThread.start()
