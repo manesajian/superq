@@ -33,13 +33,13 @@ DEFAULT_SSL_PORT = 9991
 DEFAULT_SSL_PEM_FILE = 'server.pem'
 DEFAULT_SSL_KEY_FILE = 'server.key'
 
-# used to determine buffer size for network reads
+# sets buffer size for network reads
 MAX_BUF_LEN = 4096
 
-# subpar method used to validate beginning of network messages
+# prefixes network messages
 SUPERQ_MSG_HEADER_BYTE = 42
 
-# commands supported by superq network nodes
+# superq network node supported commands
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
                               'superq_create '
                               'superq_read '
@@ -392,7 +392,7 @@ class LinkedList:
         if current_node.prev is None:
             self.head = current_node
 
-# specific superq exceptions should derive from this
+# base superq exception
 class SuperQEx(Exception):
     def __init__(self, value):
         self.value = value
@@ -441,6 +441,7 @@ class ObjectNotRecognized(SuperQEx):
     def __str__(self):
         return repr(self.value)
 
+# meant only for debugging
 def log(msg):
     with open('node.output', 'a') as f:
         f.write('\n' + msg)
