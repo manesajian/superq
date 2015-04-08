@@ -312,8 +312,10 @@ class LinkedList:
 
         return node
 
-    # there is an assumption because of oldNode that the list is not empty
     def insert_before(self, oldNode, newNode):
+        if self.__count < 1:
+            raise SuperQEx('Calling insert_before() on empty list.')
+
         # handle case inserting new head
         if self.head == oldNode:
             newNode.prev = None
@@ -328,8 +330,10 @@ class LinkedList:
 
         self.__count += 1
 
-    # there is an assumption because of oldNode that the list is not empty
     def insert_after(self, oldNode, newNode):
+        if self.__count < 1:
+            raise SuperQEx('Calling insert_before() on empty list.')
+
         # handle case inserting new tail
         if self.tail == oldNode:
             newNode.next = None
