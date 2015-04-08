@@ -59,6 +59,59 @@ def shutdown():
     if _dataStore:
         _dataStore.shutdown()
 
+def log(msg):
+    with open('node.output', 'a') as f:
+        f.write('\n' + msg)
+
+# base superq exception
+class SuperQEx(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class NotImplemented(SuperQEx):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+    
+class DBExecError(SuperQEx):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class MalformedNetworkRequest(SuperQEx):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class MalformedNetworkResponse(SuperQEx):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class SuperQEmpty(SuperQEx):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class SuperQFull(SuperQEx):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class ObjectNotRecognized(SuperQEx):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 # simple linked list element. superqelem inherits from this
 class LinkedListNode:
     def __init__(self):
@@ -395,60 +448,6 @@ class LinkedList:
         # if node is at top of list, set head to node
         if current_node.prev is None:
             self.head = current_node
-
-# base superq exception
-class SuperQEx(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class NotImplemented(SuperQEx):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-    
-class DBExecError(SuperQEx):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class MalformedNetworkRequest(SuperQEx):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class MalformedNetworkResponse(SuperQEx):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class SuperQEmpty(SuperQEx):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class SuperQFull(SuperQEx):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class ObjectNotRecognized(SuperQEx):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-# meant only for debugging
-def log(msg):
-    with open('node.output', 'a') as f:
-        f.write('\n' + msg)
 
 def db_exec(dbConn, sql):
     while True:
