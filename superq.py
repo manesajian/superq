@@ -555,7 +555,7 @@ class SuperQDataStore():
 
         return self.__networkClient
 
-    # potentially starts the network datastore when accessed
+    # potentially starts the network datastore process when accessed
     networkClient = property(__get_networkClient)
 
     def shutdown(self):
@@ -857,8 +857,7 @@ class SuperQDataStore():
             if superqelemExists(sq, sqeName):
                 self.__superqelem_update_db(sq, sqe)
             else:
-                # if this case does occur, have to create table if 1st row
-                raise NotImplemented('Unsure yet when this case might occur.')
+                raise ObjectNotRecognized('sqe \'' + sqeName + '\' not known.')
 
             self.superqdict[sq.publicName][sqeName] = sqe
             return sqe
