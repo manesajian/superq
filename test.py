@@ -655,6 +655,12 @@ try:
     val = superq('sq1', host = 'local')['a'].b
     print('\tExpected value = {0}, actual = {1}'.format(5, val))
     assert(val == 5)
+
+    print('Deleting superqelem ...')
+    sq1.delete_elem(1)
+    sqLen = len(superq('sq1', host = 'local', attach = True))
+    print('\tExpected superq length = {0}, actual = {1}'.format(3, sqLen))
+    assert(sqLen == 3)
     print('\tDeleting superq ...')
     sq1.delete()
 
