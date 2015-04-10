@@ -1801,9 +1801,11 @@ class superq():
     def delete_elem(self, value):
         if isinstance(value, superqelem):
             sqe = value
-        elif isinstance(value, (str, int, float)):
-            # try value as a superq name
+        elif isinstance(value, (str, int, float)) and \
+             value in self.__internalDict:
             sqe = self.__internalDict[value]
+        elif isinstance(value, int) and value < len(self.__internalDict):
+            sqe = self.__internalList[value]
         else:
             # lookup sqe from user object
             sqe = self.__lookup_elem(value)
