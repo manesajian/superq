@@ -664,7 +664,13 @@ try:
     print('\tDeleting superq ...')
     sq1.delete()
 
-    print('Testing basic superq query ...')
+    print('Testing datastore lookup of deleted superq ...')
+    try:
+        sq1 = superq('sq1', host = 'local')
+        raise Exception('\tExpected failure did not occur.')
+    except:
+        print('\tsuperq lookup correctly failed.')
+
     print('\tCreating new multi-element superq ...')
     myFoos = [Foo2('a', 1, .01),
               Foo2('b', 2, .02),
