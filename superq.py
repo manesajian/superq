@@ -51,7 +51,7 @@ SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
                               'superqelem_update '
                               'superqelem_delete')
 
-# local process datastore serving either user program or superq public node
+# local process datastore serving either user program or network node
 _dataStore = None
 _dataStoreLock = Lock()
 
