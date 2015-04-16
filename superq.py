@@ -2257,7 +2257,7 @@ class SuperQNetworkClientMgr():
         response = self.__send_msg(host, str(request))
 
         if not eval(response.result):
-            raise KeyError('{0} does not exist'.format(name))
+            raise SuperQEx('superq_read(): {0}'.format(response))
 
         # deserialize response body into a detached superq
         sq = superq(response.body, attach = False, buildFromStr = True)
