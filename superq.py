@@ -805,6 +805,9 @@ class SuperQDataStore():
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
 
+# TODO: multilist implementation will require some code here
+#  valStr += sqe.links ... ? # links could be a custom rw property
+
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr)
         self.__return_dbConn(dbConn)
@@ -1019,6 +1022,8 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem_datastore_only(self)
 
+# TODO: multilist implementation is going to have set sqe.links
+
     def __buildFromStr(self, sqeStr):
         headerSeparatorIdx = sqeStr.index(';')
 
@@ -1121,6 +1126,8 @@ class superqelem(LinkedListNode):
             raise KeyError(key)
 
         atom.value = value
+
+# TODO: multilist implementation is going to have add in sqe.links
 
     def __str__(self):
         sqeStr = '{0},{1},{2},{3},{4};'.format(type(self.name).__name__,
