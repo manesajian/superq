@@ -4,10 +4,10 @@ import random
 import time
 
 from os import remove
-from superq import LinkedList, LinkedListNode, shutdown, superq, superqelem
+from superq import MultiList, MultiListNode, shutdown, superq, superqelem
 from threading import Thread
 
-class FooNode(LinkedListNode):
+class FooNode(MultiListNode):
     def __init__(self, a):
         self.a = a
 
@@ -40,10 +40,10 @@ class Foo3():
             self.__dict__[attribute] = value
 
 try:
-    print('\nLINKEDLIST tests:\n')
+    print('\nMULTILIST tests (basic LinkedList functionality):\n')
 
-    print('Testing creating linked list ...')
-    ll = LinkedList()
+    print('Testing creating multi-list ...')
+    ll = MultiList()
 
     print('Testing adding elements to tail ...')
     for i in range(0, 10):
@@ -91,14 +91,26 @@ try:
     assert(fooNode.a == 11)
 
     print('Testing push/pop from both sides of list ...')
-    print('\tCreating linked list ...')
-    ll = LinkedList()
+    print('\tCreating list ...')
+    ll = MultiList()
     print('\tAdding elements ...')
     for i in range(0, 10):
         ll.push_tail(FooNode(i + 1))
     print('\tExpected list length = {0}, actual = {1}'.format(10, len(ll)))
     assert(len(ll) == 10)
-    
+
+    print('\nMulti-list-specific tests following ...\n')
+    print('\tCreating list ...')
+    ml = MultiList()
+    print('\tAdding elements ...')
+    for i in range(0, 10):
+        ml.push_tail(FooNode(i + 1))
+    headElem = ml.head
+    tailElem = ml.tail
+    headElem.tail = tailElem
+    tailEk
+
+
     print('\nDETACHED superq tests:\n')
 
     print('Testing empty superq creation ...')
