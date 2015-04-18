@@ -278,15 +278,17 @@ try:
     sq.delete()
 
     print('Testing superqelem linking to non-adjacent elements ...')
-    sq = superq([Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)])
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst)
     sqeHead = sq._list().head
     sqeTail = sq._list().tail
     print('\tSetting head sqe to point to tail ...')
     sqeHead.tail = sqeTail
-    sqe = sqeHead.tail
     print('\tChecking value to verify ...')
-    print('\tExpected value = {0}, actual = {1}'.format(4, sqe.b))
-    assert(sqe.b == 4)
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+    assert(sqeHead.tail.b == 4)
+    print('\tDeleting superq ...')
+    sq.delete()
 
     print('\nATTACHED superq tests:\n')
 
@@ -463,6 +465,20 @@ try:
     sqLen = len(superq('sq'))
     print('\tExpected superq length = {0}, actual = {1}'.format(1, sqLen))
     assert(sqLen == 1)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superqelem linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst, name = 'sq', attach = True)
+    sqeHead = sq._list().head
+    sqeTail = sq._list().tail
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq('sq')._list().head
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+    assert(sqeHead.tail.b == 4)
     print('\tDeleting superq ...')
     sq.delete()
 
@@ -682,6 +698,21 @@ try:
     except:
         print('\tsuperq lookup correctly failed.')
 
+    print('Testing superqelem linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst, name = 'sq', host = 'local', attach = True)
+    sqeHead = sq._list().head
+    sqeTail = sq._list().tail
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq('sq', host = 'local')._list().head
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+    assert(sqeHead.tail.b == 4)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq query returning single result ...')
     print('\tCreating new multi-element superq ...')
     myFoos = [Foo2('a', 1, .01),
               Foo2('b', 2, .02),
