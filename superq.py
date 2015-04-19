@@ -938,6 +938,18 @@ class superqelem(LinkedListNode):
         if not isinstance(self.name, (str, int, float)):
             raise TypeError('invalid name type ({0})'.format(type(self.name)))
 
+        # any sqe can link to any number of other sqes
+        self.links = None
+
+# Where do changes need to be made?
+# superqelem:
+#  __buildFromStr(), __str()__
+#
+# What does the interface look like to modify links?
+#
+# sqe.linkx = sqe1 to create or modify a link.
+# sqe.linkx = None to remove a link
+
         # handle scalars
         self.valueType = ''
         if isinstance(value, (str, int, float)):
