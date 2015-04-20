@@ -1055,8 +1055,6 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem_datastore_only(self)
 
-# TODO: multilist implementation is going to have set sqe.links
-
     def __buildFromStr(self, sqeStr):
         headerSeparatorIdx = sqeStr.index(';')
 
@@ -1067,7 +1065,7 @@ class superqelem(LinkedListNode):
         # parse out header fields
         headerElems = sqeHeader.split(',')
 
-        # name type and name  
+        # name-type and name-value
         nameType = headerElems[0]
         if nameType.startswith('str'):
             self.name = str(headerElems[1])
@@ -1076,7 +1074,7 @@ class superqelem(LinkedListNode):
         elif nameType.startswith('float'):
             self.name = float(headerElems[1])
 
-        # value type and value          
+        # value-type and actual value
         self.valueType = headerElems[2]
         if self.valueType.startswith('str'):
             self.value = str(headerElems[3])
@@ -1084,6 +1082,9 @@ class superqelem(LinkedListNode):
             self.value = int(headerElems[3])
         elif self.valueType.startswith('float'):
             self.value = float(headerElems[3])
+
+        # references to other sqes
+        self.links = headerElems[4]
 
         # scalar superqelems
         if self.valueType != '':
@@ -1093,7 +1094,7 @@ class superqelem(LinkedListNode):
         self.value = None
 
         # number of fields or atoms
-        numFields = int(headerElems[4])
+        numFields = int(headerElems[5])
 
         # parse out each field
         for i in range(0, numFields):
@@ -1160,14 +1161,13 @@ class superqelem(LinkedListNode):
 
         atom.value = value
 
-# TODO: multilist implementation is going to have add in sqe.links
-
     def __str__(self):
-        sqeStr = '{0},{1},{2},{3},{4};'.format(type(self.name).__name__,
-                                               self.name,
-                                               self.valueType,
-                                               self.value,
-                                               len(self.__internalList))
+        sqeStr = '{0},{1},{2},{3},{4},{5};'.format(type(self.name).__name__,
+                                                   self.name,
+                                                   self.valueType,
+                                                   self.value,
+                                                   self.links,
+                                                   len(self.__internalList))
         for atom in self:
             elemStr = '{0}|{1}|{2};'.format(atom.name, atom.type, atom.value)
             sqeStr += '{0}|{1}'.format(len(elemStr), elemStr)
