@@ -805,12 +805,7 @@ class SuperQDataStore():
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
 
-# TODO: multilist implementation will require some code here
-#  valStr += sqe.links ... ?
-
-# Create table has to cause extra columns to be added. At least 1, links.
-# Each db sqe function has to be adapted appropriately
-
+        valStr += sqe.links
 
 
         dbConn = self.__get_dbConn()
@@ -830,7 +825,6 @@ class SuperQDataStore():
                 val = "'{0}'".format(val)
             
             updateStr = '{0}={1}'.format('_val_', val)
-
         else:
             updateStr = ''
 
@@ -847,6 +841,9 @@ class SuperQDataStore():
 
                 updateStr += '{0}={1},'.format(name, val)
             updateStr = updateStr.rstrip(',')
+
+        # special-case _links_ column
+        updateStr += ",{0}='{1}'".format('_links_', sqe.links)
 
         # quote sqe name if it's a string
         sqeName = sqe.name
