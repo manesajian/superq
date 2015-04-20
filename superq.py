@@ -917,6 +917,10 @@ class superqelem(LinkedListNode):
         # dictionary of elematoms, keyed by 'field' name
         self.__internalDict = {}
 
+        # any sqe can link to any number of other sqes
+        self.__links = ''
+        self.__linksDict = {}
+
         if name is None:
             name = str(uuid4().hex)
 
@@ -955,9 +959,6 @@ class superqelem(LinkedListNode):
 #
 # I'm thinking the auto-properties will simply be a wrapper around a links
 #  str in the class.
-
-        # any sqe can link to any number of other sqes
-        self.links = ''
 
 
         # handle scalars
@@ -1045,11 +1046,27 @@ class superqelem(LinkedListNode):
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
-        self.__internalDict[attribute].value = value
+        # set either sqe link or dynamic attribute
+        if isinstance(value, superqelem):
+            # update link if it exists already
+            if attribute in linksDict:
+                oldValue = linksDict[attribute]
+                self.links = self.links.replace('{0},{1}'.format(attribute,
+                                                                 oldValue),
+                                                '{0},{1}'.format(attribute,
+                                                                 value))
+            else:
+                self.links += '{0},{1};'.format(attribute, value)
 
-        # maintain state in original user object if it is known
-        if self.obj is not None:
-            setattr(self.obj, attribute, value)
+            # now set the dictionary value
+            linksDict[attribute] = value
+        else:
+            # set normal (non-link) dynamic attribute
+            self.__internalDict[attribute].value = value
+
+            # maintain state if there is an original user object
+            if self.obj is not None:
+                setattr(self.obj, attribute, value)
 
         # trigger update
         if self.parentSq is not None:
@@ -1084,7 +1101,7 @@ class superqelem(LinkedListNode):
             self.value = float(headerElems[3])
 
         # references to other sqes
-        self.links = headerElems[4]
+        self.__links = headerElems[4]
 
         # scalar superqelems
         if self.valueType != '':
@@ -1166,7 +1183,7 @@ class superqelem(LinkedListNode):
                                                    self.name,
                                                    self.valueType,
                                                    self.value,
-                                                   self.links,
+                                                   self.__links,
                                                    len(self.__internalList))
         for atom in self:
             elemStr = '{0}|{1}|{2};'.format(atom.name, atom.type, atom.value)
