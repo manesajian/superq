@@ -806,7 +806,7 @@ class SuperQDataStore():
             valStr = valStr.rstrip(',')
 
 # TODO: multilist implementation will require some code here
-#  valStr += sqe.links ... ? # links could be a custom rw property
+#  valStr += sqe.links ... ?
 
 # Create table has to cause extra columns to be added. At least 1, links.
 # Each db sqe function has to be adapted appropriately
@@ -1355,8 +1355,8 @@ class superq():
         # using introspection on the 1st element added
         self.colNames = []
         self.colTypes = []
-        self.nameStr = ''     # comma-delimited list usable in INSERTs
-        self.nameTypeStr = '' # names and types, usable in in CREATEs
+        self.nameStr = ''     # comma-delimited list, usable in INSERTs
+        self.nameTypeStr = '' # names and types, usable in CREATEs
 
         # indicates backing db table should be created next attached add elem
         self.createTable = False
@@ -1738,12 +1738,10 @@ class superq():
     def __initialize_on_first_elem(self, sqe):
         self.nameStr = ''
         self.nameTypeStr = ''
-        colNames = []
-        colTypes = []
 
         # scalar superqelem
         if sqe.value is not None:
-            self.nameStr = '_name_,_val_'
+            self.nameStr = '_name_,_val_,_links_'
 
             self.nameTypeStr = '_name_ TEXT,'
             if sqe.valueType.startswith('str'):
@@ -1753,10 +1751,16 @@ class superq():
             elif sqe.valueType.startswith('float'):
                 self.nameTypeStr += '_val_ REAL'
 
-            self.colNames = ['_name_', '_val_']
-            self.colTypes = ['str', sqe.valueType]
+            # special _links_ column
+            self.nameTypeStr += ',_links_ TEXT'
+
+            self.colNames = ['_name_', '_val_', '_links_']
+            self.colTypes = ['str', sqe.valueType, 'str']
             
             return
+
+        colNames = []
+        colTypes = []
 
         # support autoKey
         if self.keyCol is None:
@@ -1785,6 +1789,12 @@ class superq():
         # strip trailing commas
         self.nameStr = self.nameStr.rstrip(',')
         self.nameTypeStr = self.nameTypeStr.rstrip(',')
+
+        # append special _links_ column info
+        self.nameStr += ',_links_'
+        self.nameTypeStr += ',_links_ TEXT'
+        colNames.append('_links')
+        colTypes.append('str')
 
         self.colNames = colNames
         self.colTypes = colTypes
