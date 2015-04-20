@@ -918,7 +918,7 @@ class superqelem(LinkedListNode):
         self.__internalDict = {}
 
         # any sqe can link to any number of other sqes
-        self.__links = ''
+        self.links = ''
         self.__linksDict = {}
 
         if name is None:
@@ -1078,7 +1078,7 @@ class superqelem(LinkedListNode):
             self.value = float(headerElems[3])
 
         # references to other sqes
-        self.__links = headerElems[4]
+        self.links = headerElems[4]
 
         # scalar superqelems
         if self.valueType != '':
@@ -1160,7 +1160,7 @@ class superqelem(LinkedListNode):
                                                    self.name,
                                                    self.valueType,
                                                    self.value,
-                                                   self.__links,
+                                                   self.links,
                                                    len(self.__internalList))
         for atom in self:
             elemStr = '{0}|{1}|{2};'.format(atom.name, atom.type, atom.value)
