@@ -1009,60 +1009,60 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem(self)
 
-    def add_property(self, attribute):
+    def add_property(self, attr):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
         # create local setter and getter with a particular attribute name
-        getter = lambda self: self.__get_property(attribute)
-        setter = lambda self, value: self.__set_property(attribute, value)
+        getter = lambda self: self.__get_property(attr)
+        setter = lambda self, value: self.__set_property(attr, value)
 
         # construct property attribute and add it to the class
-        setattr(self.__class__,
-                attribute,
-                property(fget = getter, fset = setter))
+        setattr(self.__class__, attr, property(fget = getter, fset = setter))
 
     # dynamic property getter that serves as a factory if property is a link
-    def __get_property(self, attribute):
+    def __get_property(self, attr):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
-        if attribute in self.__internalDict:
-            return self.__internalDict[attribute].value
-        elif attribute in self.linksDict:
-            return self.linksDict[attribute].value
+        if attr in self.__internalDict:
+            return self.__internalDict[attr].value
+        elif attr in self.linksDict:
+            return self.linksDict[attr].value
         else:
-            raise SuperQEx('unrecognized attribute: {0}'.format(attribute))
+            raise SuperQEx('unrecognized attribute: {0}'.format(attr))
 
     # dynamic property setter
-    def __set_property(self, attribute, value):
+    def __set_property(self, attr, value):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
         # set either sqe link or dynamic attribute
         if isinstance(value, superqelem):
+            log('Mark1: {0}'.format(self.links))
             # update link if it exists already
-            if attribute in linksDict:
-                oldValue = linksDict[attribute]
-                self.links = self.links.replace('{0},{1}'.format(attribute,
+            if attr in linksDict:
+                oldValue = linksDict[attr]
+                self.links = self.links.replace('{0},{1}'.format(attr,
                                                                  oldValue),
-                                                '{0},{1}'.format(attribute,
+                                                '{0},{1}'.format(attr,
                                                                  value))
             else:
-                self.links += '{0}^{1}|'.format(attribute, value.publicName)
+                self.links += '{0}^{1}|'.format(attr, value.publicName)
 
             # now set the dictionary value
-            linksDict[attribute] = value.publicName
+            linksDict[attr] = value.publicName
+            log('Mark2: {0}'.format(self.links))
         else:
             # set normal (non-link) dynamic attribute
-            self.__internalDict[attribute].value = value
+            self.__internalDict[attr].value = value
 
             # maintain state if there is an original user object
             if self.obj is not None:
-                setattr(self.obj, attribute, value)
+                setattr(self.obj, attr, value)
 
         # trigger update
         if self.parentSq is not None:
