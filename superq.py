@@ -1026,21 +1026,20 @@ class superqelem(LinkedListNode):
                 attribute,
                 property(fget = getter, fset = setter))
 
-# TODO: should links be treated like any other property? No, because different
-#  sqes will have different numbers of links, so db columns being added to
-#  an sqe table won't work.
-
-# __set_property() is going to have to look at value I think, and if it is a
-#  link, treat it differently. __get_property() on the other hand, might have
-#  to do a failed attribute lookup, then try again on the links var
-
+    # dynamic property getter that serves as a factory if property is a link
     def __get_property(self, attribute):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
-        return self.__internalDict[attribute].value
+        if attribute in self.__internalDict:
+            return self.__internalDict[attribute].value
+        else if attribute in self.__linksDict:
+            return self.__linksDict[attribute].value
+        else:
+            raise SuperQEx('unrecognized attribute: {0}'.format(attribute))
 
+    # dynamic property setter
     def __set_property(self, attribute, value):
         # scalar superqelems don't have properties
         if self.value is not None:
