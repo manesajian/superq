@@ -808,6 +808,11 @@ class SuperQDataStore():
 # TODO: multilist implementation will require some code here
 #  valStr += sqe.links ... ? # links could be a custom rw property
 
+# Create table has to cause extra columns to be added. At least 1, links.
+# Each db sqe function has to be adapted appropriately
+
+
+
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr)
         self.__return_dbConn(dbConn)
@@ -1023,7 +1028,7 @@ class superqelem(LinkedListNode):
 
         if attribute in self.__internalDict:
             return self.__internalDict[attribute].value
-        else if attribute in self.linksDict:
+        elif attribute in self.linksDict:
             return self.linksDict[attribute].value
         else:
             raise SuperQEx('unrecognized attribute: {0}'.format(attribute))
