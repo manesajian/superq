@@ -919,7 +919,7 @@ class superqelem(LinkedListNode):
 
         # any sqe can link to any number of other sqes
         self.links = ''
-        self.__linksDict = {}
+        self.linksDict = {}
 
         if name is None:
             name = str(uuid4().hex)
@@ -1023,8 +1023,8 @@ class superqelem(LinkedListNode):
 
         if attribute in self.__internalDict:
             return self.__internalDict[attribute].value
-        else if attribute in self.__linksDict:
-            return self.__linksDict[attribute].value
+        else if attribute in self.linksDict:
+            return self.linksDict[attribute].value
         else:
             raise SuperQEx('unrecognized attribute: {0}'.format(attribute))
 
@@ -1194,8 +1194,9 @@ class superqelem(LinkedListNode):
         sqe.obj = self.obj
 
         # add links
-        for k,v in self.__linksDict.items():
-            setattr(sqe, k, v)
+        for key, value in self.linksDict.items():
+            sqe.links += '{0},{1};'.format(key, value)
+            sqe.linksDict[key] = value
 
         # add atoms
         for atom in self:
