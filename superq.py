@@ -942,25 +942,6 @@ class superqelem(LinkedListNode):
         if not isinstance(self.name, (str, int, float)):
             raise TypeError('invalid name type ({0})'.format(type(self.name)))
 
-# Where do changes need to be made?
-# superqelem:
-#  __buildFromStr(), __str()__
-#
-# What does the interface look like to modify links?
-#
-# sqe.linkx = sqe1 to create or modify a link.
-# sqe.linkx = None to remove a link
-#
-# What does links look like in the db and how is it tracked in the class?
-#
-# I think links has to be stored in the db as a single string value for now.
-# Updates would involve a single string replace on the host and then the
-#  entire sqe would need to be refreshed across caches.
-#
-# I'm thinking the auto-properties will simply be a wrapper around a links
-#  str in the class.
-
-
         # handle scalars
         self.valueType = ''
         if isinstance(value, (str, int, float)):
@@ -1009,9 +990,6 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem(self)
 
-# TODO: what's the correct way to handle the setting of links? Possibly
-#  if attribute value starts with whatever marks a public sqe name?
-        
     def add_property(self, attribute):
         # scalar superqelems don't have properties
         if self.value is not None:
@@ -1197,12 +1175,13 @@ class superqelem(LinkedListNode):
         # remember user obj
         sqe.obj = self.obj
 
+        # add links
+        for k,v in self.__linksDict.items():
+            setattr(sqe, k, v)
+
         # add atoms
         for atom in self:
             sqe.add_atom(atom.name, atom.type, atom.value)
-
-
-# TODO: have to copy links properly here
 
         return sqe
 
