@@ -938,9 +938,6 @@ class superqelem(LinkedListNode):
         if not isinstance(self.name, (str, int, float)):
             raise TypeError('invalid name type ({0})'.format(type(self.name)))
 
-        # any sqe can link to any number of other sqes
-        self.links = None
-
 # Where do changes need to be made?
 # superqelem:
 #  __buildFromStr(), __str()__
@@ -949,6 +946,19 @@ class superqelem(LinkedListNode):
 #
 # sqe.linkx = sqe1 to create or modify a link.
 # sqe.linkx = None to remove a link
+#
+# What does links look like in the db and how is it tracked in the class?
+#
+# I think links has to be stored in the db as a single string value for now.
+# Updates would involve a single string replace on the host and then the
+#  entire sqe would need to be refreshed across caches.
+#
+# I'm thinking the auto-properties will simply be a wrapper around a links
+#  str in the class.
+
+        # any sqe can link to any number of other sqes
+        self.links = ''
+
 
         # handle scalars
         self.valueType = ''
@@ -997,6 +1007,9 @@ class superqelem(LinkedListNode):
         # trigger update
         if self.parentSq is not None:
             self.parentSq.update_elem(self)
+
+# TODO: what's the correct way to handle the setting of links? Possibly
+#  if attribute value starts with whatever marks a public sqe name?
         
     def add_property(self, attribute):
         # scalar superqelems don't have properties
@@ -1011,6 +1024,14 @@ class superqelem(LinkedListNode):
         setattr(self.__class__,
                 attribute,
                 property(fget = getter, fset = setter))
+
+# TODO: should links be treated like any other property? No, because different
+#  sqes will have different numbers of links, so db columns being added to
+#  an sqe table won't work.
+
+# __set_property() is going to have to look at value I think, and if it is a
+#  link, treat it differently. __get_property() on the other hand, might have
+#  to do a failed attribute lookup, then try again on the links var
 
     def __get_property(self, attribute):
         # scalar superqelems don't have properties
@@ -1163,6 +1184,9 @@ class superqelem(LinkedListNode):
         # add atoms
         for atom in self:
             sqe.add_atom(atom.name, atom.type, atom.value)
+
+
+# TODO: have to copy links properly here
 
         return sqe
 
