@@ -796,6 +796,8 @@ class SuperQDataStore():
                 if colName == '_name_':
                     valStr += "'{0}',".format(sqe.name)
                     continue
+                elif colName == '_links_':
+                    continue;
 
                 atom = atomDict[colName]
 
@@ -805,8 +807,9 @@ class SuperQDataStore():
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
 
-        valStr += sqe.links
-
+        valStr += ",'{0}'".format(sqe.links)
+        log('valStr: {0}'.format(valStr))
+# TODO: remove log msg above
 
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr)
@@ -833,6 +836,9 @@ class SuperQDataStore():
 
                 # no need to update key column
                 if name == keyCol or name == '_name_':
+                    continue
+                elif name == '_links_':
+                    # deal with links column after all the rest
                     continue
 
                 val = sqe[sq.colNames[i]]
@@ -1046,7 +1052,7 @@ class superqelem(LinkedListNode):
                                                 '{0},{1}'.format(attribute,
                                                                  value))
             else:
-                self.links += '{0},{1};'.format(attribute, value.publicName)
+                self.links += '{0}^{1}|'.format(attribute, value.publicName)
 
             # now set the dictionary value
             linksDict[attribute] = value.publicName
@@ -1090,15 +1096,14 @@ class superqelem(LinkedListNode):
         elif self.valueType.startswith('float'):
             self.value = float(headerElems[3])
 
-        self.links = headerElems[4]
-
         # add links individually
-        linkElems = headerElems[4].split(';')
-        for link in linkElems:
-            key, value = link.split(',')
+        if headerElems[4]:
+            linkElems = headerElems[4].split('|')
+            for link in linkElems:
+                key, value = link.split('^')
 
-            self.links += '{0},{1};'.format(key, value)
-            linksDict[key] = value
+                self.links += '{0}^{1}|'.format(key, value)
+                linksDict[key] = value
 
         # scalar superqelems
         if self.valueType != '':
@@ -1790,7 +1795,7 @@ class superq():
         # append special _links_ column info
         self.nameStr += ',_links_'
         self.nameTypeStr += ',_links_ TEXT'
-        colNames.append('_links')
+        colNames.append('_links_')
         colTypes.append('str')
 
         self.colNames = colNames
