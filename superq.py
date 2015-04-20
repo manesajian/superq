@@ -1090,15 +1090,13 @@ class superqelem(LinkedListNode):
 
         self.links = headerElems[4]
 
-# TODO: fix. Need to look right now at link creation
-        # add links (references to other sqes) individually
-#        linkElems = headerElems[4].split(';')
-#        for link in linkElems:
-#            key, value = link.split(',')
-#            setattr(self, key, value)
+        # add links individually
+        linkElems = headerElems[4].split(';')
+        for link in linkElems:
+            key, value = link.split(',')
 
-
-
+            self.links += '{0},{1};'.format(key, value)
+            linksDict[key] = value
 
         # scalar superqelems
         if self.valueType != '':
