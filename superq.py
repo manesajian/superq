@@ -1044,10 +1044,10 @@ class superqelem(LinkedListNode):
                                                 '{0},{1}'.format(attribute,
                                                                  value))
             else:
-                self.links += '{0},{1};'.format(attribute, value.pu)
-XYZ
+                self.links += '{0},{1};'.format(attribute, value.publicName)
+
             # now set the dictionary value
-            linksDict[attribute] = value
+            linksDict[attribute] = value.publicName
         else:
             # set normal (non-link) dynamic attribute
             self.__internalDict[attribute].value = value
