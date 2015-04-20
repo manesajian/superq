@@ -935,6 +935,12 @@ class superqelem(LinkedListNode):
         # used to remember user object for local instance
         self.obj = None
 
+        # construct publicName property and add it to the class
+        getter = lambda self: self.__get_publicName()
+        setattr(self.__class__,
+                'publicName',
+                property(fget = getter, fset = None))
+
         if buildFromStr:
             self.__buildFromStr(self.value)
             return
@@ -971,6 +977,11 @@ class superqelem(LinkedListNode):
             self.add_property(attrName)
 
             self.add_atom(attrName, type(attr).__name__, attr)
+
+    def __get_publicName(self):
+        if self.parentSq is None:
+            return self.name
+        return '{0}.{1}'.format(self.parentSq.publicName, self.name)
 
     def set_scalar(self, value):
         # scalar superqelems don't have properties
@@ -1033,8 +1044,8 @@ class superqelem(LinkedListNode):
                                                 '{0},{1}'.format(attribute,
                                                                  value))
             else:
-                self.links += '{0},{1};'.format(attribute, value)
-
+                self.links += '{0},{1};'.format(attribute, value.pu)
+XYZ
             # now set the dictionary value
             linksDict[attribute] = value
         else:
@@ -1077,8 +1088,17 @@ class superqelem(LinkedListNode):
         elif self.valueType.startswith('float'):
             self.value = float(headerElems[3])
 
-        # references to other sqes
         self.links = headerElems[4]
+
+# TODO: fix. Need to look right now at link creation
+        # add links (references to other sqes) individually
+#        linkElems = headerElems[4].split(';')
+#        for link in linkElems:
+#            key, value = link.split(',')
+#            setattr(self, key, value)
+
+
+
 
         # scalar superqelems
         if self.valueType != '':
@@ -1346,6 +1366,12 @@ class superq():
         if self.keyCol is None:
             self.autoKey = True
 
+        # construct publicName property and add it to the class
+        getter = lambda self: self.__get_publicName()
+        setattr(self.__class__,
+                'publicName',
+                property(fget = getter, fset = None))
+
         # deserializes from string or file
         if buildFromStr:
             self.buildFromStr(initObj, attach)
@@ -1375,15 +1401,6 @@ class superq():
 
         # skip __init__ in the future if superq is returned by __new__
         self.initialized = True
-
-        # create local setter and getter with a particular attribute name
-        getter = lambda self: self.__get_publicName()
-
-        # construct publicName property and add it to the class
-        setattr(self.__class__,
-                'publicName',
-                property(fget = lambda self: self.__get_publicName(),
-                         fset = None))
 
     def __get_publicName(self):       
         if self.host is None:
