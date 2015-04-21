@@ -1061,7 +1061,7 @@ class superqelem(LinkedListNode):
             print('link: {0}'.format(self.linksDict[attr]))
 
             # lookup and return linked sqe
-            sqName, sqeName = self.linksDict[attr].value.split('.')
+            sqName, sqeName = self.linksDict[attr].split('.')
             return superq(sqName)[sqeName]
         else:
             raise SuperQEx('unrecognized attribute: {0}'.format(attr))
@@ -1118,7 +1118,7 @@ class superqelem(LinkedListNode):
                 key, value = link.split('^')
 
                 self.links += '{0}^{1}|'.format(key, value)
-                linksDict[key] = value
+                self.linksDict[key] = value
 
         # scalar superqelems
         if self.valueType != '':
