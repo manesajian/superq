@@ -113,13 +113,13 @@ class ObjectNotRecognized(SuperQEx):
         return repr(self.value)
 
 # simple linked list element. superqelem inherits from this
-class LinkedListNode:
+class LinkedListNode():
     def __init__(self):
         self.prev = None
         self.next = None
 
 # doubly-linked list implementation used by superq and superqelem
-class LinkedList:
+class LinkedList():
     def __init__(self, circular = False):
         self.head = None
         self.tail = None
@@ -1009,6 +1009,34 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem(self)
 
+    def __setattr__(self, attr, value):
+        # handle the setting of links to other sqes
+        if (isinstance(value, superqelem) and
+            attr != 'prev' and attr != 'next'): # clumsy check of attr owner
+            # update link if it exists already
+            if attr in self.linksDict:
+                oldValue = self.linksDict[attr]
+                self.links = self.links.replace('{0},{1}'.format(attr,
+                                                                 oldValue),
+                                                '{0},{1}'.format(attr,
+                                                                 value))
+            else:
+                self.links += '{0}^{1}|'.format(attr, value.publicName)
+
+            # now set the dictionary value
+            self.linksDict[attr] = value.publicName
+
+            # trigger update
+            if self.parentSq is not None:
+                self.parentSq.update_elem_datastore_only(self)
+
+            # construct read-only property attribute and add it to the class
+            getter = lambda self: self.__get_property(attr)
+            setattr(self.__class__, attr, property(fget = getter))
+        else:
+            # call default setattr behavior
+            object.__setattr__(self, attr, value)
+
     def add_property(self, attr):
         # scalar superqelems don't have properties
         if self.value is not None:
@@ -1021,7 +1049,7 @@ class superqelem(LinkedListNode):
         # construct property attribute and add it to the class
         setattr(self.__class__, attr, property(fget = getter, fset = setter))
 
-    # dynamic property getter that serves as a factory if property is a link
+    # dynamic property getter
     def __get_property(self, attr):
         # scalar superqelems don't have properties
         if self.value is not None:
@@ -1030,7 +1058,11 @@ class superqelem(LinkedListNode):
         if attr in self.__internalDict:
             return self.__internalDict[attr].value
         elif attr in self.linksDict:
-            return self.linksDict[attr].value
+            print('link: {0}'.format(self.linksDict[attr]))
+
+            # lookup and return linked sqe
+            sqName, sqeName = self.linksDict[attr].value.split('.')
+            return superq(sqName)[sqeName]
         else:
             raise SuperQEx('unrecognized attribute: {0}'.format(attr))
 
@@ -1040,29 +1072,12 @@ class superqelem(LinkedListNode):
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
-        # set either sqe link or dynamic attribute
-        if isinstance(value, superqelem):
-            log('Mark1: {0}'.format(self.links))
-            # update link if it exists already
-            if attr in linksDict:
-                oldValue = linksDict[attr]
-                self.links = self.links.replace('{0},{1}'.format(attr,
-                                                                 oldValue),
-                                                '{0},{1}'.format(attr,
-                                                                 value))
-            else:
-                self.links += '{0}^{1}|'.format(attr, value.publicName)
+        # remember attribute
+        self.__internalDict[attr].value = value
 
-            # now set the dictionary value
-            linksDict[attr] = value.publicName
-            log('Mark2: {0}'.format(self.links))
-        else:
-            # set normal (non-link) dynamic attribute
-            self.__internalDict[attr].value = value
-
-            # maintain state if there is an original user object
-            if self.obj is not None:
-                setattr(self.obj, attr, value)
+        # maintain state if there is an original user object
+        if self.obj is not None:
+            setattr(self.obj, attr, value)
 
         # trigger update
         if self.parentSq is not None:
