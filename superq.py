@@ -636,7 +636,12 @@ class SuperQDataStore():
         for row in rows:
             # demarshal single-value objects
             if isinstance(objSample, str):
-                newSq.create_elem(str(row['_val_']))
+                sqe = newSq.create_elem(str(row['_val_']))
+#TODO: something along the lines of:
+#  newSq.links_populate(str(row['_links_']))
+#  need to get the sqe back from create_elem() first though
+
+
                 continue
             elif isinstance(objSample, int):
                 newSq.create_elem(int(row['_val_']))
@@ -1010,9 +1015,10 @@ class superqelem(LinkedListNode):
             self.parentSq.update_elem(self)
 
     def __setattr__(self, attr, value):
+        log('SETATTR: {0}, {1}'.format(attr, value))
         # handle the setting of links to other sqes
         if (isinstance(value, superqelem) and
-            attr != 'prev' and attr != 'next'): # clumsy check of attr owner
+            attr != 'prev' and attr != 'next'): # clumsy check of attr class
             # update link if it exists already
             if attr in self.linksDict:
                 oldValue = self.linksDict[attr]
@@ -1058,8 +1064,6 @@ class superqelem(LinkedListNode):
         if attr in self.__internalDict:
             return self.__internalDict[attr].value
         elif attr in self.linksDict:
-            print('link: {0}'.format(self.linksDict[attr]))
-
             # lookup and return linked sqe
             sqName, sqeName = self.linksDict[attr].split('.')
             return superq(sqName)[sqeName]
@@ -1082,6 +1086,17 @@ class superqelem(LinkedListNode):
         # trigger update
         if self.parentSq is not None:
             self.parentSq.update_elem_datastore_only(self)
+
+    def addLinksFromStr(self, linksStr):
+        linkElems = linksStr.split('|')
+        for link in linkElems:
+            if not link:
+                break
+
+            key, value = link.split('^')
+
+            self.links += '{0}^{1}|'.format(key, value)
+            self.linksDict[key] = value
 
     def __buildFromStr(self, sqeStr):
         headerSeparatorIdx = sqeStr.index(';')
@@ -1112,13 +1127,7 @@ class superqelem(LinkedListNode):
             self.value = float(headerElems[3])
 
         # add links individually
-        if headerElems[4]:
-            linkElems = headerElems[4].split('|')
-            for link in linkElems:
-                key, value = link.split('^')
-
-                self.links += '{0}^{1}|'.format(key, value)
-                self.linksDict[key] = value
+        addLinksFromStr(headerElems[4])
 
         # scalar superqelems
         if self.valueType != '':
