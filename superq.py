@@ -636,12 +636,7 @@ class SuperQDataStore():
         for row in rows:
             # demarshal single-value objects
             if isinstance(objSample, str):
-                sqe = newSq.create_elem(str(row['_val_']))
-#TODO: something along the lines of:
-#  newSq.links_populate(str(row['_links_']))
-#  need to get the sqe back from create_elem() first though
-
-
+                newSq.create_elem(str(row['_val_']))
                 continue
             elif isinstance(objSample, int):
                 newSq.create_elem(int(row['_val_']))
@@ -678,7 +673,7 @@ class SuperQDataStore():
 
                 setattr(newObj, fieldName, val)
 
-            newSqe = newSq.create_elem(newObj)
+            newSq.create_elem(newObj)
 
         # clear objSample from being set by first create_elem
         newSq.objSample = None
@@ -813,8 +808,6 @@ class SuperQDataStore():
             valStr = valStr.rstrip(',')
 
         valStr += ",'{0}'".format(sqe.links)
-        log('valStr: {0}'.format(valStr))
-# TODO: remove log msg above
 
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr)
@@ -1015,7 +1008,6 @@ class superqelem(LinkedListNode):
             self.parentSq.update_elem(self)
 
     def __setattr__(self, attr, value):
-        log('SETATTR: {0}, {1}'.format(attr, value))
         # handle the setting of links to other sqes
         if (isinstance(value, superqelem) and
             attr != 'prev' and attr != 'next'): # clumsy check of attr class
