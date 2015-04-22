@@ -113,13 +113,13 @@ class ObjectNotRecognized(SuperQEx):
         return repr(self.value)
 
 # simple linked list element. superqelem inherits from this
-class LinkedListNode:
+class LinkedListNode():
     def __init__(self):
         self.prev = None
         self.next = None
 
 # doubly-linked list implementation used by superq and superqelem
-class LinkedList:
+class LinkedList():
     def __init__(self, circular = False):
         self.head = None
         self.tail = None
@@ -673,7 +673,7 @@ class SuperQDataStore():
 
                 setattr(newObj, fieldName, val)
 
-            newSqe = newSq.create_elem(newObj)
+            newSq.create_elem(newObj)
 
         # clear objSample from being set by first create_elem
         newSq.objSample = None
@@ -796,6 +796,8 @@ class SuperQDataStore():
                 if colName == '_name_':
                     valStr += "'{0}',".format(sqe.name)
                     continue
+                elif colName == '_links_':
+                    continue;
 
                 atom = atomDict[colName]
 
@@ -805,8 +807,7 @@ class SuperQDataStore():
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
 
-# TODO: multilist implementation will require some code here
-#  valStr += sqe.links ... ? # links could be a custom rw property
+        valStr += ",'{0}'".format(sqe.links)
 
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr)
@@ -825,7 +826,6 @@ class SuperQDataStore():
                 val = "'{0}'".format(val)
             
             updateStr = '{0}={1}'.format('_val_', val)
-
         else:
             updateStr = ''
 
@@ -835,6 +835,9 @@ class SuperQDataStore():
                 # no need to update key column
                 if name == keyCol or name == '_name_':
                     continue
+                elif name == '_links_':
+                    # deal with links column after all the rest
+                    continue
 
                 val = sqe[sq.colNames[i]]
                 if sq.colTypes[i].startswith('str'):
@@ -842,6 +845,9 @@ class SuperQDataStore():
 
                 updateStr += '{0}={1},'.format(name, val)
             updateStr = updateStr.rstrip(',')
+
+        # special-case _links_ column
+        updateStr += ",{0}='{1}'".format('_links_', sqe.links)
 
         # quote sqe name if it's a string
         sqeName = sqe.name
@@ -917,6 +923,10 @@ class superqelem(LinkedListNode):
         # dictionary of elematoms, keyed by 'field' name
         self.__internalDict = {}
 
+        # any sqe can link to any number of other sqes
+        self.links = ''
+        self.linksDict = {}
+
         if name is None:
             name = str(uuid4().hex)
 
@@ -930,6 +940,12 @@ class superqelem(LinkedListNode):
 
         # used to remember user object for local instance
         self.obj = None
+
+        # construct publicName property and add it to the class
+        getter = lambda self: self.__get_publicName()
+        setattr(self.__class__,
+                'publicName',
+                property(fget = getter, fset = None))
 
         if buildFromStr:
             self.__buildFromStr(self.value)
@@ -968,6 +984,11 @@ class superqelem(LinkedListNode):
 
             self.add_atom(attrName, type(attr).__name__, attr)
 
+    def __get_publicName(self):
+        if self.parentSq is None:
+            return self.name
+        return '{0}.{1}'.format(self.parentSq.publicName, self.name)
+
     def set_scalar(self, value):
         # scalar superqelems don't have properties
         if self.value is None:
@@ -985,44 +1006,89 @@ class superqelem(LinkedListNode):
         # trigger update
         if self.parentSq is not None:
             self.parentSq.update_elem(self)
-        
-    def add_property(self, attribute):
+
+    def __setattr__(self, attr, value):
+        # handle the setting of links to other sqes
+        if (isinstance(value, superqelem) and
+            attr != 'prev' and attr != 'next'): # clumsy check of attr class
+            # update link if it exists already
+            if attr in self.linksDict:
+                oldValue = self.linksDict[attr]
+                self.links = self.links.replace('{0},{1}'.format(attr,
+                                                                 oldValue),
+                                                '{0},{1}'.format(attr,
+                                                                 value))
+            else:
+                self.links += '{0}^{1}|'.format(attr, value.publicName)
+
+            # now set the dictionary value
+            self.linksDict[attr] = value.publicName
+
+            # trigger update
+            if self.parentSq is not None:
+                self.parentSq.update_elem_datastore_only(self)
+
+            # construct read-only property attribute and add it to the class
+            getter = lambda self: self.__get_property(attr)
+            setattr(self.__class__, attr, property(fget = getter))
+        else:
+            # call default setattr behavior
+            object.__setattr__(self, attr, value)
+
+    def add_property(self, attr):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
         # create local setter and getter with a particular attribute name
-        getter = lambda self: self.__get_property(attribute)
-        setter = lambda self, value: self.__set_property(attribute, value)
+        getter = lambda self: self.__get_property(attr)
+        setter = lambda self, value: self.__set_property(attr, value)
 
         # construct property attribute and add it to the class
-        setattr(self.__class__,
-                attribute,
-                property(fget = getter, fset = setter))
+        setattr(self.__class__, attr, property(fget = getter, fset = setter))
 
-    def __get_property(self, attribute):
+    # dynamic property getter
+    def __get_property(self, attr):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
-        return self.__internalDict[attribute].value
+        if attr in self.__internalDict:
+            return self.__internalDict[attr].value
+        elif attr in self.linksDict:
+            # lookup and return linked sqe
+            sqName, sqeName = self.linksDict[attr].split('.')
+            return superq(sqName)[sqeName]
+        else:
+            raise SuperQEx('unrecognized attribute: {0}'.format(attr))
 
-    def __set_property(self, attribute, value):
+    # dynamic property setter
+    def __set_property(self, attr, value):
         # scalar superqelems don't have properties
         if self.value is not None:
             raise TypeError('invalid scalar property')
 
-        self.__internalDict[attribute].value = value
+        # remember attribute
+        self.__internalDict[attr].value = value
 
-        # maintain state in original user object if it is known
+        # maintain state if there is an original user object
         if self.obj is not None:
-            setattr(self.obj, attribute, value)
+            setattr(self.obj, attr, value)
 
         # trigger update
         if self.parentSq is not None:
             self.parentSq.update_elem_datastore_only(self)
 
-# TODO: multilist implementation is going to have set sqe.links
+    def addLinksFromStr(self, linksStr):
+        linkElems = linksStr.split('|')
+        for link in linkElems:
+            if not link:
+                break
+
+            key, value = link.split('^')
+
+            self.links += '{0}^{1}|'.format(key, value)
+            self.linksDict[key] = value
 
     def __buildFromStr(self, sqeStr):
         headerSeparatorIdx = sqeStr.index(';')
@@ -1034,7 +1100,7 @@ class superqelem(LinkedListNode):
         # parse out header fields
         headerElems = sqeHeader.split(',')
 
-        # name type and name  
+        # name-type and name-value
         nameType = headerElems[0]
         if nameType.startswith('str'):
             self.name = str(headerElems[1])
@@ -1043,7 +1109,7 @@ class superqelem(LinkedListNode):
         elif nameType.startswith('float'):
             self.name = float(headerElems[1])
 
-        # value type and value          
+        # value-type and actual value
         self.valueType = headerElems[2]
         if self.valueType.startswith('str'):
             self.value = str(headerElems[3])
@@ -1051,6 +1117,9 @@ class superqelem(LinkedListNode):
             self.value = int(headerElems[3])
         elif self.valueType.startswith('float'):
             self.value = float(headerElems[3])
+
+        # add links individually
+        addLinksFromStr(headerElems[4])
 
         # scalar superqelems
         if self.valueType != '':
@@ -1060,7 +1129,7 @@ class superqelem(LinkedListNode):
         self.value = None
 
         # number of fields or atoms
-        numFields = int(headerElems[4])
+        numFields = int(headerElems[5])
 
         # parse out each field
         for i in range(0, numFields):
@@ -1127,14 +1196,13 @@ class superqelem(LinkedListNode):
 
         atom.value = value
 
-# TODO: multilist implementation is going to have add in sqe.links
-
     def __str__(self):
-        sqeStr = '{0},{1},{2},{3},{4};'.format(type(self.name).__name__,
-                                               self.name,
-                                               self.valueType,
-                                               self.value,
-                                               len(self.__internalList))
+        sqeStr = '{0},{1},{2},{3},{4},{5};'.format(type(self.name).__name__,
+                                                   self.name,
+                                                   self.valueType,
+                                                   self.value,
+                                                   self.links,
+                                                   len(self.__internalList))
         for atom in self:
             elemStr = '{0}|{1}|{2};'.format(atom.name, atom.type, atom.value)
             sqeStr += '{0}|{1}'.format(len(elemStr), elemStr)
@@ -1147,6 +1215,11 @@ class superqelem(LinkedListNode):
 
         # remember user obj
         sqe.obj = self.obj
+
+        # add links
+        for key, value in self.linksDict.items():
+            sqe.links += '{0},{1};'.format(key, value)
+            sqe.linksDict[key] = value
 
         # add atoms
         for atom in self:
@@ -1300,8 +1373,8 @@ class superq():
         # using introspection on the 1st element added
         self.colNames = []
         self.colTypes = []
-        self.nameStr = ''     # comma-delimited list usable in INSERTs
-        self.nameTypeStr = '' # names and types, usable in in CREATEs
+        self.nameStr = ''     # comma-delimited list, usable in INSERTs
+        self.nameTypeStr = '' # names and types, usable in CREATEs
 
         # indicates backing db table should be created next attached add elem
         self.createTable = False
@@ -1314,6 +1387,12 @@ class superq():
         self.autoKey = False
         if self.keyCol is None:
             self.autoKey = True
+
+        # construct publicName property and add it to the class
+        getter = lambda self: self.__get_publicName()
+        setattr(self.__class__,
+                'publicName',
+                property(fget = getter, fset = None))
 
         # deserializes from string or file
         if buildFromStr:
@@ -1344,15 +1423,6 @@ class superq():
 
         # skip __init__ in the future if superq is returned by __new__
         self.initialized = True
-
-        # create local setter and getter with a particular attribute name
-        getter = lambda self: self.__get_publicName()
-
-        # construct publicName property and add it to the class
-        setattr(self.__class__,
-                'publicName',
-                property(fget = lambda self: self.__get_publicName(),
-                         fset = None))
 
     def __get_publicName(self):       
         if self.host is None:
@@ -1686,12 +1756,10 @@ class superq():
     def __initialize_on_first_elem(self, sqe):
         self.nameStr = ''
         self.nameTypeStr = ''
-        colNames = []
-        colTypes = []
 
         # scalar superqelem
         if sqe.value is not None:
-            self.nameStr = '_name_,_val_'
+            self.nameStr = '_name_,_val_,_links_'
 
             self.nameTypeStr = '_name_ TEXT,'
             if sqe.valueType.startswith('str'):
@@ -1701,10 +1769,16 @@ class superq():
             elif sqe.valueType.startswith('float'):
                 self.nameTypeStr += '_val_ REAL'
 
-            self.colNames = ['_name_', '_val_']
-            self.colTypes = ['str', sqe.valueType]
+            # special _links_ column
+            self.nameTypeStr += ',_links_ TEXT'
+
+            self.colNames = ['_name_', '_val_', '_links_']
+            self.colTypes = ['str', sqe.valueType, 'str']
             
             return
+
+        colNames = []
+        colTypes = []
 
         # support autoKey
         if self.keyCol is None:
@@ -1733,6 +1807,12 @@ class superq():
         # strip trailing commas
         self.nameStr = self.nameStr.rstrip(',')
         self.nameTypeStr = self.nameTypeStr.rstrip(',')
+
+        # append special _links_ column info
+        self.nameStr += ',_links_'
+        self.nameTypeStr += ',_links_ TEXT'
+        colNames.append('_links_')
+        colTypes.append('str')
 
         self.colNames = colNames
         self.colTypes = colTypes

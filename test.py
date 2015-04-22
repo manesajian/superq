@@ -42,7 +42,7 @@ class Foo3():
 try:
     print('\nLINKEDLIST tests:\n')
 
-    print('Testing creating linked list ...')
+    print('Testing creating linked-list ...')
     ll = LinkedList()
 
     print('Testing adding elements to tail ...')
@@ -91,14 +91,14 @@ try:
     assert(fooNode.a == 11)
 
     print('Testing push/pop from both sides of list ...')
-    print('\tCreating linked list ...')
+    print('\tCreating list ...')
     ll = LinkedList()
     print('\tAdding elements ...')
     for i in range(0, 10):
         ll.push_tail(FooNode(i + 1))
     print('\tExpected list length = {0}, actual = {1}'.format(10, len(ll)))
     assert(len(ll) == 10)
-    
+
     print('\nDETACHED superq tests:\n')
 
     print('Testing empty superq creation ...')
@@ -277,6 +277,19 @@ try:
     print('\tDeleting superq ...')
     sq.delete()
 
+    print('Testing superqelem linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst)
+    sqeHead = sq._list().head
+    sqeTail = sq._list().tail
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+    print('\tChecking value to verify ...')
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+    assert(sqeHead.tail.b == 4)
+    print('\tDeleting superq ...')
+    sq.delete()
+
     print('\nATTACHED superq tests:\n')
 
     print('Testing empty superq creation ...')
@@ -452,6 +465,20 @@ try:
     sqLen = len(superq('sq'))
     print('\tExpected superq length = {0}, actual = {1}'.format(1, sqLen))
     assert(sqLen == 1)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superqelem linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst, name = 'sq', attach = True)
+    sqeHead = sq._list().head
+    sqeTail = sq._list().tail
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq('sq')._list().head
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+    assert(sqeHead.tail.b == 4)
     print('\tDeleting superq ...')
     sq.delete()
 
@@ -671,6 +698,21 @@ try:
     except:
         print('\tsuperq lookup correctly failed.')
 
+    print('Testing superqelem linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst, name = 'sq', host = 'local', attach = True)
+    sqeHead = sq._list().head
+    sqeTail = sq._list().tail
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq('sq', host = 'local')._list().head
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+    assert(sqeHead.tail.b == 4)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq query returning single result ...')
     print('\tCreating new multi-element superq ...')
     myFoos = [Foo2('a', 1, .01),
               Foo2('b', 2, .02),
