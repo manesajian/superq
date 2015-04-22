@@ -1119,7 +1119,7 @@ class superqelem(LinkedListNode):
             self.value = float(headerElems[3])
 
         # add links individually
-        addLinksFromStr(headerElems[4])
+        self.addLinksFromStr(headerElems[4])
 
         # scalar superqelems
         if self.valueType != '':
