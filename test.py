@@ -690,9 +690,12 @@ try:
     sqeHead = sq._list().head
     sqeTail = sq._list().tail
     print('\tSetting head sqe to point to tail ...')
+    print('\tLOG1>>>{0}<<<'.format(sqeHead.links))
     sqeHead.tail = sqeTail
+    print('\tLOG2>>>{0}<<<'.format(sqeHead.links))
     print('\tRe-loading superqelem to verify ...')
     sqeHead = superq('sq', host = 'local')._list().head
+    print('\tLOG3>>>{0}<<<'.format(sqeHead.links))
     print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
     assert(sqeHead.tail.b == 4)
     print('\tDeleting superq ...')

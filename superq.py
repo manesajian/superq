@@ -467,7 +467,7 @@ def db_exec(dbConn, sql):
 
 def db_select(dbConn, sql):
     rowLst = []
-
+    log('DB_SELECT: {0}'.format(sql))
     dbConn.row_factory = sqlite3.Row
     try:
         result = dbConn.execute(sql)
@@ -488,6 +488,7 @@ def db_delete_table(dbConn, tableName):
     db_exec(dbConn, 'DROP TABLE {0};'.format(tableName))
 
 def db_create_row(dbConn, tableName, colStr, valStr):
+    log('DB_CREATE_ROW: {0}, {1}, {2}'.format(tableName, colStr, valStr))
     db_exec(dbConn, 'INSERT INTO {0} ({1}) VALUES ({2});'.format(tableName,
                                                                  colStr,
                                                                  valStr))
@@ -634,6 +635,7 @@ class SuperQDataStore():
         newSq = superq([])
 
         for row in rows:
+            log('XYZ')
             # demarshal single-value objects
             if isinstance(objSample, str):
                 newSq.create_elem(str(row['_val_']))
@@ -711,10 +713,11 @@ class SuperQDataStore():
         queryStr = 'SELECT {0} FROM {1} WHERE {2};'.format(colStr,
                                                            tableStr,
                                                            conditional)
-
+        log('LOG1')
         # execute query locally if superq is not public or the datastore is
         if sq.host is None or self.public:
             return self.superq_query_local(queryStr, objSample)
+        log('LOG2')
 
         resultSq = self.networkClient.superq_query(sq, queryStr)
 
@@ -771,6 +774,8 @@ class SuperQDataStore():
         if sq.host is not None and not self.public:
             self.networkClient.superqelem_create(sq, sqe, idx)
             return
+
+        log('SQE_CREATE: {0}, {1}'.format(sq.name, sqe.name))
 
         # the backing db table is only created when the 1st element is added
         if createTable:
@@ -1010,7 +1015,9 @@ class superqelem(LinkedListNode):
     def __setattr__(self, attr, value):
         # handle the setting of links to other sqes
         if (isinstance(value, superqelem) and
-            attr != 'prev' and attr != 'next'): # clumsy check of attr class
+            attr != 'prev' and attr != 'next' and
+            attr != 'iterNext'): # clumsy check of attr class
+            log('SETATTR1: {0}, {1}'.format(attr, value))
             # update link if it exists already
             if attr in self.linksDict:
                 oldValue = self.linksDict[attr]
@@ -1032,6 +1039,7 @@ class superqelem(LinkedListNode):
             getter = lambda self: self.__get_property(attr)
             setattr(self.__class__, attr, property(fget = getter))
         else:
+            log('SETATTR2: {0}, {1}'.format(attr, value))
             # call default setattr behavior
             object.__setattr__(self, attr, value)
 
@@ -1409,6 +1417,8 @@ class superq():
             for elem in initObj:
                 self.create_elem(copy(elem), name = elem.name)
         elif isinstance(initObj, list):
+            if self.name == 'sqMulti':
+                import pdb; pdb.set_trace()
             for item in initObj:
                 self.create_elem(item)
         elif isinstance(initObj, dict):
@@ -1533,6 +1543,8 @@ class superq():
 
         sqElems = ''
         for sqe in self.__internalList:
+            if self.name == 'sqMulti':
+                log('__STR__: {0}'.format(sqe.name))
             sqeStr = str(sqe)
             sqElems += '{0},{1}'.format(len(sqeStr), sqeStr)
 
