@@ -494,6 +494,10 @@ def db_create_row(dbConn, tableName, colStr, valStr):
                                                                  valStr))
 
 def db_update_row(dbConn, tableName, updateStr, keyName, keyVal):
+# TODO: I'm not sure I'm updating db when changes are made to an attached,
+#  non-hosted superq
+    log('UPDATE_ROW: {0}, {1}, {2}, {3}'.format(tableName, updateStr, keyName, keyVal))
+
     db_exec(dbConn, 'UPDATE {0} SET {1} WHERE {2} = {3};'.format(tableName,
                                                                  updateStr,
                                                                  keyName,
@@ -635,7 +639,6 @@ class SuperQDataStore():
         newSq = superq([])
 
         for row in rows:
-            log('XYZ')
             # demarshal single-value objects
             if isinstance(objSample, str):
                 newSq.create_elem(str(row['_val_']))
@@ -713,11 +716,10 @@ class SuperQDataStore():
         queryStr = 'SELECT {0} FROM {1} WHERE {2};'.format(colStr,
                                                            tableStr,
                                                            conditional)
-        log('LOG1')
+
         # execute query locally if superq is not public or the datastore is
         if sq.host is None or self.public:
             return self.superq_query_local(queryStr, objSample)
-        log('LOG2')
 
         resultSq = self.networkClient.superq_query(sq, queryStr)
 
@@ -775,7 +777,7 @@ class SuperQDataStore():
             self.networkClient.superqelem_create(sq, sqe, idx)
             return
 
-        log('SQE_CREATE: {0}, {1}'.format(sq.name, sqe.name))
+        log('SQE_CREATE: {0}.{1}'.format(sq.name, sqe.name))
 
         # the backing db table is only created when the 1st element is added
         if createTable:
@@ -858,6 +860,8 @@ class SuperQDataStore():
         sqeName = sqe.name
         if isinstance(sqeName, str):
             sqeName = "'{0}'".format(sqeName)
+
+        log('UPDATE: {0}, {1}, {2}, {3}'.format(sq.name, updateStr, keyCol, sqeName))
 
         dbConn = self.__get_dbConn()
         db_update_row(dbConn, sq.name, updateStr, keyCol, sqeName)
@@ -1017,13 +1021,13 @@ class superqelem(LinkedListNode):
         if (isinstance(value, superqelem) and
             attr != 'prev' and attr != 'next' and
             attr != 'iterNext'): # clumsy check of attr class
-            log('SETATTR1: {0}, {1}'.format(attr, value))
+            import pdb; pdb.set_trace()
             # update link if it exists already
             if attr in self.linksDict:
                 oldValue = self.linksDict[attr]
-                self.links = self.links.replace('{0},{1}'.format(attr,
+                self.links = self.links.replace('{0}^{1}'.format(attr,
                                                                  oldValue),
-                                                '{0},{1}'.format(attr,
+                                                '{0}^{1}'.format(attr,
                                                                  value))
             else:
                 self.links += '{0}^{1}|'.format(attr, value.publicName)
@@ -1038,10 +1042,13 @@ class superqelem(LinkedListNode):
             # construct read-only property attribute and add it to the class
             getter = lambda self: self.__get_property(attr)
             setattr(self.__class__, attr, property(fget = getter))
+#            log('Mark1: {0}'.format(self.parentSq))
         else:
-            log('SETATTR2: {0}, {1}'.format(attr, value))
             # call default setattr behavior
             object.__setattr__(self, attr, value)
+
+        if attr == 'tail':
+            log('LINKS1: {0}'.format(self.links))
 
     def add_property(self, attr):
         # scalar superqelems don't have properties
@@ -1068,6 +1075,8 @@ class superqelem(LinkedListNode):
             sqName, sqeName = self.linksDict[attr].split('.')
             return superq(sqName)[sqeName]
         else:
+            if attr == 'tail':
+                log('LINKS2: {0}'.format(self.links))
             raise SuperQEx('unrecognized attribute: {0}'.format(attr))
 
     # dynamic property setter
@@ -1224,10 +1233,8 @@ class superqelem(LinkedListNode):
         # remember user obj
         sqe.obj = self.obj
 
-        # add links
-        for key, value in self.linksDict.items():
-            sqe.links += '{0},{1};'.format(key, value)
-            sqe.linksDict[key] = value
+        # add links individually
+        sqe.addLinksFromStr(self.links)
 
         # add atoms
         for atom in self:
@@ -1417,8 +1424,8 @@ class superq():
             for elem in initObj:
                 self.create_elem(copy(elem), name = elem.name)
         elif isinstance(initObj, list):
-            if self.name == 'sqMulti':
-                import pdb; pdb.set_trace()
+#            if self.name == 'sqMulti':
+#                import pdb; pdb.set_trace()
             for item in initObj:
                 self.create_elem(item)
         elif isinstance(initObj, dict):
@@ -1543,8 +1550,6 @@ class superq():
 
         sqElems = ''
         for sqe in self.__internalList:
-            if self.name == 'sqMulti':
-                log('__STR__: {0}'.format(sqe.name))
             sqeStr = str(sqe)
             sqElems += '{0},{1}'.format(len(sqeStr), sqeStr)
 
@@ -2433,8 +2438,7 @@ class SuperQStreamHandler(StreamRequestHandler):
                 self.handle_connection()
             except Exception as e:
                 tb = format_exc()
-                log('Exception: {0}\nTrace: {1}'.format(e, tb))
-                break
+                self.raise_error('Exception: {0}\nTrace: {1}'.format(e, tb))
         self.request.close()
 
     def raise_error(self, msg):
@@ -2474,7 +2478,6 @@ class SuperQStreamHandler(StreamRequestHandler):
 
                 data += currentData
         except Exception as e:
-            log(str(e))
             self.raise_error(str(e))
             raise
 
@@ -2512,7 +2515,6 @@ class SuperQStreamHandler(StreamRequestHandler):
             response.body = ''
         elif cmd == SQNodeCmd.superq_create:
             if _dataStore.superq_exists(args):
-                log("superq " + args + " already exists.")
                 response.result = str(False)
             else:
                 # deserialize request body into a detached superq
