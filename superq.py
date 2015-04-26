@@ -467,7 +467,6 @@ def db_exec(dbConn, sql):
 
 def db_select(dbConn, sql):
     rowLst = []
-
     dbConn.row_factory = sqlite3.Row
     try:
         result = dbConn.execute(sql)
@@ -1010,16 +1009,19 @@ class superqelem(LinkedListNode):
     def __setattr__(self, attr, value):
         # handle the setting of links to other sqes
         if (isinstance(value, superqelem) and
-            attr != 'prev' and attr != 'next'): # clumsy check of attr class
+            attr != 'prev' and attr != 'next' and
+            attr != 'iterNext'): # clumsy check of attr class
+# TODO: is iterNext necessary above?
             # update link if it exists already
             if attr in self.linksDict:
                 oldValue = self.linksDict[attr]
-                self.links = self.links.replace('{0},{1}'.format(attr,
+                newValue = value.publicName
+                self.links = self.links.replace('{0}^{1}'.format(attr,
                                                                  oldValue),
-                                                '{0},{1}'.format(attr,
-                                                                 value))
+                                                '{0}^{1}'.format(attr,
+                                                                 newValue))
             else:
-                self.links += '{0}^{1}|'.format(attr, value.publicName)
+                self.links += '{0}^{1}/'.format(attr, value.publicName)
 
             # now set the dictionary value
             self.linksDict[attr] = value.publicName
@@ -1057,7 +1059,7 @@ class superqelem(LinkedListNode):
             return self.__internalDict[attr].value
         elif attr in self.linksDict:
             # lookup and return linked sqe
-            sqName, sqeName = self.linksDict[attr].split('.')
+            sqName, sqeName = self.linksDict[attr].rsplit('.', 1)
             return superq(sqName)[sqeName]
         else:
             raise SuperQEx('unrecognized attribute: {0}'.format(attr))
@@ -1079,16 +1081,27 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem_datastore_only(self)
 
+    def resetLinks(self):
+        for key in self.linksDict:
+            delattr(self.__class__, key)
+
+        self.linksDict = {}
+        self.links = ''
+
     def addLinksFromStr(self, linksStr):
-        linkElems = linksStr.split('|')
+        linkElems = linksStr.split('/')
         for link in linkElems:
             if not link:
                 break
 
             key, value = link.split('^')
 
-            self.links += '{0}^{1}|'.format(key, value)
+            self.links += '{0}^{1}/'.format(key, value)
             self.linksDict[key] = value
+
+            # construct read-only property attribute and add it to the class
+            getter = lambda self: self.__get_property(key)
+            setattr(self.__class__, key, property(fget = getter))
 
     def __buildFromStr(self, sqeStr):
         headerSeparatorIdx = sqeStr.index(';')
@@ -1119,7 +1132,7 @@ class superqelem(LinkedListNode):
             self.value = float(headerElems[3])
 
         # add links individually
-        addLinksFromStr(headerElems[4])
+        self.addLinksFromStr(headerElems[4])
 
         # scalar superqelems
         if self.valueType != '':
@@ -1216,10 +1229,8 @@ class superqelem(LinkedListNode):
         # remember user obj
         sqe.obj = self.obj
 
-        # add links
-        for key, value in self.linksDict.items():
-            sqe.links += '{0},{1};'.format(key, value)
-            sqe.linksDict[key] = value
+        # add links individually
+        sqe.addLinksFromStr(self.links)
 
         # add atoms
         for atom in self:
@@ -1409,6 +1420,8 @@ class superq():
             for elem in initObj:
                 self.create_elem(copy(elem), name = elem.name)
         elif isinstance(initObj, list):
+#            if self.name == 'sqMulti':
+#                import pdb; pdb.set_trace()
             for item in initObj:
                 self.create_elem(item)
         elif isinstance(initObj, dict):
@@ -1867,6 +1880,11 @@ class superq():
                 # 'demarshal' from detached sqe to attached
                 for atom in attachedSqe:
                     atom.value = sqe[atom.name]
+
+                # rebuild links
+                attachedSqe.resetLinks()
+                attachedSqe.addLinksFromStr(sqe.links)
+# TODO: I'm feeling update_elem_datastore_only() should happen here too
             else:
                 self.update_elem_datastore_only(sqe)
 
@@ -2421,8 +2439,7 @@ class SuperQStreamHandler(StreamRequestHandler):
                 self.handle_connection()
             except Exception as e:
                 tb = format_exc()
-                log('Exception: {0}\nTrace: {1}'.format(e, tb))
-                break
+                self.raise_error('Exception: {0}\nTrace: {1}'.format(e, tb))
         self.request.close()
 
     def raise_error(self, msg):
@@ -2462,7 +2479,6 @@ class SuperQStreamHandler(StreamRequestHandler):
 
                 data += currentData
         except Exception as e:
-            log(str(e))
             self.raise_error(str(e))
             raise
 
@@ -2500,7 +2516,6 @@ class SuperQStreamHandler(StreamRequestHandler):
             response.body = ''
         elif cmd == SQNodeCmd.superq_create:
             if _dataStore.superq_exists(args):
-                log("superq " + args + " already exists.")
                 response.result = str(False)
             else:
                 # deserialize request body into a detached superq
