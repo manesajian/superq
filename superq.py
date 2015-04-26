@@ -1009,9 +1009,7 @@ class superqelem(LinkedListNode):
     def __setattr__(self, attr, value):
         # handle the setting of links to other sqes
         if (isinstance(value, superqelem) and
-            attr != 'prev' and attr != 'next' and
-            attr != 'iterNext'): # clumsy check of attr class
-# TODO: is iterNext necessary above?
+            attr != 'prev' and attr != 'next'): # clumsy LinkedList avoidance
             # update link if it exists already
             if attr in self.linksDict:
                 oldValue = self.linksDict[attr]
