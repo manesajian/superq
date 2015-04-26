@@ -462,7 +462,8 @@ try:
     sqeTail = sq._list().tail
     print('\tSetting head sqe to point to tail ...')
     sqeHead.tail = sqeTail
-    print('\tChecking value to verify ...')
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq(sq.name)._list().head
     print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
     assert(sqeHead.tail.b == 4)
     print('\tDeleting superq ...')
