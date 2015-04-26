@@ -1882,18 +1882,15 @@ class superq():
                 # rebuild links
                 attachedSqe.resetLinks()
                 attachedSqe.addLinksFromStr(sqe.links)
-# TODO: I'm feeling update_elem_datastore_only() should happen here too
-            else:
-                self.update_elem_datastore_only(sqe)
 
-            return
-
-        # lookup sqe from user object
-        sqe = self.__lookup_elem(value)
+                sqe = attachedSqe
+        else:
+            # lookup sqe from user object
+            sqe = self.__lookup_elem(value)
             
-        # 'marshal' from user object to sqe
-        for atom in sqe:
-            atom.value = getattr(value, atom.name)
+            # 'marshal' from user object to sqe
+            for atom in sqe:
+                atom.value = getattr(value, atom.name)
 
         self.update_elem_datastore_only(sqe)
 
