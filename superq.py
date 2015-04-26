@@ -467,7 +467,6 @@ def db_exec(dbConn, sql):
 
 def db_select(dbConn, sql):
     rowLst = []
-    log('DB_SELECT: {0}'.format(sql))
     dbConn.row_factory = sqlite3.Row
     try:
         result = dbConn.execute(sql)
@@ -488,16 +487,11 @@ def db_delete_table(dbConn, tableName):
     db_exec(dbConn, 'DROP TABLE {0};'.format(tableName))
 
 def db_create_row(dbConn, tableName, colStr, valStr):
-    log('DB_CREATE_ROW: {0}, {1}, {2}'.format(tableName, colStr, valStr))
     db_exec(dbConn, 'INSERT INTO {0} ({1}) VALUES ({2});'.format(tableName,
                                                                  colStr,
                                                                  valStr))
 
 def db_update_row(dbConn, tableName, updateStr, keyName, keyVal):
-# TODO: I'm not sure I'm updating db when changes are made to an attached,
-#  non-hosted superq
-    log('UPDATE_ROW: {0}, {1}, {2}, {3}'.format(tableName, updateStr, keyName, keyVal))
-
     db_exec(dbConn, 'UPDATE {0} SET {1} WHERE {2} = {3};'.format(tableName,
                                                                  updateStr,
                                                                  keyName,
@@ -777,8 +771,6 @@ class SuperQDataStore():
             self.networkClient.superqelem_create(sq, sqe, idx)
             return
 
-        log('SQE_CREATE: {0}.{1}'.format(sq.name, sqe.name))
-
         # the backing db table is only created when the 1st element is added
         if createTable:
             dbConn = self.__get_dbConn()
@@ -860,8 +852,6 @@ class SuperQDataStore():
         sqeName = sqe.name
         if isinstance(sqeName, str):
             sqeName = "'{0}'".format(sqeName)
-
-        log('UPDATE: {0}, {1}, {2}, {3}'.format(sq.name, updateStr, keyCol, sqeName))
 
         dbConn = self.__get_dbConn()
         db_update_row(dbConn, sq.name, updateStr, keyCol, sqeName)
@@ -1021,16 +1011,17 @@ class superqelem(LinkedListNode):
         if (isinstance(value, superqelem) and
             attr != 'prev' and attr != 'next' and
             attr != 'iterNext'): # clumsy check of attr class
-            import pdb; pdb.set_trace()
+# TODO: is iterNext necessary above?
             # update link if it exists already
             if attr in self.linksDict:
                 oldValue = self.linksDict[attr]
+                newValue = value.publicName
                 self.links = self.links.replace('{0}^{1}'.format(attr,
                                                                  oldValue),
                                                 '{0}^{1}'.format(attr,
-                                                                 value))
+                                                                 newValue))
             else:
-                self.links += '{0}^{1}|'.format(attr, value.publicName)
+                self.links += '{0}^{1}/'.format(attr, value.publicName)
 
             # now set the dictionary value
             self.linksDict[attr] = value.publicName
@@ -1042,13 +1033,9 @@ class superqelem(LinkedListNode):
             # construct read-only property attribute and add it to the class
             getter = lambda self: self.__get_property(attr)
             setattr(self.__class__, attr, property(fget = getter))
-#            log('Mark1: {0}'.format(self.parentSq))
         else:
             # call default setattr behavior
             object.__setattr__(self, attr, value)
-
-        if attr == 'tail':
-            log('LINKS1: {0}'.format(self.links))
 
     def add_property(self, attr):
         # scalar superqelems don't have properties
@@ -1072,11 +1059,9 @@ class superqelem(LinkedListNode):
             return self.__internalDict[attr].value
         elif attr in self.linksDict:
             # lookup and return linked sqe
-            sqName, sqeName = self.linksDict[attr].split('.')
+            sqName, sqeName = self.linksDict[attr].rsplit('.', 1)
             return superq(sqName)[sqeName]
         else:
-            if attr == 'tail':
-                log('LINKS2: {0}'.format(self.links))
             raise SuperQEx('unrecognized attribute: {0}'.format(attr))
 
     # dynamic property setter
@@ -1096,16 +1081,27 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem_datastore_only(self)
 
+    def resetLinks(self):
+        for key in self.linksDict:
+            delattr(self.__class__, key)
+
+        self.linksDict = {}
+        self.links = ''
+
     def addLinksFromStr(self, linksStr):
-        linkElems = linksStr.split('|')
+        linkElems = linksStr.split('/')
         for link in linkElems:
             if not link:
                 break
 
             key, value = link.split('^')
 
-            self.links += '{0}^{1}|'.format(key, value)
+            self.links += '{0}^{1}/'.format(key, value)
             self.linksDict[key] = value
+
+            # construct read-only property attribute and add it to the class
+            getter = lambda self: self.__get_property(key)
+            setattr(self.__class__, key, property(fget = getter))
 
     def __buildFromStr(self, sqeStr):
         headerSeparatorIdx = sqeStr.index(';')
@@ -1884,6 +1880,11 @@ class superq():
                 # 'demarshal' from detached sqe to attached
                 for atom in attachedSqe:
                     atom.value = sqe[atom.name]
+
+                # rebuild links
+                attachedSqe.resetLinks()
+                attachedSqe.addLinksFromStr(sqe.links)
+# TODO: I'm feeling update_elem_datastore_only() should happen here too
             else:
                 self.update_elem_datastore_only(sqe)
 
