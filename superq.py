@@ -983,6 +983,41 @@ class superqelem(LinkedListNode):
 
             self.add_atom(attrName, type(attr).__name__, attr)
 
+    # all attribute assignments in the class will use this
+    def __setattr__(self, attr, value):
+        # handle the setting of links to other sqes
+        if (isinstance(value, superqelem) and
+            attr != 'prev' and attr != 'next'): # clumsy LinkedList avoidance
+            # update link if it exists already
+            if attr in self.linksDict:
+                oldValue = self.linksDict[attr]
+                newValue = value.publicName
+                self.links = self.links.replace('{0}^{1}'.format(attr,
+                                                                 oldValue),
+                                                '{0}^{1}'.format(attr,
+                                                                 newValue))
+            else:
+                self.links += '{0}^{1}/'.format(attr, value.publicName)
+
+            # now set the dictionary value
+            self.linksDict[attr] = value.publicName
+
+            # trigger update
+            if self.parentSq is not None:
+                self.parentSq.update_elem_datastore_only(self)
+        else:
+            # call default setattr behavior
+            object.__setattr__(self, attr, value)
+
+    # this will be called only for attributes that don't exist
+    def __getattr__(self, attr):
+        if attr in self.linksDict:
+            # lookup and return linked sqe
+            sqName, sqeName = self.linksDict[attr].rsplit('.', 1)
+            return superq(sqName)[sqeName]
+
+        raise AttributeError
+
     def __get_publicName(self):
         if self.parentSq is None:
             return self.name
@@ -1006,35 +1041,6 @@ class superqelem(LinkedListNode):
         if self.parentSq is not None:
             self.parentSq.update_elem(self)
 
-    def __setattr__(self, attr, value):
-        # handle the setting of links to other sqes
-        if (isinstance(value, superqelem) and
-            attr != 'prev' and attr != 'next'): # clumsy LinkedList avoidance
-            # update link if it exists already
-            if attr in self.linksDict:
-                oldValue = self.linksDict[attr]
-                newValue = value.publicName
-                self.links = self.links.replace('{0}^{1}'.format(attr,
-                                                                 oldValue),
-                                                '{0}^{1}'.format(attr,
-                                                                 newValue))
-            else:
-                self.links += '{0}^{1}/'.format(attr, value.publicName)
-
-            # now set the dictionary value
-            self.linksDict[attr] = value.publicName
-
-            # trigger update
-            if self.parentSq is not None:
-                self.parentSq.update_elem_datastore_only(self)
-
-            # construct read-only property attribute and add it to the class
-            getter = lambda self: self.__get_property(attr)
-            setattr(self.__class__, attr, property(fget = getter))
-        else:
-            # call default setattr behavior
-            object.__setattr__(self, attr, value)
-
     def add_property(self, attr):
         # scalar superqelems don't have properties
         if self.value is not None:
@@ -1055,10 +1061,6 @@ class superqelem(LinkedListNode):
 
         if attr in self.__internalDict:
             return self.__internalDict[attr].value
-        elif attr in self.linksDict:
-            # lookup and return linked sqe
-            sqName, sqeName = self.linksDict[attr].rsplit('.', 1)
-            return superq(sqName)[sqeName]
         else:
             raise SuperQEx('unrecognized attribute: {0}'.format(attr))
 
@@ -1080,9 +1082,6 @@ class superqelem(LinkedListNode):
             self.parentSq.update_elem_datastore_only(self)
 
     def resetLinks(self):
-        for key in self.linksDict:
-            delattr(self.__class__, key)
-
         self.linksDict = {}
         self.links = ''
 
@@ -1092,14 +1091,10 @@ class superqelem(LinkedListNode):
             if not link:
                 break
 
+            # add link
             key, value = link.split('^')
-
-            self.links += '{0}^{1}/'.format(key, value)
+            self.links += '{0}/'.format(link)
             self.linksDict[key] = value
-
-            # construct read-only property attribute and add it to the class
-            getter = lambda self: self.__get_property(key)
-            setattr(self.__class__, key, property(fget = getter))
 
     def __buildFromStr(self, sqeStr):
         headerSeparatorIdx = sqeStr.index(';')
@@ -1869,13 +1864,15 @@ class superq():
         if isinstance(value, superqelem):
             sqe = value
 
+            # if sqe is not attached
             if sqe.parentSq is None:
+                # lookup attached sqe
                 attachedSqe = self.__internalDict[sqe.name]
 
                 # handle scalars
                 attachedSqe.set_scalar(sqe.value)
 
-                # 'demarshal' from detached sqe to attached
+                # demarshal from detached sqe to attached
                 for atom in attachedSqe:
                     atom.value = sqe[atom.name]
 
@@ -1885,13 +1882,14 @@ class superq():
 
                 sqe = attachedSqe
         else:
-            # lookup sqe from user object
+            # lookup attached sqe from user object
             sqe = self.__lookup_elem(value)
             
-            # 'marshal' from user object to sqe
+            # marshal from user object to sqe
             for atom in sqe:
                 atom.value = getattr(value, atom.name)
 
+        # update attached sqe
         self.update_elem_datastore_only(sqe)
 
     def delete_elem_datastore_only(self, sqe):
