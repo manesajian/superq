@@ -451,12 +451,19 @@ class LinkedList():
 
 def db_exec(dbConn, sql):
     while True:
+        errors = 0
         try:
             dbConn.execute(sql)
             break
-        except sqlite3.OperationalError:
+        except sqlite3.OperationalError as e:
+            # limit the amount of spinning in case there is a real error
+            errors += 1
+            if errors > 10:
+                raise DBExecError('query: {0}\nException: {1}'.format(sql,
+                                                                      str(e)))
+
             # when using shared cache mode, sqlite ignores timeouts and
-            # handlers, requiring for now this spinning solution.
+            # handlers; requiring for now this spinning solution.
             # shared cache mode is needed for parallel access of memory db
             sleep(.01)
         except Exception as e:
