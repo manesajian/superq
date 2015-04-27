@@ -5,7 +5,7 @@ import time
 
 from os import remove
 from superq import LinkedList, LinkedListNode, shutdown, superq, superqelem
-from threading import Thread
+from threading import Lock, Thread
 
 class FooNode(LinkedListNode):
     def __init__(self, a):
@@ -462,9 +462,30 @@ try:
     sqeTail = sq._list().tail
     print('\tSetting head sqe to point to tail ...')
     sqeHead.tail = sqeTail
-    print('\tChecking value to verify ...')
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq(sq.name)._list().head
     print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
     assert(sqeHead.tail.b == 4)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superqelem multi-linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst, attach = True)
+    sqLst = sq._list()
+    sqeHead = sqLst.head
+    sqeTail = sqLst.tail
+    sqeTwo = sqLst[1]
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+    print('\tSetting head sqe to point to second element ...')
+    sqeHead.two = sqeTwo
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq(sq.name)._list().head
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+    assert(sqeHead.tail.b == 4)
+    print('\tExpected value = {0}, actual = {1}'.format(2, sqeHead.two.b))
+    assert(sqeHead.two.b == 2)
     print('\tDeleting superq ...')
     sq.delete()
 
@@ -697,6 +718,32 @@ try:
     assert(sqeHead.tail.b == 4)
     print('\tDeleting superq ...')
     sq.delete()
+
+    print('Testing superqelem multi-linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst, name = 'sq', host = 'local', attach = True)
+    sqLst = sq._list()
+    sqeHead = sqLst.head
+    sqeTail = sqLst.tail
+    sqeTwo = sqLst[1]
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+#    print('SQNAME2: {0}'.format(sqeHead.tail.a))
+    print('\tSetting head sqe to point to second element ...')
+    sqeHead.two = sqeTwo
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq('sq', host = 'local')._list().head
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+#    print('SQNAME2: {0}'.format(sqeHead.tail.a))
+    assert(sqeHead.tail.b == 4)
+    print('\tExpected value = {0}, actual = {1}'.format(2, sqeHead.two.b))
+    assert(sqeHead.two.b == 2)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+
+# Somehow multiple links are getting confused on the HOSTED side
+
 
     print('Testing superq query returning single result ...')
     print('\tCreating new multi-element superq ...')
@@ -1119,20 +1166,23 @@ try:
     consumers = 10
     items_produced = 0
     items_consumed = 0
+    lockObj = Lock()
     def producer_thread(sqPending, producerIndex):
         global items_produced
         items_to_produce = total_items // producers
         for i in range(0, items_to_produce):
             val = (producerIndex * items_to_produce) + i
             sqPending.push(Foo(val, val))
-            items_produced += 1
+            with lockObj:
+                items_produced += 1
 
     def consumer_thread(sqPending, sqCompleted):
         global items_consumed
         while True:
             val = sqPending.pop()
             sqCompleted.push(val)
-            items_consumed += 1
+            with lockObj:
+                items_consumed += 1
     
     print('Testing multi-Producer, multi-Consumer hosted superq ...')
     print('\tCreating pending jobs superq ...')
