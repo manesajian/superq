@@ -469,6 +469,26 @@ try:
     print('\tDeleting superq ...')
     sq.delete()
 
+    print('Testing superqelem multi-linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst, attach = True)
+    sqLst = sq._list()
+    sqeHead = sqLst.head
+    sqeTail = sqLst.tail
+    sqeTwo = sqLst[1]
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+    print('\tSetting head sqe to point to second element ...')
+    sqeHead.two = sqeTwo
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq(sq.name)._list().head
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+    assert(sqeHead.tail.b == 4)
+    print('\tExpected value = {0}, actual = {1}'.format(2, sqeHead.two.b))
+    assert(sqeHead.two.b == 2)
+    print('\tDeleting superq ...')
+    sq.delete()
+
     print('Testing basic superq query ...')
     print('\tCreating new multi-element superq ...')
     myFoos = [Foo2('a', 1, .01),
@@ -698,6 +718,32 @@ try:
     assert(sqeHead.tail.b == 4)
     print('\tDeleting superq ...')
     sq.delete()
+
+    print('Testing superqelem multi-linking to non-adjacent elements ...')
+    lst = [Foo('a', 1), Foo('b', 2), Foo('c', 3), Foo('d', 4)]
+    sq = superq(lst, name = 'sq', host = 'local', attach = True)
+    sqLst = sq._list()
+    sqeHead = sqLst.head
+    sqeTail = sqLst.tail
+    sqeTwo = sqLst[1]
+    print('\tSetting head sqe to point to tail ...')
+    sqeHead.tail = sqeTail
+#    print('SQNAME2: {0}'.format(sqeHead.tail.a))
+    print('\tSetting head sqe to point to second element ...')
+    sqeHead.two = sqeTwo
+    print('\tRe-loading superqelem to verify ...')
+    sqeHead = superq('sq', host = 'local')._list().head
+    print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
+#    print('SQNAME2: {0}'.format(sqeHead.tail.a))
+    assert(sqeHead.tail.b == 4)
+    print('\tExpected value = {0}, actual = {1}'.format(2, sqeHead.two.b))
+    assert(sqeHead.two.b == 2)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+
+# Somehow multiple links are getting confused on the HOSTED side
+
 
     print('Testing superq query returning single result ...')
     print('\tCreating new multi-element superq ...')
