@@ -983,7 +983,7 @@ class superqelem(LinkedListNode):
 
             self.add_atom(attrName, type(attr).__name__, attr)
 
-    # all attribute assignments in the class will use this
+    # called for all attribute assignments
     def __setattr__(self, attr, value):
         # handle the setting of links to other sqes
         if (isinstance(value, superqelem) and
@@ -1009,7 +1009,7 @@ class superqelem(LinkedListNode):
             # call default setattr behavior
             object.__setattr__(self, attr, value)
 
-    # this will be called only for attributes that don't exist
+    # called only when a non-existant attribute is accessed
     def __getattr__(self, attr):
         if attr in self.linksDict:
             # lookup and return linked sqe
