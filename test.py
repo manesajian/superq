@@ -5,7 +5,7 @@ import time
 
 from os import remove
 from superq import LinkedList, LinkedListNode, shutdown, superq, superqelem
-from threading import Thread
+from threading import Lock, Thread
 
 class FooNode(LinkedListNode):
     def __init__(self, a):
@@ -1166,20 +1166,23 @@ try:
     consumers = 10
     items_produced = 0
     items_consumed = 0
+    lockObj = Lock()
     def producer_thread(sqPending, producerIndex):
         global items_produced
         items_to_produce = total_items // producers
         for i in range(0, items_to_produce):
             val = (producerIndex * items_to_produce) + i
             sqPending.push(Foo(val, val))
-            items_produced += 1
+            with lockObj:
+                items_produced += 1
 
     def consumer_thread(sqPending, sqCompleted):
         global items_consumed
         while True:
             val = sqPending.pop()
             sqCompleted.push(val)
-            items_consumed += 1
+            with lockObj:
+                items_consumed += 1
     
     print('Testing multi-Producer, multi-Consumer hosted superq ...')
     print('\tCreating pending jobs superq ...')
