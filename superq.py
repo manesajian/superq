@@ -450,8 +450,8 @@ class LinkedList():
             self.head = current_node
 
 def db_exec(dbConn, sql, values = None):
+    errors = 0
     while True:
-        errors = 0
         try:
             if values:
                 dbConn.execute(sql, values)
