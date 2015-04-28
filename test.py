@@ -39,6 +39,12 @@ class Foo3():
         else:
             self.__dict__[attribute] = value
 
+class Foo4():
+    def __init__(self, a):
+        if not isinstance(a, bytearray):
+            raise AttributeError
+        self.a = a
+
 try:
     print('\nLINKEDLIST tests:\n')
 
@@ -736,6 +742,26 @@ try:
     assert(sqeHead.tail.b == 4)
     print('\tExpected value = {0}, actual = {1}'.format(2, sqeHead.two.b))
     assert(sqeHead.two.b == 2)
+    print('\tDeleting superq ...')
+    sq.delete()
+
+    print('Testing superq creation with custom bytearray object ...')
+    fooA = Foo4(bytearray([random.randrange(256) for x in range(100)]))
+    fooB = Foo4(bytearray([random.randrange(256) for x in range(1000)]))
+    lst = [fooA, fooB]
+    print('\tCreating superq ...')
+    sq = superq(lst, name = 'sq', host = 'local', attach = True)
+    print('\tRe-loading superq ...')
+    sq = superq('sq', host = 'local', attach = True)
+    print('\tExpected superq length = {0}, actual = {1}'.format(2, len(sq)))
+    assert(len(sq) == 2)
+    print('\tTesting reading values back ...')
+    valA = sq[0].a
+    valB = sq[1].a
+    print('\tComparing values ...')
+    assert(valA == fooA.a)
+    assert(valB == fooB.a)
+    print('\tComparisons successful.')
     print('\tDeleting superq ...')
     sq.delete()
 
