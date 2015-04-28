@@ -728,22 +728,16 @@ try:
     sqeTwo = sqLst[1]
     print('\tSetting head sqe to point to tail ...')
     sqeHead.tail = sqeTail
-#    print('SQNAME2: {0}'.format(sqeHead.tail.a))
     print('\tSetting head sqe to point to second element ...')
     sqeHead.two = sqeTwo
     print('\tRe-loading superqelem to verify ...')
     sqeHead = superq('sq', host = 'local')._list().head
     print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
-#    print('SQNAME2: {0}'.format(sqeHead.tail.a))
     assert(sqeHead.tail.b == 4)
     print('\tExpected value = {0}, actual = {1}'.format(2, sqeHead.two.b))
     assert(sqeHead.two.b == 2)
     print('\tDeleting superq ...')
     sq.delete()
-
-
-# Somehow multiple links are getting confused on the HOSTED side
-
 
     print('Testing superq query returning single result ...')
     print('\tCreating new multi-element superq ...')
