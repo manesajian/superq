@@ -449,11 +449,11 @@ class LinkedList():
         if current_node.prev is None:
             self.head = current_node
 
-def db_exec(dbConn, sql):
+def db_exec(dbConn, sql, values = None):
     while True:
         errors = 0
         try:
-            dbConn.execute(sql)
+            dbConn.execute(sql, values)
             break
         except sqlite3.OperationalError as e:
             # limit the amount of spinning in case there is a real error
@@ -467,47 +467,58 @@ def db_exec(dbConn, sql):
             # shared cache mode is needed for parallel access of memory db
             sleep(.01)
         except Exception as e:
-            raise DBExecError('query: {0}\nException: {1}'.format(sql,
-                                                                  str(e)))
+            raise DBExecError('sql: {0}\n'
+                              'values: {1}\n'
+                              'exception: {2}'.format(sql, values, str(e)))
 
     dbConn.commit()
 
-def db_select(dbConn, sql):
+def db_select(dbConn, sql, values = None):
     rowLst = []
     dbConn.row_factory = sqlite3.Row
     try:
-        result = dbConn.execute(sql)
+        result = dbConn.execute(sql, values)
     except Exception as e:
-        raise DBExecError('query: {0}\nException: {1}'.format(sql,
-                                                              str(e)))
+        raise DBExecError('sql: {0}\n'
+                          'values: {1}\n'
+                          'exception: {2}'.format(sql, values, str(e)))
 
     for row in result:
         rowLst.append(row)
 
     return rowLst
 
-def db_create_table(dbConn, tableName, colStr):
-    db_exec(dbConn, 'CREATE TABLE {0} ({1});'.format(tableName,
-                                                     colStr))
+def db_create_table(dbConn, tableName, colStr, values = None):
+    db_exec(dbConn,
+            'CREATE TABLE {0} ({1});'.format(tableName, colStr),
+            values)
 
-def db_delete_table(dbConn, tableName):
-    db_exec(dbConn, 'DROP TABLE {0};'.format(tableName))
+def db_delete_table(dbConn, tableName, values = None):
+    db_exec(dbConn,
+            'DROP TABLE {0};'.format(tableName),
+            values)
 
-def db_create_row(dbConn, tableName, colStr, valStr):
-    db_exec(dbConn, 'INSERT INTO {0} ({1}) VALUES ({2});'.format(tableName,
-                                                                 colStr,
-                                                                 valStr))
+def db_create_row(dbConn, tableName, colStr, valStr, values = None):
+    db_exec(dbConn,
+            'INSERT INTO {0} ({1}) VALUES ({2});'.format(tableName,
+                                                         colStr,
+                                                         valStr),
+            values)
 
-def db_update_row(dbConn, tableName, updateStr, keyName, keyVal):
-    db_exec(dbConn, 'UPDATE {0} SET {1} WHERE {2} = {3};'.format(tableName,
-                                                                 updateStr,
-                                                                 keyName,
-                                                                 keyVal))
+def db_update_row(dbConn, tableName, updateStr, key, keyVal, values = None):
+    db_exec(dbConn,
+            'UPDATE {0} SET {1} WHERE {2} = {3};'.format(tableName,
+                                                         updateStr,
+                                                         key,
+                                                         keyVal),
+            values)
             
-def db_delete_row(dbConn, tableName, keyName, keyVal):
-    db_exec(dbConn, 'DELETE FROM {0} WHERE {1} = {2};'.format(tableName,
-                                                              keyName,
-                                                              keyVal))
+def db_delete_row(dbConn, tableName, key, keyVal, values = None):
+    db_exec(dbConn,
+            'DELETE FROM {0} WHERE {1} = {2};'.format(tableName,
+                                                      key,
+                                                      keyVal),
+            values)
 
 # instantiated for each superq app and for each network node process
 class SuperQDataStore():
