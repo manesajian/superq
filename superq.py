@@ -745,6 +745,9 @@ class SuperQDataStore():
             elif isinstance(objSample, float):
                 newSq.create_elem(float(sqe['_val_']))
                 continue
+            elif isinstance(objSample, bytearray):
+                newSq.create_elem(bytearray(sqe['_val_']))
+                continue
 
             newObj = copy(objSample)
 
@@ -763,6 +766,8 @@ class SuperQDataStore():
                     val = int(atom.value)
                 elif isinstance(objVal, float):
                     val = float(atom.value)
+                elif isinstance(objVal, bytearray):
+                    val = bytearray(atom.value)
                 else:
                     valType = type(objVal)
                     raise TypeError('unsupported type ({0})'.format(valType))
