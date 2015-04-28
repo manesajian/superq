@@ -484,7 +484,7 @@ def db_select(dbConn, sql, values = None):
         if values:
             result = dbConn.execute(sql, values)
         else:
-            dbConn.execute(sql)
+            result = dbConn.execute(sql)
     except Exception as e:
         raise DBExecError('sql: {0}\n'
                           'values: {1}\n'
