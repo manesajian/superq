@@ -805,6 +805,7 @@ class SuperQDataStore():
             self.__return_dbConn(dbConn)
 
         valStr = ''
+        values = []
         if sqe.value is not None:
             name = sqe.name
             if isinstance(name, str):
@@ -814,13 +815,16 @@ class SuperQDataStore():
             if isinstance(value, str):
                 value = "'{0}'".format(value)
 
-            valStr += '{0},{1}'.format(name, value)
+            valStr += '?,?'
+            values.append(name)
+            values.append(value)
         else:
             atomDict = sqe.dict()
             for colName in sq.colNames:
                 # support autoKey
                 if colName == '_name_':
-                    valStr += "'{0}',".format(sqe.name)
+                    valStr += "'?',"
+                    values.append(sqe.name)
                     continue
                 elif colName == '_links_':
                     continue;
@@ -828,21 +832,20 @@ class SuperQDataStore():
                 atom = atomDict[colName]
 
                 if atom.type.startswith('str'):
-                    valStr += "'{0}',".format(atom.value)
+                    valStr += "'?',"
+                    values.append(atom.value)
                 elif atom.type.startswith('bytes'):
-                    valStr += ""
-
-# TODO: return here after fixing code to use parameter substitution instead
-#  of string operations. 
-
+                    valStr += "?,"
+                    values.append(memoryview(atom.value))
                 else:
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
 
-        valStr += ",'{0}'".format(sqe.links)
+        valStr += ",'?'"
+        values.append(sqe.links)
 
         dbConn = self.__get_dbConn()
-        db_create_row(dbConn, sq.name, sq.nameStr, valStr)
+        db_create_row(dbConn, sq.name, sq.nameStr, valStr, values)
         self.__return_dbConn(dbConn)
 
     def __superqelem_update_db(self, sq, sqe):
