@@ -481,7 +481,10 @@ def db_select(dbConn, sql, values = None):
     rowLst = []
     dbConn.row_factory = sqlite3.Row
     try:
-        result = dbConn.execute(sql, values)
+        if values:
+            result = dbConn.execute(sql, values)
+        else:
+            dbConn.execute(sql)
     except Exception as e:
         raise DBExecError('sql: {0}\n'
                           'values: {1}\n'
