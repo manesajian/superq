@@ -457,6 +457,7 @@ def db_exec(dbConn, sql, values = None):
                 dbConn.execute(sql, values)
             else:
                 dbConn.execute(sql)
+            break
         except sqlite3.OperationalError as e:
             # limit the amount of spinning in case there is a real error
             errors += 1
@@ -810,42 +811,30 @@ class SuperQDataStore():
         valStr = ''
         values = []
         if sqe.value is not None:
-            name = sqe.name
-            if isinstance(name, str):
-                name = "'{0}'".format(name)
-
-            value = sqe.value
-            if isinstance(value, str):
-                value = "'{0}'".format(value)
-
             valStr += '?,?'
-            values.append(name)
-            values.append(value)
+            values.append(sqe.name)
+            values.append(sqe.value)
         else:
             atomDict = sqe.dict()
             for colName in sq.colNames:
                 # support autoKey
                 if colName == '_name_':
-                    valStr += "'?',"
+                    valStr += '?,'
                     values.append(sqe.name)
                     continue
                 elif colName == '_links_':
+                    valStr += '?,'
+                    values.append(sqe.links)
                     continue;
 
                 atom = atomDict[colName]
 
-                if atom.type.startswith('str'):
-                    valStr += "'?',"
-                    values.append(atom.value)
-                elif atom.type.startswith('bytes'):
-                    valStr += "?,"
+                if atom.type.startswith('bytes'):
                     values.append(memoryview(atom.value))
                 else:
-                    valStr += str(atom.value) + ','
+                    values.append(atom.value)
+                valStr += '?,'
             valStr = valStr.rstrip(',')
-
-        valStr += ",'?'"
-        values.append(sqe.links)
 
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr, tuple(values))
