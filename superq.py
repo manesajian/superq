@@ -833,7 +833,7 @@ class SuperQDataStore():
 
                 atom = atomDict[colName]
 
-                if atom.type.startswith('bytes'):
+                if atom.type.startswith('byte'):
                     values.append(memoryview(atom.value))
                 else:
                     values.append(atom.value)
@@ -987,7 +987,7 @@ class superqelem(LinkedListNode):
 
         # handle scalars
         self.valueType = ''
-        if isinstance(value, (str, int, float)):
+        if isinstance(value, (str, int, float, bytearray)):
             self.valueType = type(self.value).__name__
             return
 
@@ -1007,7 +1007,7 @@ class superqelem(LinkedListNode):
                 continue
 
             # ignore any attributes whose types aren't supported
-            if not isinstance(attr, (str, int, float)):
+            if not isinstance(attr, (str, int, float, bytearray)):
                 continue
 
             # add object field as superqelem property
@@ -1066,6 +1066,8 @@ class superqelem(LinkedListNode):
             value = int(value)
         elif isinstance(self.value, float):
             value = float(value)
+        elif isinstance(self.value, bytearray):
+            value = bytearray(value)
 
         self.value = value
 
@@ -1155,6 +1157,8 @@ class superqelem(LinkedListNode):
             self.value = int(headerElems[3])
         elif self.valueType.startswith('float'):
             self.value = float(headerElems[3])
+        elif self.valueType.startswith('byte'):
+            self.value = bytearray().extend(map(ord, headerElems[3]))
 
         # add links individually
         self.addLinksFromStr(headerElems[4])
@@ -1194,6 +1198,8 @@ class superqelem(LinkedListNode):
                 fieldValue = int(fieldValue)
             elif fieldType.startswith('float'):
                 fieldValue = float(fieldValue)
+            elif fieldType.startswith('byte'):
+                fieldValue = bytearray().extend(map(ord, fieldValue))
 
             self.add_atom(fieldName, fieldType, fieldValue)
 
@@ -1311,6 +1317,8 @@ class superqelem(LinkedListNode):
             return int(self['_val_'])
         elif isinstance(objSample, float):
             return float(self['_val_'])
+        elif isinstance(objSample, bytearray):
+            return bytearray(self['_val_'])
 
         # demarshal multi-value objects
         newObj = copy(objSample)
@@ -1322,6 +1330,8 @@ class superqelem(LinkedListNode):
                 val = int(atom.value)
             elif isinstance(objVal, float):
                 val = float(atom.value)
+            elif isinstance(objVal, bytearray):
+                val = bytearray(atom.value)
             else:
                 raise TypeError('unsupported type ({0})'.format(colType))
 
@@ -1806,6 +1816,8 @@ class superq():
                 self.nameTypeStr += '_val_ INTEGER'
             elif sqe.valueType.startswith('float'):
                 self.nameTypeStr += '_val_ REAL'
+            elif sqe.valueType.startswith('byte'):
+                self.nameTypeStr += '_val_ BLOB'
 
             # special _links_ column
             self.nameTypeStr += ',_links_ TEXT'
@@ -1833,6 +1845,8 @@ class superq():
                 self.nameTypeStr += '{0} INTEGER,'.format(atom.name)
             elif atom.type.startswith('float'):
                 self.nameTypeStr += '{0} REAL,'.format(atom.name)
+            elif atom.type.startswith('byte'):
+                self.nameTypeStr += '{0} BLOB,'.format(atom.name)
             else:
                 raise TypeError('Unsupported type {0}'.format(atom.type))
 
