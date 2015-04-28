@@ -453,8 +453,10 @@ def db_exec(dbConn, sql, values = None):
     while True:
         errors = 0
         try:
-            dbConn.execute(sql, values)
-            break
+            if values:
+                dbConn.execute(sql, values)
+            else:
+                dbConn.execute(sql)
         except sqlite3.OperationalError as e:
             # limit the amount of spinning in case there is a real error
             errors += 1
@@ -845,7 +847,7 @@ class SuperQDataStore():
         values.append(sqe.links)
 
         dbConn = self.__get_dbConn()
-        db_create_row(dbConn, sq.name, sq.nameStr, valStr, values)
+        db_create_row(dbConn, sq.name, sq.nameStr, valStr, tuple(values))
         self.__return_dbConn(dbConn)
 
     def __superqelem_update_db(self, sq, sqe):
