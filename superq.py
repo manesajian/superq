@@ -449,58 +449,78 @@ class LinkedList():
         if current_node.prev is None:
             self.head = current_node
 
-def db_exec(dbConn, sql):
+def db_exec(dbConn, sql, values = None):
     while True:
+        errors = 0
         try:
-            dbConn.execute(sql)
-            break
-        except sqlite3.OperationalError:
+            if values:
+                dbConn.execute(sql, values)
+            else:
+                dbConn.execute(sql)
+        except sqlite3.OperationalError as e:
+            # limit the amount of spinning in case there is a real error
+            errors += 1
+            if errors > 10:
+                raise DBExecError('query: {0}\nException: {1}'.format(sql,
+                                                                      str(e)))
+
             # when using shared cache mode, sqlite ignores timeouts and
-            # handlers, requiring for now this spinning solution.
+            # handlers; requiring for now this spinning solution.
             # shared cache mode is needed for parallel access of memory db
             sleep(.01)
         except Exception as e:
-            raise DBExecError('query: {0}\nException: {1}'.format(sql,
-                                                                  str(e)))
+            raise DBExecError('sql: {0}\n'
+                              'values: {1}\n'
+                              'exception: {2}'.format(sql, values, str(e)))
 
     dbConn.commit()
 
-def db_select(dbConn, sql):
+def db_select(dbConn, sql, values = None):
     rowLst = []
     dbConn.row_factory = sqlite3.Row
     try:
-        result = dbConn.execute(sql)
+        result = dbConn.execute(sql, values)
     except Exception as e:
-        raise DBExecError('query: {0}\nException: {1}'.format(sql,
-                                                              str(e)))
+        raise DBExecError('sql: {0}\n'
+                          'values: {1}\n'
+                          'exception: {2}'.format(sql, values, str(e)))
 
     for row in result:
         rowLst.append(row)
 
     return rowLst
 
-def db_create_table(dbConn, tableName, colStr):
-    db_exec(dbConn, 'CREATE TABLE {0} ({1});'.format(tableName,
-                                                     colStr))
+def db_create_table(dbConn, tableName, colStr, values = None):
+    db_exec(dbConn,
+            'CREATE TABLE {0} ({1});'.format(tableName, colStr),
+            values)
 
-def db_delete_table(dbConn, tableName):
-    db_exec(dbConn, 'DROP TABLE {0};'.format(tableName))
+def db_delete_table(dbConn, tableName, values = None):
+    db_exec(dbConn,
+            'DROP TABLE {0};'.format(tableName),
+            values)
 
-def db_create_row(dbConn, tableName, colStr, valStr):
-    db_exec(dbConn, 'INSERT INTO {0} ({1}) VALUES ({2});'.format(tableName,
-                                                                 colStr,
-                                                                 valStr))
+def db_create_row(dbConn, tableName, colStr, valStr, values = None):
+    db_exec(dbConn,
+            'INSERT INTO {0} ({1}) VALUES ({2});'.format(tableName,
+                                                         colStr,
+                                                         valStr),
+            values)
 
-def db_update_row(dbConn, tableName, updateStr, keyName, keyVal):
-    db_exec(dbConn, 'UPDATE {0} SET {1} WHERE {2} = {3};'.format(tableName,
-                                                                 updateStr,
-                                                                 keyName,
-                                                                 keyVal))
+def db_update_row(dbConn, tableName, updateStr, key, keyVal, values = None):
+    db_exec(dbConn,
+            'UPDATE {0} SET {1} WHERE {2} = {3};'.format(tableName,
+                                                         updateStr,
+                                                         key,
+                                                         keyVal),
+            values)
             
-def db_delete_row(dbConn, tableName, keyName, keyVal):
-    db_exec(dbConn, 'DELETE FROM {0} WHERE {1} = {2};'.format(tableName,
-                                                              keyName,
-                                                              keyVal))
+def db_delete_row(dbConn, tableName, key, keyVal, values = None):
+    db_exec(dbConn,
+            'DELETE FROM {0} WHERE {1} = {2};'.format(tableName,
+                                                      key,
+                                                      keyVal),
+            values)
 
 # instantiated for each superq app and for each network node process
 class SuperQDataStore():
@@ -643,6 +663,8 @@ class SuperQDataStore():
             elif isinstance(objSample, float):
                 newSq.create_elem(float(row['_val_']))
                 continue
+            elif isinstance(objSample, bytearray):
+                newSq.create_elem(bytearray(row['_val_']))
 
             if objSample is None:
                 newObj = superqelem(parentSq = newSq)
@@ -666,6 +688,8 @@ class SuperQDataStore():
                     val = int(row[fieldName])
                 elif isinstance(objVal, float):
                     val = float(row[fieldName])
+                elif isinstance(objVal, bytearray):
+                    val = bytearray(row[fieldName])
                 else:
                     valType = type(objVal)
                     raise TypeError('unsupported type ({0})'.format(valType))
@@ -734,6 +758,9 @@ class SuperQDataStore():
             elif isinstance(objSample, float):
                 newSq.create_elem(float(sqe['_val_']))
                 continue
+            elif isinstance(objSample, bytearray):
+                newSq.create_elem(bytearray(sqe['_val_']))
+                continue
 
             newObj = copy(objSample)
 
@@ -752,6 +779,8 @@ class SuperQDataStore():
                     val = int(atom.value)
                 elif isinstance(objVal, float):
                     val = float(atom.value)
+                elif isinstance(objVal, bytearray):
+                    val = bytearray(atom.value)
                 else:
                     valType = type(objVal)
                     raise TypeError('unsupported type ({0})'.format(valType))
@@ -778,6 +807,7 @@ class SuperQDataStore():
             self.__return_dbConn(dbConn)
 
         valStr = ''
+        values = []
         if sqe.value is not None:
             name = sqe.name
             if isinstance(name, str):
@@ -787,13 +817,16 @@ class SuperQDataStore():
             if isinstance(value, str):
                 value = "'{0}'".format(value)
 
-            valStr += '{0},{1}'.format(name, value)
+            valStr += '?,?'
+            values.append(name)
+            values.append(value)
         else:
             atomDict = sqe.dict()
             for colName in sq.colNames:
                 # support autoKey
                 if colName == '_name_':
-                    valStr += "'{0}',".format(sqe.name)
+                    valStr += "'?',"
+                    values.append(sqe.name)
                     continue
                 elif colName == '_links_':
                     continue;
@@ -801,15 +834,20 @@ class SuperQDataStore():
                 atom = atomDict[colName]
 
                 if atom.type.startswith('str'):
-                    valStr += "'{0}',".format(atom.value)
+                    valStr += "'?',"
+                    values.append(atom.value)
+                elif atom.type.startswith('bytes'):
+                    valStr += "?,"
+                    values.append(memoryview(atom.value))
                 else:
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
 
-        valStr += ",'{0}'".format(sqe.links)
+        valStr += ",'?'"
+        values.append(sqe.links)
 
         dbConn = self.__get_dbConn()
-        db_create_row(dbConn, sq.name, sq.nameStr, valStr)
+        db_create_row(dbConn, sq.name, sq.nameStr, valStr, tuple(values))
         self.__return_dbConn(dbConn)
 
     def __superqelem_update_db(self, sq, sqe):

@@ -39,6 +39,12 @@ class Foo3():
         else:
             self.__dict__[attribute] = value
 
+class Foo4():
+    def __init__(self, a):
+        if not isinstance(a, bytearray):
+            raise AttributeError
+        self.a = a
+
 try:
     print('\nLINKEDLIST tests:\n')
 
@@ -728,22 +734,36 @@ try:
     sqeTwo = sqLst[1]
     print('\tSetting head sqe to point to tail ...')
     sqeHead.tail = sqeTail
-#    print('SQNAME2: {0}'.format(sqeHead.tail.a))
     print('\tSetting head sqe to point to second element ...')
     sqeHead.two = sqeTwo
     print('\tRe-loading superqelem to verify ...')
     sqeHead = superq('sq', host = 'local')._list().head
     print('\tExpected value = {0}, actual = {1}'.format(4, sqeHead.tail.b))
-#    print('SQNAME2: {0}'.format(sqeHead.tail.a))
     assert(sqeHead.tail.b == 4)
     print('\tExpected value = {0}, actual = {1}'.format(2, sqeHead.two.b))
     assert(sqeHead.two.b == 2)
     print('\tDeleting superq ...')
     sq.delete()
 
-
-# Somehow multiple links are getting confused on the HOSTED side
-
+    print('Testing superq creation with custom bytearray object ...')
+    fooA = Foo4(bytearray([random.randrange(256) for x in range(100)]))
+    fooB = Foo4(bytearray([random.randrange(256) for x in range(1000)]))
+    lst = [fooA, fooB]
+    print('\tCreating superq ...')
+    sq = superq(lst, name = 'sq', host = 'local', attach = True)
+    print('\tRe-loading superq ...')
+    sq = superq('sq', host = 'local', attach = True)
+    print('\tExpected superq length = {0}, actual = {1}'.format(2, len(sq)))
+    assert(len(sq) == 2)
+    print('\tTesting reading values back ...')
+    valA = sq[0].a
+    valB = sq[1].a
+    print('\tComparing values ...')
+    assert(valA == fooA.a)
+    assert(valB == fooB.a)
+    print('\tComparisons successful.')
+    print('\tDeleting superq ...')
+    sq.delete()
 
     print('Testing superq query returning single result ...')
     print('\tCreating new multi-element superq ...')
