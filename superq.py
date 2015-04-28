@@ -833,10 +833,7 @@ class SuperQDataStore():
 
                 atom = atomDict[colName]
 
-                if atom.type.startswith('byte'):
-                    values.append(memoryview(atom.value))
-                else:
-                    values.append(atom.value)
+                values.append(atom.value)
                 valStr += '?,'
             valStr = valStr.rstrip(',')
 
