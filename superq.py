@@ -461,8 +461,9 @@ def db_exec(dbConn, sql, values = None):
             # limit the amount of spinning in case there is a real error
             errors += 1
             if errors > 10:
-                raise DBExecError('query: {0}\nException: {1}'.format(sql,
-                                                                      str(e)))
+                raise DBExecError('sql: {0}\n'
+                                  'values: {1}\n'
+                                  'exception: {2}'.format(sql, values, str(e)))
 
             # when using shared cache mode, sqlite ignores timeouts and
             # handlers; requiring for now this spinning solution.
