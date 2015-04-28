@@ -818,6 +818,12 @@ class SuperQDataStore():
 
                 if atom.type.startswith('str'):
                     valStr += "'{0}',".format(atom.value)
+                elif atom.type.startswith('bytes'):
+                    valStr += ""
+
+# TODO: return here after fixing code to use parameter substitution instead
+#  of string operations. 
+
                 else:
                     valStr += str(atom.value) + ','
             valStr = valStr.rstrip(',')
