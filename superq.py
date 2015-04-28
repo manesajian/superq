@@ -811,13 +811,14 @@ class SuperQDataStore():
         valStr = ''
         values = []
         if sqe.value is not None:
-            valStr += '?,?'
+            valStr += '?,?,?'
             values.append(sqe.name)
             values.append(sqe.value)
+            values.append(sqe.links)
         else:
             atomDict = sqe.dict()
             for colName in sq.colNames:
-                # support autoKey
+                # support standard columns
                 if colName == '_name_':
                     valStr += '?,'
                     values.append(sqe.name)
