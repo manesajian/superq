@@ -1,6 +1,7 @@
 import sqlite3
 import sys
 
+from binascii import hexlify, unhexlify
 from copy import copy
 from enum import Enum
 from getopt import getopt
@@ -36,6 +37,7 @@ DEFAULT_SSL_KEY_FILE = 'server.key'
 # sets buffer size for network reads
 MAX_BUF_LEN = 4096
 
+# TODO: replace with binascii.crc32?
 # prefixes network messages
 SUPERQ_MSG_HEADER_BYTE = 42
 
@@ -837,6 +839,9 @@ class SuperQDataStore():
                 valStr += '?,'
             valStr = valStr.rstrip(',')
 
+# TODO: look into using binascii.rledecode_hqx() and rlecode_hqx() when
+#  writing/reading BLOBs to/from db.
+
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr, tuple(values))
         self.__return_dbConn(dbConn)
@@ -1135,7 +1140,7 @@ class superqelem(LinkedListNode):
         sqeBody = sqeStr[headerSeparatorIdx + 1 : ]
 
         # parse out header fields
-        headerElems = sqeHeader.split(',')
+        headerElems = sqeHeader.split(',', 5)
 
         # name-type and name-value
         nameType = headerElems[0]
@@ -1155,7 +1160,10 @@ class superqelem(LinkedListNode):
         elif self.valueType.startswith('float'):
             self.value = float(headerElems[3])
         elif self.valueType.startswith('byte'):
-            self.value = bytearray().extend(map(ord, headerElems[3]))
+            # ignore str frame "b'...'"
+            byteStr = headerElems[3][2 : -1]
+
+            self.value = unhexlify(byteStr)
 
         # add links individually
         self.addLinksFromStr(headerElems[4])
@@ -1196,7 +1204,10 @@ class superqelem(LinkedListNode):
             elif fieldType.startswith('float'):
                 fieldValue = float(fieldValue)
             elif fieldType.startswith('byte'):
-                fieldValue = bytearray().extend(map(ord, fieldValue))
+                # ignore str frame "b'...'"
+                byteStr = fieldValue[2 : -1]
+
+                fieldValue = unhexlify(byteStr)
 
             self.add_atom(fieldName, fieldType, fieldValue)
 
@@ -1245,7 +1256,13 @@ class superqelem(LinkedListNode):
                                                    self.links,
                                                    len(self.__internalList))
         for atom in self:
-            elemStr = '{0}|{1}|{2};'.format(atom.name, atom.type, atom.value)
+            if atom.type.startswith('byte'):
+                # convert bytearray to string
+                value = hexlify(atom.value)
+            else:
+                value = atom.value
+            elemStr = '{0}|{1}|{2};'.format(atom.name, atom.type, value)
+
             sqeStr += '{0}|{1}'.format(len(elemStr), elemStr)
         
         return sqeStr
