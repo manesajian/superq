@@ -1,6 +1,7 @@
 import sqlite3
 import sys
 
+from binascii import hexlify, unhexlify
 from copy import copy
 from enum import Enum
 from getopt import getopt
@@ -36,6 +37,7 @@ DEFAULT_SSL_KEY_FILE = 'server.key'
 # sets buffer size for network reads
 MAX_BUF_LEN = 4096
 
+# TODO: replace with binascii.crc32?
 # prefixes network messages
 SUPERQ_MSG_HEADER_BYTE = 42
 
@@ -450,19 +452,21 @@ class LinkedList():
             self.head = current_node
 
 def db_exec(dbConn, sql, values = None):
+    errors = 0
     while True:
-        errors = 0
         try:
             if values:
                 dbConn.execute(sql, values)
             else:
                 dbConn.execute(sql)
+            break
         except sqlite3.OperationalError as e:
             # limit the amount of spinning in case there is a real error
             errors += 1
             if errors > 10:
-                raise DBExecError('query: {0}\nException: {1}'.format(sql,
-                                                                      str(e)))
+                raise DBExecError('sql: {0}\n'
+                                  'values: {1}\n'
+                                  'exception: {2}'.format(sql, values, str(e)))
 
             # when using shared cache mode, sqlite ignores timeouts and
             # handlers; requiring for now this spinning solution.
@@ -479,7 +483,10 @@ def db_select(dbConn, sql, values = None):
     rowLst = []
     dbConn.row_factory = sqlite3.Row
     try:
-        result = dbConn.execute(sql, values)
+        if values:
+            result = dbConn.execute(sql, values)
+        else:
+            result = dbConn.execute(sql)
     except Exception as e:
         raise DBExecError('sql: {0}\n'
                           'values: {1}\n'
@@ -809,42 +816,31 @@ class SuperQDataStore():
         valStr = ''
         values = []
         if sqe.value is not None:
-            name = sqe.name
-            if isinstance(name, str):
-                name = "'{0}'".format(name)
-
-            value = sqe.value
-            if isinstance(value, str):
-                value = "'{0}'".format(value)
-
-            valStr += '?,?'
-            values.append(name)
-            values.append(value)
+            valStr += '?,?,?'
+            values.append(sqe.name)
+            values.append(sqe.value)
+            values.append(sqe.links)
         else:
             atomDict = sqe.dict()
             for colName in sq.colNames:
-                # support autoKey
+                # support standard columns
                 if colName == '_name_':
-                    valStr += "'?',"
+                    valStr += '?,'
                     values.append(sqe.name)
                     continue
                 elif colName == '_links_':
+                    valStr += '?,'
+                    values.append(sqe.links)
                     continue;
 
                 atom = atomDict[colName]
 
-                if atom.type.startswith('str'):
-                    valStr += "'?',"
-                    values.append(atom.value)
-                elif atom.type.startswith('bytes'):
-                    valStr += "?,"
-                    values.append(memoryview(atom.value))
-                else:
-                    valStr += str(atom.value) + ','
+                values.append(atom.value)
+                valStr += '?,'
             valStr = valStr.rstrip(',')
 
-        valStr += ",'?'"
-        values.append(sqe.links)
+# TODO: look into using binascii.rledecode_hqx() and rlecode_hqx() when
+#  writing/reading BLOBs to/from db.
 
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr, tuple(values))
@@ -993,7 +989,7 @@ class superqelem(LinkedListNode):
 
         # handle scalars
         self.valueType = ''
-        if isinstance(value, (str, int, float)):
+        if isinstance(value, (str, int, float, bytearray)):
             self.valueType = type(self.value).__name__
             return
 
@@ -1013,7 +1009,7 @@ class superqelem(LinkedListNode):
                 continue
 
             # ignore any attributes whose types aren't supported
-            if not isinstance(attr, (str, int, float)):
+            if not isinstance(attr, (str, int, float, bytearray)):
                 continue
 
             # add object field as superqelem property
@@ -1072,6 +1068,8 @@ class superqelem(LinkedListNode):
             value = int(value)
         elif isinstance(self.value, float):
             value = float(value)
+        elif isinstance(self.value, bytearray):
+            value = bytearray(value)
 
         self.value = value
 
@@ -1142,7 +1140,7 @@ class superqelem(LinkedListNode):
         sqeBody = sqeStr[headerSeparatorIdx + 1 : ]
 
         # parse out header fields
-        headerElems = sqeHeader.split(',')
+        headerElems = sqeHeader.split(',', 5)
 
         # name-type and name-value
         nameType = headerElems[0]
@@ -1161,6 +1159,11 @@ class superqelem(LinkedListNode):
             self.value = int(headerElems[3])
         elif self.valueType.startswith('float'):
             self.value = float(headerElems[3])
+        elif self.valueType.startswith('byte'):
+            # ignore str frame "b'...'"
+            byteStr = headerElems[3][2 : -1]
+
+            self.value = unhexlify(byteStr)
 
         # add links individually
         self.addLinksFromStr(headerElems[4])
@@ -1200,6 +1203,11 @@ class superqelem(LinkedListNode):
                 fieldValue = int(fieldValue)
             elif fieldType.startswith('float'):
                 fieldValue = float(fieldValue)
+            elif fieldType.startswith('byte'):
+                # ignore str frame "b'...'"
+                byteStr = fieldValue[2 : -1]
+
+                fieldValue = unhexlify(byteStr)
 
             self.add_atom(fieldName, fieldType, fieldValue)
 
@@ -1248,7 +1256,13 @@ class superqelem(LinkedListNode):
                                                    self.links,
                                                    len(self.__internalList))
         for atom in self:
-            elemStr = '{0}|{1}|{2};'.format(atom.name, atom.type, atom.value)
+            if atom.type.startswith('byte'):
+                # convert bytearray to string
+                value = hexlify(atom.value)
+            else:
+                value = atom.value
+            elemStr = '{0}|{1}|{2};'.format(atom.name, atom.type, value)
+
             sqeStr += '{0}|{1}'.format(len(elemStr), elemStr)
         
         return sqeStr
@@ -1317,6 +1331,8 @@ class superqelem(LinkedListNode):
             return int(self['_val_'])
         elif isinstance(objSample, float):
             return float(self['_val_'])
+        elif isinstance(objSample, bytearray):
+            return bytearray(self['_val_'])
 
         # demarshal multi-value objects
         newObj = copy(objSample)
@@ -1328,6 +1344,8 @@ class superqelem(LinkedListNode):
                 val = int(atom.value)
             elif isinstance(objVal, float):
                 val = float(atom.value)
+            elif isinstance(objVal, bytearray):
+                val = bytearray(atom.value)
             else:
                 raise TypeError('unsupported type ({0})'.format(colType))
 
@@ -1812,6 +1830,8 @@ class superq():
                 self.nameTypeStr += '_val_ INTEGER'
             elif sqe.valueType.startswith('float'):
                 self.nameTypeStr += '_val_ REAL'
+            elif sqe.valueType.startswith('byte'):
+                self.nameTypeStr += '_val_ BLOB'
 
             # special _links_ column
             self.nameTypeStr += ',_links_ TEXT'
@@ -1839,6 +1859,8 @@ class superq():
                 self.nameTypeStr += '{0} INTEGER,'.format(atom.name)
             elif atom.type.startswith('float'):
                 self.nameTypeStr += '{0} REAL,'.format(atom.name)
+            elif atom.type.startswith('byte'):
+                self.nameTypeStr += '{0} BLOB,'.format(atom.name)
             else:
                 raise TypeError('Unsupported type {0}'.format(atom.type))
 
