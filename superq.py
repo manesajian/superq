@@ -37,9 +37,39 @@ DEFAULT_SSL_KEY_FILE = 'server.key'
 # sets buffer size for network reads
 MAX_BUF_LEN = 4096
 
+# TODO: FEATURES:
+#
+# 1) fix checksum?
+# 2) compression and encryption
+# 3) instance persistence
+# 4) design performance test
+# 5) document
+
+# Thinking about compression and encryption.
+# In the case of encrypted data, it shouldn't be compressed I think.
+# In the case of unencrypted data, when should compression occur?
+# I think right before BLOBs are handed to the sqlite storage engine is correct.
+
 # TODO: replace with binascii.crc32?
 # prefixes network messages
 SUPERQ_MSG_HEADER_BYTE = 42
+
+# 1) I think ... remove the header byte altogether at this stage as the
+#  checksum would be overkill.
+
+# 2) Encryption is needed in two places. When data is sent acros the wire and
+#  when data is stored on disk. In-memory security must be handled by the
+#  platform. Is there an alternative to SSL? How secure does it have to be?
+#  Presumably more secure than simple obfuscation would provide. This indicates
+#  the need for some key-passing mechanism.
+# Hmm, can the key be built into superq? I want a zero-external-configuration
+#  system. Would the user have to provide some permutation of the key to foil
+#  listeners? But how would the server know which permutation if the listener
+#  can't tell either?
+
+# 3) I like maintaining the current datastore-based save/restore. Could be
+#  useful for migrating datastores between physical nodes. Or possibly
+#  mirroring. It can be treated entirely separately from instance persistence.
 
 # superq network node supported commands
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
