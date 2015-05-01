@@ -42,8 +42,9 @@ MAX_BUF_LEN = 4096
 # 1) fix checksum?
 # 2) compression and encryption
 # 3) instance persistence
-# 4) design performance test
-# 5) document
+# 4) alter table? add/drop columns, rename sq?
+# 5) design performance test
+# 6) document
 
 # Thinking about compression and encryption.
 # In the case of encrypted data, it shouldn't be compressed I think.
