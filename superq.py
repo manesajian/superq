@@ -1,5 +1,3 @@
-import sqlite3
-
 from binascii import hexlify, unhexlify
 from copy import copy
 from enum import Enum
@@ -7,6 +5,7 @@ from getopt import getopt
 from os import kill
 from socket import socket, AF_INET, SOCK_STREAM
 from socketserver import TCPServer, ThreadingMixIn, StreamRequestHandler
+from sqlite3 import connect, OperationalError, Row
 from ssl import wrap_socket, CERT_NONE, CERT_REQUIRED, PROTOCOL_TLSv1
 from struct import pack, unpack
 from sys import argv, exit
@@ -491,7 +490,7 @@ def db_exec(dbConn, sql, values = None):
             else:
                 dbConn.execute(sql)
             break
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             # limit the amount of spinning in case there is a real error
             errors += 1
             if errors > 10:
@@ -512,7 +511,7 @@ def db_exec(dbConn, sql, values = None):
 
 def db_select(dbConn, sql, values = None):
     rowLst = []
-    dbConn.row_factory = sqlite3.Row
+    dbConn.row_factory = Row
     try:
         if values:
             result = dbConn.execute(sql, values)
@@ -579,9 +578,9 @@ class SuperQDataStore():
         self.internalConn = self.__new_dbConn()
 
     def __new_dbConn(self):
-        return sqlite3.connect('file:memdb1?mode=memory&cache=shared',
-                               uri = True,
-                               check_same_thread = False)
+        return connect('file:memdb1?mode=memory&cache=shared',
+                       uri = True,
+                       check_same_thread = False)
 
     def __get_dbConn(self):
         try:
