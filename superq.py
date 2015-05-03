@@ -1,5 +1,4 @@
 import sqlite3
-import sys
 
 from binascii import hexlify, unhexlify
 from copy import copy
@@ -10,6 +9,7 @@ from socket import socket, AF_INET, SOCK_STREAM
 from socketserver import TCPServer, ThreadingMixIn, StreamRequestHandler
 from ssl import wrap_socket, CERT_NONE, CERT_REQUIRED, PROTOCOL_TLSv1
 from struct import pack, unpack
+from sys import argv, exit
 from threading import Condition, Lock, RLock, Thread
 from time import sleep
 from traceback import format_exc, print_stack
@@ -2806,7 +2806,7 @@ def main(argv):
     try:
         opts, args = getopt(argv, 't:s:', ['tcpport=', 'sslport='])
     except GetoptError:
-        sys.exit(2)
+        exit(2)
 
     for opt, arg in opts:
         if opt in ('-t', '--tcpport'):
@@ -2833,4 +2833,4 @@ def main(argv):
     log('Leaving main.')
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main(argv[1:])
