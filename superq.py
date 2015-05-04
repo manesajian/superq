@@ -43,7 +43,7 @@ MAX_BUF_LEN = 4096
 # 3) instance persistence
 # 4) alter table? add/drop columns, rename sq?
 # 5) design performance test
-# 6) document
+# 6) document api
 
 # Thinking about compression and encryption.
 # In the case of encrypted data, it shouldn't be compressed I think.
@@ -57,7 +57,7 @@ SUPERQ_MSG_HEADER_BYTE = 42
 # 1) I think ... remove the header byte altogether at this stage as the
 #  checksum would be overkill.
 
-# 2) Encryption is needed in two places. When data is sent acros the wire and
+# 2) Encryption is needed in two places. When data is sent across the wire and
 #  when data is stored on disk. In-memory security must be handled by the
 #  platform. Is there an alternative to SSL? How secure does it have to be?
 #  Presumably more secure than simple obfuscation would provide. This indicates
@@ -70,6 +70,11 @@ SUPERQ_MSG_HEADER_BYTE = 42
 # 3) I like maintaining the current datastore-based save/restore. Could be
 #  useful for migrating datastores between physical nodes. Or possibly
 #  mirroring. It can be treated entirely separately from instance persistence.
+#  Instance persistence should be handled simply with a boolean setting that
+#  can be passed to the constructor on superq creation or changed dynamically
+#  any time after.
+
+# 4) Need to support: add column, remove column, rename column, rename table
 
 # superq network node supported commands
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
