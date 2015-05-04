@@ -50,10 +50,6 @@ MAX_BUF_LEN = 4096
 # In the case of unencrypted data, when should compression occur?
 # I think right before BLOBs are handed to the sqlite storage engine is correct.
 
-# TODO: replace with binascii.crc32?
-# prefixes network messages
-SUPERQ_MSG_HEADER_BYTE = 42
-
 # 1) I think ... remove the header byte altogether at this stage as the
 #  checksum would be overkill.
 
@@ -2336,13 +2332,7 @@ class SuperQNetworkClientMgr():
         return buffer
 
     def __get_msg(self, s):
-        # first byte will always be a marker to verify begining of Request
-        data = self.__recv(s, 1)
-
-        if (len(data) == 0 or data[0] != SUPERQ_MSG_HEADER_BYTE):
-            raise Exception('Bad message.')
-
-        # next 4 bytes must always be message body length
+        # first 4 bytes contain message body length
         data = bytearray()
         while len(data) < 4:
             currentData = self.__recv(s, 4 - len(data))
@@ -2394,7 +2384,6 @@ class SuperQNetworkClientMgr():
                     port = DEFAULT_TCP_PORT
 
         msg = bytearray()
-        msg.append(SUPERQ_MSG_HEADER_BYTE)
         msg.extend(pack('I', len(strMsg)))
         msg.extend(strMsg.encode('utf-8'))
 
@@ -2540,23 +2529,13 @@ class SuperQStreamHandler(StreamRequestHandler):
         strResponse = str(response)
         msg = bytearray()
         
-        msg.append(SUPERQ_MSG_HEADER_BYTE)
         msg.extend(pack('I', len(strResponse)))
         msg.extend(strResponse.encode('utf-8'))
 
         self.wfile.write(msg)
 
     def handle_connection(self):
-        # first byte will always be a marker to verify beginning of Request
-        data = self.connection.recv(1)
-
-        if len(data) == 0:
-            self.raise_error('connection closed while reading marker')
-
-        if data[0] != SUPERQ_MSG_HEADER_BYTE:
-            self.raise_error('invalid marker ({0}).'.format(data[0]))
-
-        # next 4 bytes must always be message body length
+        # first 4 bytes contain message body length
         data = bytearray()
         try:
             while len(data) < 4:
