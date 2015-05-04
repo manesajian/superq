@@ -38,22 +38,18 @@ MAX_BUF_LEN = 4096
 
 # TODO: FEATURES:
 #
-# 1) fix checksum?
-# 2) compression and encryption
-# 3) instance persistence
-# 4) alter table? add/drop columns, rename sq?
-# 5) design performance test
-# 6) document api
+# 1) compression and encryption
+# 2) instance persistence
+# 3) alter table? add/drop columns, rename sq?
+# 4) design performance test
+# 5) document api
 
 # Thinking about compression and encryption.
 # In the case of encrypted data, it shouldn't be compressed I think.
 # In the case of unencrypted data, when should compression occur?
 # I think right before BLOBs are handed to the sqlite storage engine is correct.
 
-# 1) I think ... remove the header byte altogether at this stage as the
-#  checksum would be overkill.
-
-# 2) Encryption is needed in two places. When data is sent across the wire and
+# 1) Encryption is needed in two places. When data is sent across the wire and
 #  when data is stored on disk. In-memory security must be handled by the
 #  platform. Is there an alternative to SSL? How secure does it have to be?
 #  Presumably more secure than simple obfuscation would provide. This indicates
@@ -63,14 +59,14 @@ MAX_BUF_LEN = 4096
 #  listeners? But how would the server know which permutation if the listener
 #  can't tell either?
 
-# 3) I like maintaining the current datastore-based save/restore. Could be
+# 2) I like maintaining the current datastore-based save/restore. Could be
 #  useful for migrating datastores between physical nodes. Or possibly
 #  mirroring. It can be treated entirely separately from instance persistence.
 #  Instance persistence should be handled simply with a boolean setting that
 #  can be passed to the constructor on superq creation or changed dynamically
 #  any time after.
 
-# 4) Need to support: add column, remove column, rename column, rename table
+# 3) Need to support: add column, remove column, rename column, rename table
 
 # superq network node supported commands
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
