@@ -1,6 +1,3 @@
-import sqlite3
-import sys
-
 from binascii import hexlify, unhexlify
 from copy import copy
 from enum import Enum
@@ -8,8 +5,10 @@ from getopt import getopt
 from os import kill
 from socket import socket, AF_INET, SOCK_STREAM
 from socketserver import TCPServer, ThreadingMixIn, StreamRequestHandler
+from sqlite3 import connect, OperationalError, Row
 from ssl import wrap_socket, CERT_NONE, CERT_REQUIRED, PROTOCOL_TLSv1
 from struct import pack, unpack
+from sys import argv, exit
 from threading import Condition, Lock, RLock, Thread
 from time import sleep
 from traceback import format_exc, print_stack
@@ -39,26 +38,18 @@ MAX_BUF_LEN = 4096
 
 # TODO: FEATURES:
 #
-# 1) fix checksum?
-# 2) compression and encryption
-# 3) instance persistence
-# 4) alter table? add/drop columns, rename sq?
-# 5) design performance test
-# 6) document
+# 1) compression and encryption
+# 2) instance persistence
+# 3) alter table? add/drop columns, rename sq?
+# 4) design performance test
+# 5) document api
 
 # Thinking about compression and encryption.
 # In the case of encrypted data, it shouldn't be compressed I think.
 # In the case of unencrypted data, when should compression occur?
 # I think right before BLOBs are handed to the sqlite storage engine is correct.
 
-# TODO: replace with binascii.crc32?
-# prefixes network messages
-SUPERQ_MSG_HEADER_BYTE = 42
-
-# 1) I think ... remove the header byte altogether at this stage as the
-#  checksum would be overkill.
-
-# 2) Encryption is needed in two places. When data is sent acros the wire and
+# 1) Encryption is needed in two places. When data is sent across the wire and
 #  when data is stored on disk. In-memory security must be handled by the
 #  platform. Is there an alternative to SSL? How secure does it have to be?
 #  Presumably more secure than simple obfuscation would provide. This indicates
@@ -68,9 +59,14 @@ SUPERQ_MSG_HEADER_BYTE = 42
 #  listeners? But how would the server know which permutation if the listener
 #  can't tell either?
 
-# 3) I like maintaining the current datastore-based save/restore. Could be
+# 2) I like maintaining the current datastore-based save/restore. Could be
 #  useful for migrating datastores between physical nodes. Or possibly
 #  mirroring. It can be treated entirely separately from instance persistence.
+#  Instance persistence should be handled simply with a boolean setting that
+#  can be passed to the constructor on superq creation or changed dynamically
+#  any time after.
+
+# 3) Need to support: add column, remove column, rename column, rename table
 
 # superq network node supported commands
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
@@ -491,7 +487,7 @@ def db_exec(dbConn, sql, values = None):
             else:
                 dbConn.execute(sql)
             break
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             # limit the amount of spinning in case there is a real error
             errors += 1
             if errors > 10:
@@ -512,7 +508,7 @@ def db_exec(dbConn, sql, values = None):
 
 def db_select(dbConn, sql, values = None):
     rowLst = []
-    dbConn.row_factory = sqlite3.Row
+    dbConn.row_factory = Row
     try:
         if values:
             result = dbConn.execute(sql, values)
@@ -579,9 +575,9 @@ class SuperQDataStore():
         self.internalConn = self.__new_dbConn()
 
     def __new_dbConn(self):
-        return sqlite3.connect('file:memdb1?mode=memory&cache=shared',
-                               uri = True,
-                               check_same_thread = False)
+        return connect('file:memdb1?mode=memory&cache=shared',
+                       uri = True,
+                       check_same_thread = False)
 
     def __get_dbConn(self):
         try:
@@ -2332,13 +2328,7 @@ class SuperQNetworkClientMgr():
         return buffer
 
     def __get_msg(self, s):
-        # first byte will always be a marker to verify begining of Request
-        data = self.__recv(s, 1)
-
-        if (len(data) == 0 or data[0] != SUPERQ_MSG_HEADER_BYTE):
-            raise Exception('Bad message.')
-
-        # next 4 bytes must always be message body length
+        # first 4 bytes contain message body length
         data = bytearray()
         while len(data) < 4:
             currentData = self.__recv(s, 4 - len(data))
@@ -2390,7 +2380,6 @@ class SuperQNetworkClientMgr():
                     port = DEFAULT_TCP_PORT
 
         msg = bytearray()
-        msg.append(SUPERQ_MSG_HEADER_BYTE)
         msg.extend(pack('I', len(strMsg)))
         msg.extend(strMsg.encode('utf-8'))
 
@@ -2536,23 +2525,13 @@ class SuperQStreamHandler(StreamRequestHandler):
         strResponse = str(response)
         msg = bytearray()
         
-        msg.append(SUPERQ_MSG_HEADER_BYTE)
         msg.extend(pack('I', len(strResponse)))
         msg.extend(strResponse.encode('utf-8'))
 
         self.wfile.write(msg)
 
     def handle_connection(self):
-        # first byte will always be a marker to verify beginning of Request
-        data = self.connection.recv(1)
-
-        if len(data) == 0:
-            self.raise_error('connection closed while reading marker')
-
-        if data[0] != SUPERQ_MSG_HEADER_BYTE:
-            self.raise_error('invalid marker ({0}).'.format(data[0]))
-
-        # next 4 bytes must always be message body length
+        # first 4 bytes contain message body length
         data = bytearray()
         try:
             while len(data) < 4:
@@ -2806,7 +2785,7 @@ def main(argv):
     try:
         opts, args = getopt(argv, 't:s:', ['tcpport=', 'sslport='])
     except GetoptError:
-        sys.exit(2)
+        exit(2)
 
     for opt, arg in opts:
         if opt in ('-t', '--tcpport'):
@@ -2833,4 +2812,4 @@ def main(argv):
     log('Leaving main.')
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main(argv[1:])

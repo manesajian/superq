@@ -747,7 +747,7 @@ try:
 
     print('Testing superq creation with custom bytearray object ...')
     fooA = Foo4(bytearray([random.randrange(256) for x in range(100)]))
-    fooB = Foo4(bytearray([random.randrange(256) for x in range(1000)]))
+    fooB = Foo4(bytearray([random.randrange(256) for x in range(10000)]))
     lst = [fooA, fooB]
     print('\tCreating superq ...')
     sq = superq(lst, name = 'sq', host = 'local', attach = True)
