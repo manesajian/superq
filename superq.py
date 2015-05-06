@@ -1,4 +1,4 @@
-from binascii import hexlify, unhexlify
+from binascii import hexlify, rledecode_hqx, rlecode_hqx, unhexlify
 from copy import copy
 from enum import Enum
 from getopt import getopt
@@ -733,7 +733,8 @@ class SuperQDataStore():
                 elif isinstance(objVal, float):
                     val = float(row[fieldName])
                 elif isinstance(objVal, bytearray):
-                    val = bytearray(row[fieldName])
+                    # bytearrays must be uncompressed
+                    val = rledecode_hqx(bytearray(row[fieldName]))
                 else:
                     valType = type(objVal)
                     raise TypeError('unsupported type ({0})'.format(valType))
@@ -1023,7 +1024,13 @@ class superqelem(LinkedListNode):
 
         # handle scalars
         self.valueType = ''
-        if isinstance(value, (str, int, float, bytearray)):
+        if isinstance(value, (str, int, float)):
+            self.valueType = type(self.value).__name__
+            return
+        elif isinstance(value, bytearray):
+            # compress bytearray
+            self.value = rlecode_hqx(value)
+
             self.valueType = type(self.value).__name__
             return
 
@@ -1047,7 +1054,13 @@ class superqelem(LinkedListNode):
                 continue
 
             # add object field as superqelem property
-            self.add_property(attrName)
+            if isinstance(attr, bytearray):
+                self.add_property_ba(attrName)
+
+                # compress bytearray
+                attr = rlecode_hqx(attr)
+            else:
+                self.add_property(attrName)
 
             self.add_atom(attrName, type(attr).__name__, attr)
 
@@ -1074,6 +1087,10 @@ class superqelem(LinkedListNode):
             if self.parentSq is not None:
                 self.parentSq.update_elem_datastore_only(self)
         else:
+            # compress bytearray
+            if isinstance(value, bytearray):
+                value = rlecode_hqx(value)
+
             # call default setattr behavior
             object.__setattr__(self, attr, value)
 
@@ -1103,7 +1120,8 @@ class superqelem(LinkedListNode):
         elif isinstance(self.value, float):
             value = float(value)
         elif isinstance(self.value, bytearray):
-            value = bytearray(value)
+            # compress bytearray
+            value = rlecode_hqx(bytearray(value))
 
         self.value = value
 
@@ -1112,9 +1130,9 @@ class superqelem(LinkedListNode):
             self.parentSq.update_elem(self)
 
     def add_property(self, attr):
-        # scalar superqelems don't have properties
-        if self.value is not None:
-            raise TypeError('invalid scalar property')
+#        # scalar superqelems don't have properties
+#        if self.value is not None:
+#            raise TypeError('invalid scalar property')
 
         # create local setter and getter with a particular attribute name
         getter = lambda self: self.__get_property(attr)
@@ -1123,11 +1141,23 @@ class superqelem(LinkedListNode):
         # construct property attribute and add it to the class
         setattr(self.__class__, attr, property(fget = getter, fset = setter))
 
+    def add_property_ba(self, attr):
+#        # scalar superqelems don't have properties
+#        if self.value is not None:
+#            raise TypeError('invalid scalar property')
+
+        # create local setter and getter with a particular attribute name
+        getter = lambda self: self.__get_property_ba(attr)
+        setter = lambda self, value: self.__set_property_ba(attr, value)
+
+        # construct property attribute and add it to the class
+        setattr(self.__class__, attr, property(fget = getter, fset = setter))
+
     # dynamic property getter
     def __get_property(self, attr):
-        # scalar superqelems don't have properties
-        if self.value is not None:
-            raise TypeError('invalid scalar property')
+#        # scalar superqelems don't have properties
+#        if self.value is not None:
+#            raise TypeError('invalid scalar property')
 
         if attr in self.__internalDict:
             return self.__internalDict[attr].value
@@ -1136,12 +1166,33 @@ class superqelem(LinkedListNode):
 
     # dynamic property setter
     def __set_property(self, attr, value):
-        # scalar superqelems don't have properties
-        if self.value is not None:
-            raise TypeError('invalid scalar property')
+#        # scalar superqelems don't have properties
+#        if self.value is not None:
+#            raise TypeError('invalid scalar property')
 
         # remember attribute
         self.__internalDict[attr].value = value
+
+        # maintain state if there is an original user object
+        if self.obj is not None:
+            setattr(self.obj, attr, value)
+
+        # trigger update
+        if self.parentSq is not None:
+            self.parentSq.update_elem_datastore_only(self)
+
+    # dynamic property getter for bytearrays
+    def __get_property_ba(self, attr):
+        if attr in self.__internalDict:
+            # uncompress and return data
+            return rledecode_hqx(self.__internalDict[attr].value)
+        else:
+            raise SuperQEx('unrecognized attribute: {0}'.format(attr))
+
+    # dynamic property setter for bytearrays
+    def __set_property_ba(self, attr, value):
+        # compress and store data
+        self.__internalDict[attr].value = rlecode_hqx(value)
 
         # maintain state if there is an original user object
         if self.obj is not None:
@@ -1269,7 +1320,11 @@ class superqelem(LinkedListNode):
         else:
             raise KeyError(key)
 
-        return atom.value
+        if atom.type.startswith('byte'):
+            # decompress and return data
+            return rledecode_hqx(atom.value)
+        else:
+            return atom.value
 
     def __setitem__(self, key, value):
         if key in self.__internalDict:
@@ -1280,7 +1335,11 @@ class superqelem(LinkedListNode):
         else:
             raise KeyError(key)
 
-        atom.value = value
+        if atom.type.startswith('byte'):
+            # compress and store data
+            atom.value = rlecode_hqx(value)
+        else:
+            atom.value = value
 
     def __str__(self):
         sqeStr = '{0},{1},{2},{3},{4},{5};'.format(type(self.name).__name__,
@@ -1366,7 +1425,8 @@ class superqelem(LinkedListNode):
         elif isinstance(objSample, float):
             return float(self['_val_'])
         elif isinstance(objSample, bytearray):
-            return bytearray(self['_val_'])
+            # uncompress and return data
+            return rledecode_hqx(bytearray(self['_val_']))
 
         # demarshal multi-value objects
         newObj = copy(objSample)
@@ -1379,7 +1439,8 @@ class superqelem(LinkedListNode):
             elif isinstance(objVal, float):
                 val = float(atom.value)
             elif isinstance(objVal, bytearray):
-                val = bytearray(atom.value)
+                # uncompress data
+                val = rledecode_hqx(bytearray(atom.value))
             else:
                 raise TypeError('unsupported type ({0})'.format(colType))
 
