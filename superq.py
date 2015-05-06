@@ -46,7 +46,8 @@ MAX_BUF_LEN = 4096
 # 6) documentation
 
 # 1) Compress/decompress BLOBs as they're sent-to/rcvd-from the sqlite
-#  storage engine.
+#  storage engine. Or, possibly compress when a sqe is created and decompress
+#  when demarshalling into a user object (or when the field is read from a sqe).
 
 # 2) Encryption is needed in two places. When data is sent across the wire and
 #  when data is stored on disk. In-memory security must be handled by the
@@ -874,9 +875,6 @@ class SuperQDataStore():
                 values.append(atom.value)
                 valStr += '?,'
             valStr = valStr.rstrip(',')
-
-# TODO: look into using binascii.rledecode_hqx() and rlecode_hqx() when
-#  writing/reading BLOBs to/from db.
 
         dbConn = self.__get_dbConn()
         db_create_row(dbConn, sq.name, sq.nameStr, valStr, tuple(values))
