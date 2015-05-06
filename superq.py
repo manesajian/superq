@@ -38,18 +38,13 @@ MAX_BUF_LEN = 4096
 
 # TODO: FEATURES:
 #
-# 1) compression
-# 2) encryption
-# 3) persistence
-# 4) alteration
-# 5) testing
-# 6) documentation
+# 1) encryption
+# 2) persistence
+# 3) alteration
+# 4) testing
+# 5) documentation
 
-# 1) Compress/decompress BLOBs as they're sent-to/rcvd-from the sqlite
-#  storage engine. Or, possibly compress when a sqe is created and decompress
-#  when demarshalling into a user object (or when the field is read from a sqe).
-
-# 2) Encryption is needed in two places. When data is sent across the wire and
+# 1) Encryption is needed in two places. When data is sent across the wire and
 #  when data is stored on disk. In-memory security must be handled by the
 #  platform. Is there an alternative to SSL? How secure does it have to be?
 #  Presumably more secure than simple obfuscation would provide. This indicates
@@ -63,19 +58,19 @@ MAX_BUF_LEN = 4096
 #  anyways, if the data is encrypted in the db? Need to research sqlite
 #  encryption options.
 
-# 3) I like maintaining the current datastore-based save/restore. Could be
+# 2) I like maintaining the current datastore-based save/restore. Could be
 #  useful for migrating datastores between physical nodes. Or possibly
 #  mirroring. It can be treated entirely separately from instance persistence.
 #  Instance persistence should be handled simply with a boolean setting that
 #  can be passed to the constructor on superq creation or changed dynamically
 #  any time after.
 
-# 4) Need to support: add column, remove column, rename column, rename table
+# 3) Need to support: add column, remove column, rename column, rename table
 
-# 5) Mainly interested in a performance test suite that can detect scalability
+# 4) Mainly interested in a performance test suite that can detect scalability
 #  issues as well as further synchronization/parallel testing.
 
-# 6) Improve existing architectural and api documentation. Add wire protocol
+# 5) Improve existing architectural and api documentation. Add wire protocol
 #  documentation.
 
 # superq network node supported commands
