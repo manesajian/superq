@@ -1130,10 +1130,6 @@ class superqelem(LinkedListNode):
             self.parentSq.update_elem(self)
 
     def add_property(self, attr):
-#        # scalar superqelems don't have properties
-#        if self.value is not None:
-#            raise TypeError('invalid scalar property')
-
         # create local setter and getter with a particular attribute name
         getter = lambda self: self.__get_property(attr)
         setter = lambda self, value: self.__set_property(attr, value)
@@ -1142,10 +1138,6 @@ class superqelem(LinkedListNode):
         setattr(self.__class__, attr, property(fget = getter, fset = setter))
 
     def add_property_ba(self, attr):
-#        # scalar superqelems don't have properties
-#        if self.value is not None:
-#            raise TypeError('invalid scalar property')
-
         # create local setter and getter with a particular attribute name
         getter = lambda self: self.__get_property_ba(attr)
         setter = lambda self, value: self.__set_property_ba(attr, value)
@@ -1155,10 +1147,6 @@ class superqelem(LinkedListNode):
 
     # dynamic property getter
     def __get_property(self, attr):
-#        # scalar superqelems don't have properties
-#        if self.value is not None:
-#            raise TypeError('invalid scalar property')
-
         if attr in self.__internalDict:
             return self.__internalDict[attr].value
         else:
@@ -1166,10 +1154,6 @@ class superqelem(LinkedListNode):
 
     # dynamic property setter
     def __set_property(self, attr, value):
-#        # scalar superqelems don't have properties
-#        if self.value is not None:
-#            raise TypeError('invalid scalar property')
-
         # remember attribute
         self.__internalDict[attr].value = value
 
