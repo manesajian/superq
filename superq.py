@@ -38,18 +38,17 @@ MAX_BUF_LEN = 4096
 
 # TODO: FEATURES:
 #
-# 1) compression and encryption
-# 2) instance persistence
-# 3) alter table? add/drop columns, rename sq?
-# 4) design performance test
-# 5) document api
+# 1) compression
+# 2) encryption
+# 3) persistence
+# 4) alteration
+# 5) testing
+# 6) documentation
 
-# Thinking about compression and encryption.
-# In the case of encrypted data, it shouldn't be compressed I think.
-# In the case of unencrypted data, when should compression occur?
-# I think right before BLOBs are handed to the sqlite storage engine is correct.
+# 1) Compress/decompress BLOBs as they're sent-to/rcvd-from the sqlite
+#  storage engine.
 
-# 1) Encryption is needed in two places. When data is sent across the wire and
+# 2) Encryption is needed in two places. When data is sent across the wire and
 #  when data is stored on disk. In-memory security must be handled by the
 #  platform. Is there an alternative to SSL? How secure does it have to be?
 #  Presumably more secure than simple obfuscation would provide. This indicates
@@ -58,15 +57,25 @@ MAX_BUF_LEN = 4096
 #  system. Would the user have to provide some permutation of the key to foil
 #  listeners? But how would the server know which permutation if the listener
 #  can't tell either?
+# However encryption is implemented, if a create or update comes in, the data
+#  should not have to be re-encrypted. How are queries going to be supported
+#  anyways, if the data is encrypted in the db? Need to research sqlite
+#  encryption options.
 
-# 2) I like maintaining the current datastore-based save/restore. Could be
+# 3) I like maintaining the current datastore-based save/restore. Could be
 #  useful for migrating datastores between physical nodes. Or possibly
 #  mirroring. It can be treated entirely separately from instance persistence.
 #  Instance persistence should be handled simply with a boolean setting that
 #  can be passed to the constructor on superq creation or changed dynamically
 #  any time after.
 
-# 3) Need to support: add column, remove column, rename column, rename table
+# 4) Need to support: add column, remove column, rename column, rename table
+
+# 5) Mainly interested in a performance test suite that can detect scalability
+#  issues as well as further synchronization/parallel testing.
+
+# 6) Improve existing architectural and api documentation. Add wire protocol
+#  documentation.
 
 # superq network node supported commands
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
