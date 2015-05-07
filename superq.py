@@ -2241,8 +2241,10 @@ class SuperQNodeResponse():
             exceptStr = 'Response: {0}\nException: {1}'.format(responseStr, e)
             raise MalformedNetworkResponse(exceptStr)
 
+# vigenere
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 class NetworkPrep():
+    @staticmethod
     def prep(key, clear):
         enc = []
         for i in range(len(clear)):
@@ -2251,6 +2253,7 @@ class NetworkPrep():
             enc.append(enc_c)
         return urlsafe_b64encode("".join(enc))
 
+    @staticmethod
     def deprep(key, enc):
         dec = []
         enc = urlsafe_b64decode(enc)
