@@ -2239,6 +2239,25 @@ class SuperQNodeResponse():
             exceptStr = 'Response: {0}\nException: {1}'.format(responseStr, e)
             raise MalformedNetworkResponse(exceptStr)
 
+from base64 import urlsafe_b64encode, urlsafe_b64decode
+class NetworkPrep():
+    def prep(key, clear):
+        enc = []
+        for i in range(len(clear)):
+            key_c = key[i % len(key)]
+            enc_c = chr((ord(clear[i]) + ord(key_c)) % 256)
+            enc.append(enc_c)
+        return urlsafe_b64encode("".join(enc))
+
+    def deprep(key, enc):
+        dec = []
+        enc = urlsafe_b64decode(enc)
+        for i in range(len(enc)):
+            key_c = key[i % len(key)]
+            dec_c = chr((256 + ord(enc[i]) - ord(key_c)) % 256)
+            dec.append(dec_c)
+        return "".join(dec)
+
 # manages network connections and requests to network nodes
 class SuperQNetworkClientMgr():
     def __init__(self):
