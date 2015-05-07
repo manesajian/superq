@@ -44,19 +44,10 @@ MAX_BUF_LEN = 4096
 # 4) testing
 # 5) documentation
 
-# 1) Encryption is needed in two places. When data is sent across the wire and
-#  when data is stored on disk. In-memory security must be handled by the
-#  platform. Is there an alternative to SSL? How secure does it have to be?
-#  Presumably more secure than simple obfuscation would provide. This indicates
-#  the need for some key-passing mechanism.
-# Hmm, can the key be built into superq? I want a zero-external-configuration
-#  system. Would the user have to provide some permutation of the key to foil
-#  listeners? But how would the server know which permutation if the listener
-#  can't tell either?
-# However encryption is implemented, if a create or update comes in, the data
-#  should not have to be re-encrypted. How are queries going to be supported
-#  anyways, if the data is encrypted in the db? Need to research sqlite
-#  encryption options.
+# 1) I'm only concerned with encryption over the network. Assume individual
+#  node system security is handled on an operating system administrative
+#  level. Incidentally this makes the problem of querying on an encrypted db
+#  go away.
 
 # 2) I like maintaining the current datastore-based save/restore. Could be
 #  useful for migrating datastores between physical nodes. Or possibly
