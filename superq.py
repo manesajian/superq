@@ -1428,7 +1428,8 @@ class superq():
                 keyCol = None,
                 maxlen = None,
                 buildFromStr = False,
-                buildFromFile = False):
+                buildFromFile = False,
+                networkPrep = None):
         # str initObj can contain string and file deserialization info
         if not buildFromStr and not buildFromFile:
             if isinstance(initObj, str):
@@ -1448,7 +1449,8 @@ class superq():
                  keyCol = None,
                  maxlen = None,
                  buildFromStr = False,
-                 buildFromFile = False):
+                 buildFromFile = False,
+                 networkPrep = None):
         # get DataStore handle
         self.dataStore = _dataStore
 
@@ -1513,6 +1515,8 @@ class superq():
         if self.keyCol is None:
             self.autoKey = True
 
+        self.networkPrep = networkPrep
+
         # construct publicName property and add it to the class
         getter = lambda self: self.__get_publicName()
         setattr(self.__class__,
@@ -1534,8 +1538,6 @@ class superq():
             for elem in initObj:
                 self.create_elem(copy(elem), name = elem.name)
         elif isinstance(initObj, list):
-#            if self.name == 'sqMulti':
-#                import pdb; pdb.set_trace()
             for item in initObj:
                 self.create_elem(item)
         elif isinstance(initObj, dict):
