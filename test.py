@@ -1213,18 +1213,20 @@ try:
                          attach = True,
                          host = 'local')
     print('\tSpawning {0} consumers ...'.format(consumers))
-    for i in range(0, consumers):
-        thread = Thread(target = consumer_thread,
-                        args = (sqPending, sqCompleted))
-        thread.daemon = True
-        thread.start()
+    with lockObj:
+        for i in range(0, consumers):
+            thread = Thread(target = consumer_thread,
+                            args = (sqPending, sqCompleted))
+            thread.daemon = True
+            thread.start()
     print('\tSpawning {0} producers ...'.format(producers))
     producersStart = time.time()
     consumersStart = time.time()
-    for i in range(0, producers):
-        thread = Thread(target = producer_thread, args = (sqPending, i + 1))
-        thread.daemon = True
-        thread.start()
+    with lockObj:
+        for i in range(0, producers):
+            thread = Thread(target = producer_thread, args = (sqPending, i + 1))
+            thread.daemon = True
+            thread.start()
     print('\tWaiting for producers to produce all items ...')
     while items_produced < total_items:
         print('\t\tProduced: {0}'.format(items_produced))
