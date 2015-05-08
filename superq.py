@@ -2439,7 +2439,7 @@ class SuperQNetworkClientMgr():
 
         return response
 
-    def __send_msg(self, host, strMsg):
+    def __send_msg(self, host, strMsg, secure = False):
         ssl = False
 
         # 'local' is shorthand for localhost:DEFAULT_PORT
@@ -2479,7 +2479,7 @@ class SuperQNetworkClientMgr():
     # this might be used in the case of create_elem for instance, to provide
     #  a non-blocking operation. But it requires some kind of transactional
     #  implementation or solution to prevent synchronization errors
-    def __send_msg_async(self, host, strMsg):
+    def __send_msg_async(self, host, strMsg, secure = False):
         t = Thread(target = self.__send_msg, args = (host, strMsg))
         t.start()
 
@@ -2489,7 +2489,7 @@ class SuperQNetworkClientMgr():
         request.cmd = SQNodeCmd.superq_exists.value
         request.args = name
 
-        response = self.__send_msg(host, str(request))
+        response = self.__send_msg(host, str(request), secure)
 
         return eval(response.result)
 
@@ -2500,7 +2500,7 @@ class SuperQNetworkClientMgr():
         request.args = sq.publicName
         request.body = str(sq)
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superq_create(): {0}'.format(response))
@@ -2511,7 +2511,7 @@ class SuperQNetworkClientMgr():
         request.cmd = SQNodeCmd.superq_read.value
         request.args = name
 
-        response = self.__send_msg(host, str(request))
+        response = self.__send_msg(host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superq_read(): {0}'.format(response))
@@ -2527,7 +2527,7 @@ class SuperQNetworkClientMgr():
         request.cmd = SQNodeCmd.superq_delete.value
         request.args = sq.publicName
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superq_delete(): {0}'.format(response))
@@ -2539,7 +2539,7 @@ class SuperQNetworkClientMgr():
         request.args = sq.publicName
         request.body = queryStr
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if eval(response.result):
             return superq(response.body, attach = False, buildFromStr = True)
@@ -2553,7 +2553,7 @@ class SuperQNetworkClientMgr():
         request.args = '{0},{1}'.format(sq.publicName, idx)
         request.body = str(sqe)
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superqelem_create(): {0}'.format(str(response)))
@@ -2565,7 +2565,7 @@ class SuperQNetworkClientMgr():
         request.args = '{0}'.format(sq.publicName)
         request.body = str(sqe)
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superqelem_update(): {0}'.format(str(response)))
@@ -2577,7 +2577,7 @@ class SuperQNetworkClientMgr():
         request.args = '{0}'.format(sq.publicName)
         request.body = '{0}'.format(sqeName)
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superqelem_delete(): {0}'.format(str(response)))
