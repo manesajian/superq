@@ -1077,6 +1077,14 @@ try:
     print('Deleting superq ...')
     sq.delete()
 
+    print('\nSECURE tests:\n')
+
+    print('Creating non-secure hosted superq for secure tests ...')
+    sqNonSecure = superq([1, 2, 3, 4, 5], host = 'local', secure = False)
+    print('Creating secure hosted superq for secure tests ...')
+    sqSecure = superq([1, 2, 3, 4, 5], host = 'local', secure = True)
+# TODO: don't currently have a good way of checking the data is being secured
+
     print('\nSAVE\RESTORE tests:\n')
 
     print('Testing basic save\\restore functionality ...')
