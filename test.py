@@ -1083,6 +1083,16 @@ try:
     sqNonSecure = superq([1, 2, 3, 4, 5], host = 'local', secure = False)
     print('Creating secure hosted superq for secure tests ...')
     sqSecure = superq([1, 2, 3, 4, 5], host = 'local', secure = True)
+    print('Modifying value ...')
+    sqSecure[0] = 0
+    print('Reading value ...')
+    sqName = sqSecure.name
+    val = superq(sqName, host = 'local')[0]
+    print('\tExpected value = {0}, actual = {1}'.format(0, val))
+    assert(val == 0)
+    print('Deleting superq ...')
+    sqSecure.delete()
+
 # TODO: don't currently have a good way of checking the data is being secured
 
     print('\nSAVE\RESTORE tests:\n')
