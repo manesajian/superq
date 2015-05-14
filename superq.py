@@ -48,6 +48,8 @@ MAX_BUF_LEN = 4096
 #  node system security is handled on an operating system administrative
 #  level. Incidentally this makes the problem of querying on an encrypted db
 #  go away.
+#   Considering currently pulling the ssl implementation out so that security
+#  can be cleanly revisited down the road.
 
 # 2) I like maintaining the current datastore-based save/restore. Could be
 #  useful for migrating datastores between physical nodes. Or possibly
@@ -1853,7 +1855,7 @@ class superq():
         if self.attached:
             raise Exception('Already attached!')
 
-        if self.dataStore.superq_exists(self.name, secure = self.secure):
+        if self.dataStore.superq_exists(self.name, self.host, self.secure):
             raise NotImplemented('Not yet allowed to attach existing superqs.')
 
         self.attached = True
