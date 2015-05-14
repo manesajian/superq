@@ -1014,6 +1014,7 @@ try:
     print('\nMAXLEN functionality tests with hosted superqs:\n')
 
     print('Creating hosted superq for maxlen tests ...')
+# TODO: changed to attached test?
     sq = superq([1, 2, 3, 4, 5], host = 'local', maxlen = 5)
     print('\tChecking length ...')
     print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
@@ -1079,10 +1080,9 @@ try:
 
     print('\nSECURE tests:\n')
 
-    print('Creating non-secure hosted superq for secure tests ...')
-    sqNonSecure = superq([1, 2, 3, 4, 5], host = 'local', secure = False)
+    lst = [1, 2, 3, 4, 5]
     print('Creating secure hosted superq for secure tests ...')
-    sqSecure = superq([1, 2, 3, 4, 5], host = 'local', secure = True)
+    sqSecure = superq(lst, attach = True, host = 'local', secure = True)
     print('Modifying value ...')
     sqSecure[0] = 0
     print('Reading value ...')
