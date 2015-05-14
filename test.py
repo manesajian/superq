@@ -1014,6 +1014,7 @@ try:
     print('\nMAXLEN functionality tests with hosted superqs:\n')
 
     print('Creating hosted superq for maxlen tests ...')
+# TODO: changed to attached test?
     sq = superq([1, 2, 3, 4, 5], host = 'local', maxlen = 5)
     print('\tChecking length ...')
     print('\tExpected length = {0}, actual = {1}'.format(5, len(sq)))
@@ -1076,6 +1077,23 @@ try:
 
     print('Deleting superq ...')
     sq.delete()
+
+    print('\nSECURE tests:\n')
+
+    lst = [1, 2, 3, 4, 5]
+    print('Creating secure hosted superq for secure tests ...')
+    sqSecure = superq(lst, attach = True, host = 'local', secure = True)
+    print('Modifying value ...')
+    sqSecure[0] = 0
+    print('Reading value ...')
+    sqName = sqSecure.name
+    val = superq(sqName, host = 'local')[0]
+    print('\tExpected value = {0}, actual = {1}'.format(0, val))
+    assert(val == 0)
+    print('Deleting superq ...')
+    sqSecure.delete()
+
+# TODO: don't currently have a good way of checking the data is being secured
 
     print('\nSAVE\RESTORE tests:\n')
 
@@ -1213,18 +1231,20 @@ try:
                          attach = True,
                          host = 'local')
     print('\tSpawning {0} consumers ...'.format(consumers))
-    for i in range(0, consumers):
-        thread = Thread(target = consumer_thread,
-                        args = (sqPending, sqCompleted))
-        thread.daemon = True
-        thread.start()
+    with lockObj:
+        for i in range(0, consumers):
+            thread = Thread(target = consumer_thread,
+                            args = (sqPending, sqCompleted))
+            thread.daemon = True
+            thread.start()
     print('\tSpawning {0} producers ...'.format(producers))
     producersStart = time.time()
     consumersStart = time.time()
-    for i in range(0, producers):
-        thread = Thread(target = producer_thread, args = (sqPending, i + 1))
-        thread.daemon = True
-        thread.start()
+    with lockObj:
+        for i in range(0, producers):
+            thread = Thread(target = producer_thread, args = (sqPending, i + 1))
+            thread.daemon = True
+            thread.start()
     print('\tWaiting for producers to produce all items ...')
     while items_produced < total_items:
         print('\t\tProduced: {0}'.format(items_produced))

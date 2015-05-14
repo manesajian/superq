@@ -44,19 +44,12 @@ MAX_BUF_LEN = 4096
 # 4) testing
 # 5) documentation
 
-# 1) Encryption is needed in two places. When data is sent across the wire and
-#  when data is stored on disk. In-memory security must be handled by the
-#  platform. Is there an alternative to SSL? How secure does it have to be?
-#  Presumably more secure than simple obfuscation would provide. This indicates
-#  the need for some key-passing mechanism.
-# Hmm, can the key be built into superq? I want a zero-external-configuration
-#  system. Would the user have to provide some permutation of the key to foil
-#  listeners? But how would the server know which permutation if the listener
-#  can't tell either?
-# However encryption is implemented, if a create or update comes in, the data
-#  should not have to be re-encrypted. How are queries going to be supported
-#  anyways, if the data is encrypted in the db? Need to research sqlite
-#  encryption options.
+# 1) I'm only concerned with encryption over the network. Assume individual
+#  node system security is handled on an operating system administrative
+#  level. Incidentally this makes the problem of querying on an encrypted db
+#  go away.
+#   Considering currently pulling the ssl implementation out so that security
+#  can be cleanly revisited down the road.
 
 # 2) I like maintaining the current datastore-based save/restore. Could be
 #  useful for migrating datastores between physical nodes. Or possibly
@@ -623,17 +616,17 @@ class SuperQDataStore():
     def set_public(self):
         self.public = True
 
-    def superq_exists(self, name, host = None):
+    def superq_exists(self, name, host = None, secure = False):
         # private datastore call public
         if host is not None and not self.public:
             publicName = '{0}.{1}'.format(host, name)
-            return self.networkClient.superq_exists(publicName, host)
+            return self.networkClient.superq_exists(publicName, host, secure)
         return name in self.superqdict
 
-    def superq_create(self, sq):
+    def superq_create(self, sq, secure = False):
         # private datastore call public
         if sq.host is not None and not self.public:
-            self.networkClient.superq_create(sq)
+            self.networkClient.superq_create(sq, secure)
 
         # add superq to dict after locking the entire collection
         self._dataStoreBigLock.acquire()
@@ -643,11 +636,11 @@ class SuperQDataStore():
             self.superqdict[sq.publicName] = sq
         self._dataStoreBigLock.release()
             
-    def superq_read(self, name, host = None):
+    def superq_read(self, name, host = None, secure = False):
         # private datastore call public
         if host is not None and not self.public:
             publicName = '{0}.{1}'.format(host, name)
-            sq = self.networkClient.superq_read(publicName, host)
+            sq = self.networkClient.superq_read(publicName, host, secure)
 
             if publicName not in self.superqdict:
                 sq.attached = True
@@ -664,7 +657,7 @@ class SuperQDataStore():
 
         return sq
 
-    def superq_delete(self, sq):
+    def superq_delete(self, sq, secure = False):
         # delete superq from dict after locking the entire collection
         self._dataStoreBigLock.acquire()
         if sq.publicName in self.superqdict:
@@ -675,7 +668,7 @@ class SuperQDataStore():
         
         # private datastore call public
         if sq.host is not None and not self.public:
-            self.networkClient.superq_delete(sq)
+            self.networkClient.superq_delete(sq, secure)
             return
 
         # delete backing table if there are superqelems
@@ -743,7 +736,13 @@ class SuperQDataStore():
 
         return newSq
     
-    def superq_query(self, sq, columns, tables, conditional, objSample = None):
+    def superq_query(self,
+                     sq,
+                     columns,
+                     tables,
+                     conditional,
+                     objSample = None,
+                     secure = False):
         # create column string and list from input
         if isinstance(columns, list):
             colStr = ','.join(columns)
@@ -779,7 +778,7 @@ class SuperQDataStore():
         if sq.host is None or self.public:
             return self.superq_query_local(queryStr, objSample)
 
-        resultSq = self.networkClient.superq_query(sq, queryStr)
+        resultSq = self.networkClient.superq_query(sq, queryStr, secure)
 
         if objSample is None:
             return resultSq
@@ -834,10 +833,15 @@ class SuperQDataStore():
     def superqelem_exists(self, sq, sqeName):
         return sqeName in self.superqdict[sq.publicName][sqeName]
 
-    def superqelem_create(self, sq, sqe, idx = None, createTable = False):
+    def superqelem_create(self,
+                          sq,
+                          sqe,
+                          idx = None,
+                          createTable = False,
+                          secure = False):
         # private datastore call public
         if sq.host is not None and not self.public:
-            self.networkClient.superqelem_create(sq, sqe, idx)
+            self.networkClient.superqelem_create(sq, sqe, idx, secure)
             return
 
         # the backing db table is only created when the 1st element is added
@@ -921,10 +925,10 @@ class SuperQDataStore():
         db_update_row(dbConn, sq.name, updateStr, keyCol, sqeName)
         self.__return_dbConn(dbConn)
 
-    def superqelem_read(self, sq, sqeName):
+    def superqelem_read(self, sq, sqeName, secure = False):
         # private datastore call public
         if sq.host is not None and not self.public:
-            sqe = self.networkClient.superqelem_read(sq.name, sqeName)
+            sqe = self.networkClient.superqelem_read(sq.name, sqeName, secure)
 
             if superqelemExists(sq, sqeName):
                 self.__superqelem_update_db(sq, sqe)
@@ -937,18 +941,18 @@ class SuperQDataStore():
         # raises KeyValue error if superqelem not known
         return self.superqdict[sq.publicName][sqeName]
 
-    def superqelem_update(self, sq, sqe):
+    def superqelem_update(self, sq, sqe, secure = False):
         # private datastore call public
         if sq.host is not None and not self.public:
-            sqe = self.networkClient.superqelem_update(sq, sqe)
+            sqe = self.networkClient.superqelem_update(sq, sqe, secure)
             return
 
         self.__superqelem_update_db(sq, sqe)
 
-    def superqelem_delete(self, sq, sqeName):
+    def superqelem_delete(self, sq, sqeName, secure = False):
         # private datastore call public 
         if sq.host is not None and not self.public:
-            self.networkClient.superqelem_delete(sq, sqeName)
+            self.networkClient.superqelem_delete(sq, sqeName, secure)
             return
 
         # wrap with quotes if sqe key is str
@@ -1437,12 +1441,13 @@ class superq():
                 keyCol = None,
                 maxlen = None,
                 buildFromStr = False,
-                buildFromFile = False):
+                buildFromFile = False,
+                secure = False):
         # str initObj can contain string and file deserialization info
         if not buildFromStr and not buildFromFile:
             if isinstance(initObj, str):
                 # return datastore superq if it exists
-                if _dataStore.superq_exists(initObj, host):
+                if _dataStore.superq_exists(initObj, host, secure):
                     return _dataStore.superq_read(initObj, host)
                 else:
                     raise KeyError('superq {0} does not exist'.format(initObj))
@@ -1457,7 +1462,8 @@ class superq():
                  keyCol = None,
                  maxlen = None,
                  buildFromStr = False,
-                 buildFromFile = False):
+                 buildFromFile = False,
+                 secure = False):
         # get DataStore handle
         self.dataStore = _dataStore
 
@@ -1522,6 +1528,9 @@ class superq():
         if self.keyCol is None:
             self.autoKey = True
 
+        # set for secure network connections
+        self.secure = secure
+
         # construct publicName property and add it to the class
         getter = lambda self: self.__get_publicName()
         setattr(self.__class__,
@@ -1543,8 +1552,6 @@ class superq():
             for elem in initObj:
                 self.create_elem(copy(elem), name = elem.name)
         elif isinstance(initObj, list):
-#            if self.name == 'sqMulti':
-#                import pdb; pdb.set_trace()
             for item in initObj:
                 self.create_elem(item)
         elif isinstance(initObj, dict):
@@ -1848,12 +1855,12 @@ class superq():
         if self.attached:
             raise Exception('Already attached!')
 
-        if self.dataStore.superq_exists(self.name):
+        if self.dataStore.superq_exists(self.name, self.host, self.secure):
             raise NotImplemented('Not yet allowed to attach existing superqs.')
 
         self.attached = True
 
-        self.dataStore.superq_create(self)
+        self.dataStore.superq_create(self, self.secure)
 
         # if attaching a locally-backed superq, back each elem
         if self.host is None or self.dataStore.public:
@@ -1878,7 +1885,8 @@ class superq():
                                            colLst,
                                            tableLst,
                                            conditionalStr,
-                                           objSample)
+                                           objSample,
+                                           self.secure)
 
     def update(self):
         raise NotImplemented(superq.update())
@@ -1886,7 +1894,7 @@ class superq():
     def delete(self):
         if self.attached:
             self.attached = False
-            self.dataStore.superq_delete(self)
+            self.dataStore.superq_delete(self, self.secure)
 
     # inspect first sqe to determine backing table characteristics
     def __initialize_on_first_elem(self, sqe):
@@ -1971,7 +1979,11 @@ class superq():
                 self.createTable = True
 
         if self.attached:
-            self.dataStore.superqelem_create(self, sqe, idx, self.createTable)
+            self.dataStore.superqelem_create(self,
+                                             sqe,
+                                             idx,
+                                             self.createTable,
+                                             self.secure)
 
             if self.createTable:
                 self.createTable = False
@@ -1992,7 +2004,7 @@ class superq():
     # exists for sqe.__setProperty() to update datastore without recursing
     def update_elem_datastore_only(self, sqe):
         if self.attached:
-            self.dataStore.superqelem_update(self, sqe)
+            self.dataStore.superqelem_update(self, sqe, self.secure)
 
     def update_elem(self, value):
         if isinstance(value, superqelem):
@@ -2028,7 +2040,7 @@ class superq():
 
     def delete_elem_datastore_only(self, sqe):
         if self.attached:
-            self.dataStore.superqelem_delete(self, sqe.name)
+            self.dataStore.superqelem_delete(self, sqe.name, self.secure)
 
     def delete_elem(self, value):
         if isinstance(value, superqelem):
@@ -2248,6 +2260,28 @@ class SuperQNodeResponse():
             exceptStr = 'Response: {0}\nException: {1}'.format(responseStr, e)
             raise MalformedNetworkResponse(exceptStr)
 
+# vigenere
+from base64 import urlsafe_b64encode, urlsafe_b64decode
+class NetworkPrep():
+    @staticmethod
+    def prep(key, clear):
+        enc = []
+        for i in range(len(clear)):
+            key_c = key[i % len(key)]
+            enc_c = chr((ord(clear[i]) + ord(key_c)) % 256)
+            enc.append(enc_c)
+        return urlsafe_b64encode("".join(enc))
+
+    @staticmethod
+    def deprep(key, enc):
+        dec = []
+        enc = urlsafe_b64decode(enc)
+        for i in range(len(enc)):
+            key_c = key[i % len(key)]
+            dec_c = chr((256 + ord(enc[i]) - ord(key_c)) % 256)
+            dec.append(dec_c)
+        return "".join(dec)
+
 # manages network connections and requests to network nodes
 class SuperQNetworkClientMgr():
     def __init__(self):
@@ -2407,7 +2441,7 @@ class SuperQNetworkClientMgr():
 
         return response
 
-    def __send_msg(self, host, strMsg):
+    def __send_msg(self, host, strMsg, secure = False):
         ssl = False
 
         # 'local' is shorthand for localhost:DEFAULT_PORT
@@ -2447,39 +2481,39 @@ class SuperQNetworkClientMgr():
     # this might be used in the case of create_elem for instance, to provide
     #  a non-blocking operation. But it requires some kind of transactional
     #  implementation or solution to prevent synchronization errors
-    def __send_msg_async(self, host, strMsg):
+    def __send_msg_async(self, host, strMsg, secure = False):
         t = Thread(target = self.__send_msg, args = (host, strMsg))
         t.start()
 
-    def superq_exists(self, name, host):
+    def superq_exists(self, name, host, secure = False):
         # build request object from string
         request = SuperQNodeRequest()
         request.cmd = SQNodeCmd.superq_exists.value
         request.args = name
 
-        response = self.__send_msg(host, str(request))
+        response = self.__send_msg(host, str(request), secure)
 
         return eval(response.result)
 
-    def superq_create(self, sq):
+    def superq_create(self, sq, secure = False):
         # build request object from string
         request = SuperQNodeRequest()
         request.cmd = SQNodeCmd.superq_create.value
         request.args = sq.publicName
         request.body = str(sq)
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superq_create(): {0}'.format(response))
 
-    def superq_read(self, name, host):
+    def superq_read(self, name, host, secure = False):
         # build request object from string
         request = SuperQNodeRequest()
         request.cmd = SQNodeCmd.superq_read.value
         request.args = name
 
-        response = self.__send_msg(host, str(request))
+        response = self.__send_msg(host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superq_read(): {0}'.format(response))
@@ -2489,63 +2523,63 @@ class SuperQNetworkClientMgr():
 
         return sq
 
-    def superq_delete(self, sq):
+    def superq_delete(self, sq, secure = False):
         # build request object
         request = SuperQNodeRequest()
         request.cmd = SQNodeCmd.superq_delete.value
         request.args = sq.publicName
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superq_delete(): {0}'.format(response))
 
-    def superq_query(self, sq, queryStr):
+    def superq_query(self, sq, queryStr, secure = False):
         # build request object from string
         request = SuperQNodeRequest()
         request.cmd = SQNodeCmd.superq_query.value
         request.args = sq.publicName
         request.body = queryStr
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if eval(response.result):
             return superq(response.body, attach = False, buildFromStr = True)
         else:
             raise SuperQEx('superq_query(): {0}'.format(response))
 
-    def superqelem_create(self, sq, sqe, idx = None):
+    def superqelem_create(self, sq, sqe, idx = None, secure = False):
         # build request object
         request = SuperQNodeRequest()
         request.cmd = SQNodeCmd.superqelem_create.value
         request.args = '{0},{1}'.format(sq.publicName, idx)
         request.body = str(sqe)
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superqelem_create(): {0}'.format(str(response)))
 
-    def superqelem_update(self, sq, sqe):
+    def superqelem_update(self, sq, sqe, secure = False):
         # build request object
         request = SuperQNodeRequest()
         request.cmd = SQNodeCmd.superqelem_update.value
         request.args = '{0}'.format(sq.publicName)
         request.body = str(sqe)
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superqelem_update(): {0}'.format(str(response)))
 
-    def superqelem_delete(self, sq, sqeName):
+    def superqelem_delete(self, sq, sqeName, secure = False):
         # build request object
         request = SuperQNodeRequest()
         request.cmd = SQNodeCmd.superqelem_delete.value
         request.args = '{0}'.format(sq.publicName)
         request.body = '{0}'.format(sqeName)
 
-        response = self.__send_msg(sq.host, str(request))
+        response = self.__send_msg(sq.host, str(request), secure)
 
         if not eval(response.result):
             raise SuperQEx('superqelem_delete(): {0}'.format(str(response)))
