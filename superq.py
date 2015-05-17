@@ -36,36 +36,6 @@ DEFAULT_SSL_KEY_FILE = 'server.key'
 # sets buffer size for network reads
 MAX_BUF_LEN = 4096
 
-# TODO: FEATURES:
-#
-# 1) encryption
-# 2) persistence
-# 3) alteration
-# 4) testing
-# 5) documentation
-
-# 1) I'm only concerned with encryption over the network. Assume individual
-#  node system security is handled on an operating system administrative
-#  level. Incidentally this makes the problem of querying on an encrypted db
-#  go away.
-#   Considering currently pulling the ssl implementation out so that security
-#  can be cleanly revisited down the road.
-
-# 2) I like maintaining the current datastore-based save/restore. Could be
-#  useful for migrating datastores between physical nodes. Or possibly
-#  mirroring. It can be treated entirely separately from instance persistence.
-#  Instance persistence should be handled simply with a boolean setting that
-#  can be passed to the constructor on superq creation or changed dynamically
-#  any time after.
-
-# 3) Need to support: add column, remove column, rename column, rename table
-
-# 4) Mainly interested in a performance test suite that can detect scalability
-#  issues as well as further synchronization/parallel testing.
-
-# 5) Improve existing architectural and api documentation. Add wire protocol
-#  documentation.
-
 # superq network node supported commands
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
                               'superq_create '
@@ -2894,3 +2864,34 @@ def main(argv):
 
 if __name__ == '__main__':
     main(argv[1:])
+
+# TODO: FEATURES:
+#
+# 1) encryption
+# 2) persistence
+# 3) alteration
+# 4) testing
+# 5) documentation
+
+# 1) I'm only concerned with encryption over the network. Assume individual
+#  node system security is handled on an operating system administrative
+#  level. Incidentally this makes the problem of querying on an encrypted db
+#  go away.
+#   Considering currently pulling the ssl implementation out so that security
+#  can be cleanly revisited down the road.
+
+# 2) I like maintaining the current datastore-based save/restore. Could be
+#  useful for migrating datastores between physical nodes. Or possibly
+#  mirroring. It can be treated entirely separately from instance persistence.
+#  Instance persistence should be handled simply with a boolean setting that
+#  can be passed to the constructor on superq creation or changed dynamically
+#  any time after.
+
+# 3) Need to support: add column, remove column, rename column, rename table
+
+# 4) Mainly interested in a performance test suite that can detect scalability
+#  issues as well as further synchronization/parallel testing.
+
+# 5) Improve existing architectural and api documentation. Add wire protocol
+#  documentation.
+
