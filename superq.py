@@ -2035,6 +2035,9 @@ class superq():
 
     # these thread-safe methods can be used for synchronized superq access
 
+# TODO: does it make sense to add more aliases to match for instance standard
+#  list functions. Or to change the existing names?
+
     def push(self, value, idx = None, block = True, timeout = None):
         with self.not_full:
             # handle dropping an element if needed
@@ -2895,3 +2898,5 @@ if __name__ == '__main__':
 # 5) Improve existing architectural and api documentation. Add wire protocol
 #  documentation.
 
+# TODO: investigate if superq class should support __add__, __iadd__,
+#  __eq__, and __ne__?
