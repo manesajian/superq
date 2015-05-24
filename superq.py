@@ -2898,5 +2898,4 @@ if __name__ == '__main__':
 # 5) Improve existing architectural and api documentation. Add wire protocol
 #  documentation.
 
-# TODO: investigate if superq class should support __add__, __iadd__,
-#  __eq__, and __ne__?
+# TODO: investigate if superq class should support __add__, __iadd__
