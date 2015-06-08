@@ -36,36 +36,6 @@ DEFAULT_SSL_KEY_FILE = 'server.key'
 # sets buffer size for network reads
 MAX_BUF_LEN = 4096
 
-# TODO: FEATURES:
-#
-# 1) encryption
-# 2) persistence
-# 3) alteration
-# 4) testing
-# 5) documentation
-
-# 1) I'm only concerned with encryption over the network. Assume individual
-#  node system security is handled on an operating system administrative
-#  level. Incidentally this makes the problem of querying on an encrypted db
-#  go away.
-#   Considering currently pulling the ssl implementation out so that security
-#  can be cleanly revisited down the road.
-
-# 2) I like maintaining the current datastore-based save/restore. Could be
-#  useful for migrating datastores between physical nodes. Or possibly
-#  mirroring. It can be treated entirely separately from instance persistence.
-#  Instance persistence should be handled simply with a boolean setting that
-#  can be passed to the constructor on superq creation or changed dynamically
-#  any time after.
-
-# 3) Need to support: add column, remove column, rename column, rename table
-
-# 4) Mainly interested in a performance test suite that can detect scalability
-#  issues as well as further synchronization/parallel testing.
-
-# 5) Improve existing architectural and api documentation. Add wire protocol
-#  documentation.
-
 # superq network node supported commands
 SQNodeCmd = Enum('SQNodeCmd', 'superq_exists '
                               'superq_create '
@@ -177,28 +147,26 @@ class LinkedList():
         return returnObj
 
     def __lookup(self, idx):
-        if idx >= self.__count:
+        # convert negative index to positive
+        if idx < 0:
+            idx += self.__count
+
+        if idx < 0 or idx >= self.__count:
             raise IndexError('idx ({0}/{1}) out of range'.format(idx,
                                                                  len(self)))
 
         if self.__count == 0:
             return None
 
-        if idx >= 0:
-            # start from whichever end of list is closest to idx
-            midIdx = (self.__count - 1) // 2
-            if idx < midIdx:
-                item = self.head
-                for i in range(0, idx):
-                    item = item.next
-            else:
-                item = self.tail
-                for i in range(0, (self.__count - 1) - idx):
-                    item = item.prev
+        # start from whichever end of list is closest to idx
+        midIdx = (self.__count - 1) // 2
+        if idx < midIdx:
+            item = self.head
+            for i in range(0, idx):
+                item = item.next
         else:
-            # handle negative idx
             item = self.tail
-            for i in range(1, abs(idx)):
+            for i in range(0, (self.__count - 1) - idx):
                 item = item.prev
 
         return item
@@ -2065,6 +2033,9 @@ class superq():
 
     # these thread-safe methods can be used for synchronized superq access
 
+# TODO: does it make sense to add more aliases to match for instance standard
+#  list functions. Or to change the existing names?
+
     def push(self, value, idx = None, block = True, timeout = None):
         with self.not_full:
             # handle dropping an element if needed
@@ -2894,3 +2865,35 @@ def main(argv):
 
 if __name__ == '__main__':
     main(argv[1:])
+
+# TODO: FEATURES:
+#
+# 1) encryption
+# 2) persistence
+# 3) alteration
+# 4) testing
+# 5) documentation
+
+# 1) I'm only concerned with encryption over the network. Assume individual
+#  node system security is handled on an operating system administrative
+#  level. Incidentally this makes the problem of querying on an encrypted db
+#  go away.
+#   Considering currently pulling the ssl implementation out so that security
+#  can be cleanly revisited down the road.
+
+# 2) I like maintaining the current datastore-based save/restore. Could be
+#  useful for migrating datastores between physical nodes. Or possibly
+#  mirroring. It can be treated entirely separately from instance persistence.
+#  Instance persistence should be handled simply with a boolean setting that
+#  can be passed to the constructor on superq creation or changed dynamically
+#  any time after.
+
+# 3) Need to support: add column, remove column, rename column, rename table
+
+# 4) Mainly interested in a performance test suite that can detect scalability
+#  issues as well as further synchronization/parallel testing.
+
+# 5) Improve existing architectural and api documentation. Add wire protocol
+#  documentation.
+
+# TODO: investigate if superq class should support __add__, __iadd__
