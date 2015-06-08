@@ -147,28 +147,26 @@ class LinkedList():
         return returnObj
 
     def __lookup(self, idx):
-        if idx >= self.__count:
+        # convert negative index to positive
+        if idx < 0:
+            idx += self.__count
+
+        if idx < 0 or idx >= self.__count:
             raise IndexError('idx ({0}/{1}) out of range'.format(idx,
                                                                  len(self)))
 
         if self.__count == 0:
             return None
 
-        if idx >= 0:
-            # start from whichever end of list is closest to idx
-            midIdx = (self.__count - 1) // 2
-            if idx < midIdx:
-                item = self.head
-                for i in range(0, idx):
-                    item = item.next
-            else:
-                item = self.tail
-                for i in range(0, (self.__count - 1) - idx):
-                    item = item.prev
+        # start from whichever end of list is closest to idx
+        midIdx = (self.__count - 1) // 2
+        if idx < midIdx:
+            item = self.head
+            for i in range(0, idx):
+                item = item.next
         else:
-            # handle negative idx
             item = self.tail
-            for i in range(1, abs(idx)):
+            for i in range(0, (self.__count - 1) - idx):
                 item = item.prev
 
         return item
